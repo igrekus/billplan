@@ -1,4 +1,5 @@
 from csvengine import CsvEngine
+from sqliteengine import SqliteEngine
 from domainmodel import DomainModel
 from billtablemodel import BillTableModel
 from persistencefacade import PersistenceFacade
@@ -21,7 +22,8 @@ class MainWindow(QMainWindow):
         self.ui = uic.loadUi("mw.ui", self)
 
         # persistence engine
-        self._persistenceEngine = CsvEngine(parent=self)
+        # self._persistenceEngine = CsvEngine(parent=self)
+        self._persistenceEngine = SqliteEngine(parent=self)
 
         # facades
         self._facadePersistence = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
@@ -47,7 +49,8 @@ class MainWindow(QMainWindow):
 
     def initApp(self):
         # init instances
-        self._persistenceEngine.initEngine(fileName="ref/1.csv")
+        # self._persistenceEngine.initEngine(fileName="ref/1.csv")
+        self._persistenceEngine.initEngine(fileName="sqlite3.db")
         self._facadePersistence.initFacade()
         self._modelDomain.initModel()
         self._modelBillTable.initModel()
@@ -66,3 +69,27 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
 
+    def refreshView(self):
+        twidth = self.ui.tableBill.frameGeometry().width() - 30
+        if twidth < 200:
+            twidth = 800
+        self.ui.tableBill.setColumnWidth(0, twidth * 0.035)
+        self.ui.tableBill.setColumnWidth(1, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(2, twidth * 0.07)
+        self.ui.tableBill.setColumnWidth(3, twidth * 0.07)
+        self.ui.tableBill.setColumnWidth(4, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(5, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(6, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(7, twidth * 0.18)
+        self.ui.tableBill.setColumnWidth(8, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(9, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(10, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(11, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(12, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(13, twidth * 0.04)
+        self.ui.tableBill.setColumnWidth(14, twidth * 0.03)
+        # self.ui.tableBill.resizeRowsToContents()
+
+    def resizeEvent(self, event):
+        # print("resize event")
+        self.refreshView()

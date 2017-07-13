@@ -23,11 +23,12 @@ class BillTableModel(QAbstractTableModel):
     ColumnCount = 15
 
     _headers = ["Номер", "Дата", "Счёт", "Категория", "Поставщик", "Сумма", "Работа", "Назначение", "Срок",
-                "Статус", "Приоритет", "Дата поставки", "Отгрузка", "Неделя оплаты", "Примечание"]
+                "Статус", "Приоритет", "Дата", "Отгрузка", "Неделя", "Примечание"]
 
     def __init__(self, parent=None, domainModel=None):
         super(BillTableModel, self).__init__(parent)
         self._modelDomain = domainModel
+        self._dicts = dict()
 
     def clear(self):
         pass
@@ -37,12 +38,7 @@ class BillTableModel(QAbstractTableModel):
 
     def initModel(self):
         print("init suggestion model")
-        # self._users = self._dbman.getUserDict()
-        #
-        # tmplst = self._dbman.getSuggestionList()
-        # self.beginInsertRows(QModelIndex(), 0, len(tmplst)-1)
-        # self._data = tmplst
-        # self.endInsertRows()
+        self._dicts = self._modelDomain.getDicts()
 
     def headerData(self, section, orientation, role=None):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole and section < len(self._headers):
@@ -63,9 +59,9 @@ class BillTableModel(QAbstractTableModel):
 
         col = index.column()
         row = index.row()
+        item = self._modelDomain.getItemAtRow(row)
 
         if role == Qt.DisplayRole:
-            item = self._modelDomain.getItemAtRow(row)
             if col == self.ColumnId:
                 return QVariant(item.item_id)
             elif col == self.ColumnDate:
@@ -73,28 +69,53 @@ class BillTableModel(QAbstractTableModel):
             elif col == self.ColumnName:
                 return QVariant(item.item_name)
             elif col == self.ColumnCategory:
-                return QVariant(item.item_category)
+                return QVariant(self._dicts["category"][item.item_category])
             elif col == self.ColumnVendor:
-                return QVariant(item.item_vendor)
+                return QVariant(self._dicts["vendor"][item.item_vendor])
             elif col == self.ColumnCost:
-                return QVariant(item.item_cost)
+                return QVariant("{:.2f}".format(float(item.item_cost/100)))
             elif col == self.ColumnProject:
-                return QVariant(item.item_project)
+                return QVariant(self._dicts["project"][item.item_project])
             elif col == self.ColumnDescription:
                 return QVariant(item.item_descript)
             elif col == self.ColumnShipmentTime:
-                return QVariant(item.item_shipment_time)
+                return QVariant(self._dicts["period"][item.item_shipment_time])
             elif col == self.ColumnStatus:
-                return QVariant(item.item_status)
+                return QVariant(self._dicts["status"][item.item_status])
             elif col == self.ColumnPriority:
-                return QVariant(item.item_priority)
+                return QVariant(self._dicts["priority"][item.item_priority])
             elif col == self.ColumnShipmentDate:
                 return QVariant(item.item_shipment_date)
             elif col == self.ColumnShipmentStatus:
-                return QVariant(item.item_shipment_status)
+                return QVariant(self._dicts["shipment"][item.item_shipment_status])
             elif col == self.ColumnPaymentWeek:
                 return QVariant(item.item_payment_week)
             elif col == self.ColumnNote:
                 return QVariant(item.item_note)
+        elif role == Qt.BackgroundRole:
+            # FIXME hardcoded ids for coloring - add color codes to SQL table?
+            retcolor = Qt.white;
 
+            if item.item_status == 1:
+                retcolor = const.COLOR_PAYMENT_FINISHED
+
+            if col == self.ColumnStatus:
+                if item.item_status == 2:
+                    retcolor = const.COLOR_PAYMENT_PENDING
+            if col == self.ColumnPriority:
+                if item.item_status != 1:
+                    if item.item_priority == 2:  # 3 4
+                        retcolor = const.COLOR_PRIORITY_LOW
+                    elif item.item_priority == 3:
+                        retcolor = const.COLOR_PRIORITY_MEDIUM
+                    elif item.item_priority == 4:
+                        retcolor = const.COLOR_PRIORITY_HIGH
+            if col == self.ColumnShipmentStatus:
+                if item.item_shipment_status == 2:
+                    retcolor = const.COLOR_ARRIVAL_PENDING
+                if item.item_shipment_status == 3:
+                    retcolor = const.COLOR_ARRIVAL_PARTIAL
+                if item.item_shipment_status == 4:
+                    retcolor = const.COLOR_ARRIVAL_RECLAIM
+            return QVariant(QBrush(QColor(retcolor)))
         return QVariant()

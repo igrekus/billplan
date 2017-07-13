@@ -63,7 +63,26 @@ class BillItem:
                    , note="empty note")
 
     @classmethod
-    def fromSqlRecord(cls, record):
+    def fromSqliteTuple(cls, sqlite_tuple):
+        return cls(id_=sqlite_tuple[0]
+                   , date=sqlite_tuple[1]
+                   , name=sqlite_tuple[2]
+                   , category=sqlite_tuple[3]
+                   , vendor=sqlite_tuple[4]
+                   , cost=sqlite_tuple[5]
+                   , project=sqlite_tuple[6]
+                   , descript=sqlite_tuple[7]
+                   , shipment_time=sqlite_tuple[8]
+                   , status=sqlite_tuple[9]
+                   , priority=sqlite_tuple[10]
+                   , shipment_date=sqlite_tuple[11]
+                   , shipment_status=sqlite_tuple[12]
+                   , payment_week=sqlite_tuple[13]
+                   , note=sqlite_tuple[14])
+
+
+    @classmethod
+    def fromQSqlRecord(cls, record):
         # if not record:
         #     raise ValueError("Wrong SQL record.")
         # return cls(id_=record.value(0)

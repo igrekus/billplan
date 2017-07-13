@@ -12,10 +12,11 @@ class CsvEngine(QObject):
         self._inFileName = None
 
     def initEngine(self, fileName=None):
-        print("init csv engine")
+        print("init CSV engine")
         self._inFileName = fileName
 
     def fetchAllData(self):
+        print("fetch all recordss")
         with open(self._inFileName) as fileHandle:
             reader = csv.reader(fileHandle, delimiter=";")
             return [l for l in reader]
