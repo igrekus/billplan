@@ -4,7 +4,6 @@ import const
 
 class BillItem:
     # TODO make properties
-    # TODO change to a property sets item_is_dirty = True
     def __init__(self, id_=None, date=None, name=None, category=None, vendor=None, cost=None, project=None,
                  descript=None, shipment_time=None, status=None, priority=None, shipment_date=None,
                  shipment_status=None, payment_week=None, note=None):

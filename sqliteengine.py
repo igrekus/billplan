@@ -47,8 +47,6 @@ class SqliteEngine(QObject):
             return cursor.fetchall()
 
         return [fetchDict(self._connection, d) for d in dict_list]
-        # for d in dict_list:
-        #     print(fetchDict(self._connection, d))
 
     def shutdownEngine(self):
         self._connection.close()

@@ -3,14 +3,13 @@ from sqliteengine import SqliteEngine
 from domainmodel import DomainModel
 from billtablemodel import BillTableModel
 from persistencefacade import PersistenceFacade
+from uifacade import UiFacade
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
 
-# TODO record commentaries from other users
 class MainWindow(QMainWindow):
-
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
@@ -19,39 +18,32 @@ class MainWindow(QMainWindow):
 
         # create instance variables
         # ui
-        self.ui = uic.loadUi("mw.ui", self)
+        self.ui = uic.loadUi("mainwindow.ui", self)
 
         # persistence engine
         # self._persistenceEngine = CsvEngine(parent=self)
         self._persistenceEngine = SqliteEngine(parent=self)
 
         # facades
-        self._facadePersistence = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
+        self._persistenceFacade = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
+        self._uiFacade = UiFacade(parent=self)
 
         # models
-        self._modelDomain = DomainModel(parent=self, persistenceFacade=self._facadePersistence)
+        self._modelDomain = DomainModel(parent=self, persistenceFacade=self._persistenceFacade)
+        self._uiFacade.setDomainModel(self._modelDomain)
         self._modelBillTable = BillTableModel(parent=self, domainModel=self._modelDomain)
         self._modelSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelSearchProxy.setSourceModel(self._modelBillTable)
-        # self._dbman = dbman.DbManager(self)
-        #
-        # self._model_authors = MapModel(self)
-        #
-        # # self._model_search_proxy = QSortFilterProxyModel(self)
-        # self._model_suggestions = SuggestionModel(parent=self, dbmanager=self._dbman)
-        # self._model_search_proxy = SuggestionSearchProxyModel(self)
-        # self._model_search_proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)
-        # self._model_search_proxy.setSourceModel(self._model_suggestions)
-        #
-        # self._data_mapper = QDataWidgetMapper(self)
-        #
-        # self._logged_user = {}
+
+        # create actions
+        self.createActions()
 
     def initApp(self):
         # init instances
         # self._persistenceEngine.initEngine(fileName="ref/1.csv")
         self._persistenceEngine.initEngine(fileName="sqlite3.db")
-        self._facadePersistence.initFacade()
+        self._persistenceFacade.initFacade()
+        # self._uiFacade.initFacade()
         self._modelDomain.initModel()
         self._modelBillTable.initModel()
 
@@ -68,6 +60,18 @@ class MainWindow(QMainWindow):
         # self.ui.tableBill.verticalHeader().setDefaultSectionSize(40)
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
+
+        # create actions
+        self.createActions()
+
+        # setup ui widget signals
+        self.ui.btnRefresh.clicked.connect(self.onBtnRefreshClicked)
+
+    def createActions(self):
+        self.actRefresh = QAction("Обновить", self)
+        self.actRefresh.setShortcut("Ctrl+R")
+        self.actRefresh.setStatusTip("Обновить данные")
+        self.actRefresh.triggered.connect(self._uiFacade.procActRefresh)
 
     def refreshView(self):
         twidth = self.ui.tableBill.frameGeometry().width() - 30
@@ -88,8 +92,23 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setColumnWidth(12, twidth * 0.06)
         self.ui.tableBill.setColumnWidth(13, twidth * 0.04)
         self.ui.tableBill.setColumnWidth(14, twidth * 0.03)
-        # self.ui.tableBill.resizeRowsToContents()
 
+    # ui events
+    def onBtnRefreshClicked(self):
+        self.actRefresh.trigger()
+        self.ui.tableBill.resizeRowsToContents()
+
+    def onBtnAddClicked(self):
+        self.actAddBillRecord.trigger()
+
+    def onBtnEditClicked(self):
+        self.actEditBillRecord.trigger()
+
+    def onBtnDeleteClicked(self):
+        self.actDeleteBillRecords.trigger()
+
+    # misc events
     def resizeEvent(self, event):
         # print("resize event")
         self.refreshView()
+

@@ -17,15 +17,15 @@ class DomainModel(QObject):
         print("init domain model")
 
         # choose item builder depending on data source
-        if self._facade.engineType == "csv":
-            builder = BillItem.fromRawList
-
-        if self._facade.engineType == "sqlite":
-            builder = BillItem.fromSqliteTuple
+        # if self._facade.engineType == "csv":
+        #     builder = BillItem.fromRawList
+        #
+        # if self._facade.engineType == "sqlite":
+        #     builder = BillItem.fromSqliteTuples
 
         self._dicts = self._facade.fetchDicts(self.dict_list)
 
-        self._data = [builder(d) for d in self._facade.fetchAllData()]
+        self._data = self._facade.fetchAllData()
 
     def rowCount(self):
         return len(self._data)
@@ -35,3 +35,6 @@ class DomainModel(QObject):
 
     def getDicts(self):
         return self._dicts
+
+    def testMethod(self):
+        print("domain model test method call")
