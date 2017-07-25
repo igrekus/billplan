@@ -16,13 +16,6 @@ class DomainModel(QObject):
     def initModel(self):
         print("init domain model")
 
-        # choose item builder depending on data source
-        # if self._facade.engineType == "csv":
-        #     builder = BillItem.fromRawList
-        #
-        # if self._facade.engineType == "sqlite":
-        #     builder = BillItem.fromSqliteTuples
-
         self._dicts = self._facade.fetchDicts(self.dict_list)
 
         self._data = self._facade.fetchAllData()
@@ -36,6 +29,17 @@ class DomainModel(QObject):
     def getDicts(self):
         return self._dicts
 
-    def testMethod(self):
-        print("domain model test method call")
+    def refreshData(self):
+        print("domain model refresh call")
 
+    def addBillRecord(self):
+        print("domain model add bill record call")
+
+    def editBillRecord(self, recordId: int):
+        print("domain model edit bill record call:", recordId)
+
+    def deleteBillRecord(self):
+        print("domain model delete bill record call")
+
+    def getBillItemById(self):
+        raise NotImplementedError("implement if needed")

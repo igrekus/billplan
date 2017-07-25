@@ -28,14 +28,14 @@
         <enum>QFormLayout::DontWrapRows</enum>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="lblDateBill">
          <property name="text">
           <string>Счёт от:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QDateEdit" name="dateEdit">
+        <widget class="QDateEdit" name="dateBill">
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -51,17 +51,17 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="lblBillName">
          <property name="text">
           <string>Название:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="editBillName"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="lblCategory">
          <property name="text">
           <string>Категория:</string>
          </property>
@@ -221,14 +221,14 @@
         <widget class="QSpinBox" name="spinBox_2"/>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="lblNote">
          <property name="text">
           <string>Примечание:</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="editNote"/>
        </item>
       </layout>
      </item>
@@ -250,14 +250,17 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btnOk">
        <property name="text">
-        <string>Созранить</string>
+        <string>Сохранить</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="btnCancel">
        <property name="text">
         <string>Отменить</string>
        </property>
@@ -268,5 +271,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btnCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>642</x>
+     <y>327</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

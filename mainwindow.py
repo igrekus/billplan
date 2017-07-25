@@ -5,7 +5,7 @@ from billtablemodel import BillTableModel
 from persistencefacade import PersistenceFacade
 from uifacade import UiFacade
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
 
@@ -39,8 +39,8 @@ class MainWindow(QMainWindow):
         # actions
         self.actRefresh = QAction("Обновить", self)
         self.actAddBillRecord = QAction("Добавить счёт...", self)
-        self.actEditBillRecord = QAction("Добавить счёт...", self)
-        self.actDeleteBillRecord = QAction("Добавить счёт...", self)
+        self.actEditBillRecord = QAction("Изменить счёт...", self)
+        self.actDeleteBillRecord = QAction("Удалить счёт...", self)
 
     def initApp(self):
         # init instances
@@ -78,19 +78,19 @@ class MainWindow(QMainWindow):
         # TODO move actions to main window, call ui facade methods with user request parameters
         self.actRefresh.setShortcut("Ctrl+R")
         self.actRefresh.setStatusTip("Обновить данные")
-        self.actRefresh.triggered.connect(self._uiFacade.procActRefresh)
+        self.actRefresh.triggered.connect(self.procActRefresh)
 
         self.actAddBillRecord.setShortcut("Ctrl+A")
         self.actAddBillRecord.setStatusTip("Добавить новый счёт")
-        self.actAddBillRecord.triggered.connect(self._uiFacade.procActAddBillRecord)
+        self.actAddBillRecord.triggered.connect(self.procActAddBillRecord)
 
         # self.actEditBillRecord.setShortcut("Ctrl+A")
         self.actEditBillRecord.setStatusTip("Добавить новый счёт")
-        self.actEditBillRecord.triggered.connect(self._uiFacade.procActEditRecord)
+        self.actEditBillRecord.triggered.connect(self.procActEditRecord)
 
         # self.actDeleteBillRecord.setShortcut("Ctrl+A")
         self.actDeleteBillRecord.setStatusTip("Добавить новый счёт")
-        self.actDeleteBillRecord.triggered.connect(self._uiFacade.procActDeleteRecord)
+        self.actDeleteBillRecord.triggered.connect(self.procActDeleteRecord)
 
     def refreshView(self):
         twidth = self.ui.tableBill.frameGeometry().width() - 30
@@ -115,7 +115,6 @@ class MainWindow(QMainWindow):
     # ui events
     def onBtnRefreshClicked(self):
         self.actRefresh.trigger()
-        self.ui.tableBill.resizeRowsToContents()
 
     def onBtnAddBillClicked(self):
         self.actAddBillRecord.trigger()
@@ -131,3 +130,27 @@ class MainWindow(QMainWindow):
         # print("resize event")
         self.refreshView()
 
+    # action processing
+    # send user commands to the ui facade: (command, parameters (like indexes, etc.))
+    def procActRefresh(self):
+        print("act refresh trigger")
+        self._uiFacade.requestRefresh()
+        self.refreshView()
+        self.ui.tableBill.resizeRowsToContents()
+
+    def procActAddBillRecord(self):
+        print("act add record trigger")
+        self._uiFacade.requestAddBillRecord()
+
+    def procActEditRecord(self):
+        print("act edit record trigger")
+        if not self.ui.tableBill.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
+            return
+
+        selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestEditBillRecord(self._modelSearchProxy.mapToSource(selectedIndex))
+
+    def procActDeleteRecord(self):
+        print("act delete record trigger")
+        self._uiFacade.requestDeleteRecord()

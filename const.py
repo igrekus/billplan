@@ -10,3 +10,8 @@ COLOR_PRIORITY_HIGH = 0xffFF2B00
 COLOR_ARRIVAL_PENDING = 0xffFF0000
 COLOR_ARRIVAL_PARTIAL = 0xffFF6262
 COLOR_ARRIVAL_RECLAIM = 0xffFF0000
+
+RoleNodeId = Qt.UserRole + 1
+# RoleStatus = Qt.UserRole + 2
+# RoleAuthor = Qt.UserRole + 3
+# RoleActive = Qt.UserRole + 4

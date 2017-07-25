@@ -118,4 +118,6 @@ class BillTableModel(QAbstractTableModel):
                 if item.item_shipment_status == 4:
                     retcolor = const.COLOR_ARRIVAL_RECLAIM
             return QVariant(QBrush(QColor(retcolor)))
+        elif role == const.RoleNodeId:
+            return QVariant(item.item_id)
         return QVariant()

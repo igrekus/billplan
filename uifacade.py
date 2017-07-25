@@ -1,3 +1,4 @@
+import const
 from dlgbilldata import DlgBillData
 from PyQt5.QtCore import QObject, pyqtSlot, QModelIndex
 
@@ -11,23 +12,26 @@ class UiFacade(QObject):
     def setDomainModel(self, domainModel=None):
         self._domainModel = domainModel
 
-    # prosess ui signals
-    @pyqtSlot(name="procActRefresh")
-    def procActRefresh(self):
-        self._domainModel.testMethod()
-        print("proc act refresh call")
+    # process ui requests
+    def requestRefresh(self):
+        self._domainModel.refreshData()
+        print("ui facade refresh request")
 
-    @pyqtSlot()
-    def procActAddBillRecord(self):
-        dialog = DlgBillData()
+    def requestAddBillRecord(self):
+        print("ui facade add record request")
+        self._domainModel.addBillRecord()
+        # dialog = DlgBillData()
+        # dialog.exec()
+
+    def requestEditBillRecord(self, selectedIndex: QModelIndex):
+        oldItem = self._domainModel.getItemAtRow(selectedIndex.row())
+        print("ui facade edit record request:", oldItem)
+
+        dialog = DlgBillData(item=oldItem, domainModel=self._domainModel)
         dialog.exec()
-        print("proc act add call")
+        # self._domainModel.editBillRecord(selectedIndex.data(const.RoleNodeId))
 
-    @pyqtSlot()
-    def procActEditRecord(self):
-        self._domainModel
-        print("proc act edit call")
+    def requestDeleteRecord(self):
+        print("ui facade add record request")
+        self._domainModel.deleteBillRecord()
 
-    @pyqtSlot()
-    def procActDeleteRecord(self):
-        print("proc act delete call")

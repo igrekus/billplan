@@ -39,7 +39,7 @@ class SqliteEngine(QObject):
             return cursor.fetchall()
 
     def fetchDicts(self, dict_list: list):
-        print("fetching dicts")
+        print("fetch dicts")
 
         def fetchDict(connection, dict_name: str):
             cursor = connection.execute("SELECT " + dict_name + "_id, " + dict_name + "_name"
