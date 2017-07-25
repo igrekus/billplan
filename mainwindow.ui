@@ -73,21 +73,21 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="btnAdd">
+       <widget class="QPushButton" name="btnAddBill">
         <property name="text">
          <string>Добавить</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnEdit">
+       <widget class="QPushButton" name="btnEditBill">
         <property name="text">
          <string>Изменить</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnDelete">
+       <widget class="QPushButton" name="btnDeleteBill">
         <property name="text">
          <string>Удалить</string>
         </property>

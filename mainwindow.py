@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
+        # TODO !!! use dict.get(key, default) !!!
         super(MainWindow, self).__init__(parent)
 
         self.setAttribute(Qt.WA_QuitOnClose)
@@ -36,8 +37,11 @@ class MainWindow(QMainWindow):
         self._modelSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelSearchProxy.setSourceModel(self._modelBillTable)
 
-        # create actions
-        self.createActions()
+        # actions
+        self.actRefresh = QAction("Обновить", self)
+        self.actAddBillRecord = QAction("Добавить счёт...", self)
+        self.actEditBillRecord = QAction("Добавить счёт...", self)
+        self.actDeleteBillRecord = QAction("Добавить счёт...", self)
 
     def initApp(self):
         # init instances
@@ -63,16 +67,31 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.resizeRowsToContents()
 
         # create actions
-        self.createActions()
+        self.initActions()
 
         # setup ui widget signals
         self.ui.btnRefresh.clicked.connect(self.onBtnRefreshClicked)
+        self.ui.btnAddBill.clicked.connect(self.onBtnAddBillClicked)
+        self.ui.btnEditBill.clicked.connect(self.onBtnEditBillClicked)
+        self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
 
-    def createActions(self):
-        self.actRefresh = QAction("Обновить", self)
+    def initActions(self):
+        # TODO move actions to main window, call ui facade methods with user request parameters
         self.actRefresh.setShortcut("Ctrl+R")
         self.actRefresh.setStatusTip("Обновить данные")
         self.actRefresh.triggered.connect(self._uiFacade.procActRefresh)
+
+        self.actAddBillRecord.setShortcut("Ctrl+A")
+        self.actAddBillRecord.setStatusTip("Добавить новый счёт")
+        self.actAddBillRecord.triggered.connect(self._uiFacade.procActAddBillRecord)
+
+        # self.actEditBillRecord.setShortcut("Ctrl+A")
+        self.actEditBillRecord.setStatusTip("Добавить новый счёт")
+        self.actEditBillRecord.triggered.connect(self._uiFacade.procActEditRecord)
+
+        # self.actDeleteBillRecord.setShortcut("Ctrl+A")
+        self.actDeleteBillRecord.setStatusTip("Добавить новый счёт")
+        self.actDeleteBillRecord.triggered.connect(self._uiFacade.procActDeleteRecord)
 
     def refreshView(self):
         twidth = self.ui.tableBill.frameGeometry().width() - 30
@@ -99,14 +118,14 @@ class MainWindow(QMainWindow):
         self.actRefresh.trigger()
         self.ui.tableBill.resizeRowsToContents()
 
-    def onBtnAddClicked(self):
+    def onBtnAddBillClicked(self):
         self.actAddBillRecord.trigger()
 
-    def onBtnEditClicked(self):
+    def onBtnEditBillClicked(self):
         self.actEditBillRecord.trigger()
 
-    def onBtnDeleteClicked(self):
-        self.actDeleteBillRecords.trigger()
+    def onBtnDeleteBillClicked(self):
+        self.actDeleteBillRecord.trigger()
 
     # misc events
     def resizeEvent(self, event):

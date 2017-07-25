@@ -1,3 +1,4 @@
+from dlgbilldata import DlgBillData
 from PyQt5.QtCore import QObject, pyqtSlot, QModelIndex
 
 
@@ -16,14 +17,17 @@ class UiFacade(QObject):
         self._domainModel.testMethod()
         print("proc act refresh call")
 
-    @pyqtSlot(name="procActAddRecord")
-    def procActAddRecord(self):
+    @pyqtSlot()
+    def procActAddBillRecord(self):
+        dialog = DlgBillData()
+        dialog.exec()
         print("proc act add call")
 
-    @pyqtSlot(QModelIndex, name="procActEditRecord")
+    @pyqtSlot()
     def procActEditRecord(self):
-        print("proc act add call")
+        self._domainModel
+        print("proc act edit call")
 
-    @pyqtSlot(QModelIndex, name="procActDeleteRecord")
+    @pyqtSlot()
     def procActDeleteRecord(self):
-        print("proc act add call")
+        print("proc act delete call")
