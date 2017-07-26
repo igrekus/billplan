@@ -1,6 +1,6 @@
 import const
 # from billitem import BillItem
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot
 from PyQt5.QtGui import QBrush, QColor
 
 
@@ -30,6 +30,9 @@ class BillTableModel(QAbstractTableModel):
         self._modelDomain = domainModel
         self._dicts = dict()
 
+        self._modelDomain.billItemsInserted.connect(self.itemsInserted)
+        self._modelDomain.billItemsRemoved.connect(self.itemsRemoved)
+
     def clear(self):
         pass
         # self.beginRemoveRows(QModelIndex(), 0, len(self._data))
@@ -37,7 +40,7 @@ class BillTableModel(QAbstractTableModel):
         # self.endRemoveRows()
 
     def initModel(self):
-        print("init suggestion model")
+        print("init bill table model")
         self._dicts = self._modelDomain.getDicts()
 
     def headerData(self, section, orientation, role=None):
@@ -48,7 +51,7 @@ class BillTableModel(QAbstractTableModel):
     def rowCount(self, parent=None, *args, **kwargs):
         if parent.isValid():
             return 0
-        return self._modelDomain.rowCount()
+        return self._modelDomain.billListRowCount()
 
     def columnCount(self, parent=None, *args, **kwargs):
         return self.ColumnCount
@@ -69,25 +72,25 @@ class BillTableModel(QAbstractTableModel):
             elif col == self.ColumnName:
                 return QVariant(item.item_name)
             elif col == self.ColumnCategory:
-                return QVariant(self._dicts["category"][item.item_category])
+                return QVariant(self._dicts["category"].getData(item.item_category))
             elif col == self.ColumnVendor:
-                return QVariant(self._dicts["vendor"][item.item_vendor])
+                return QVariant(self._dicts["vendor"].getData(item.item_vendor))
             elif col == self.ColumnCost:
                 return QVariant("{:.2f}".format(float(item.item_cost/100)))
             elif col == self.ColumnProject:
-                return QVariant(self._dicts["project"][item.item_project])
+                return QVariant(self._dicts["project"].getData(item.item_project))
             elif col == self.ColumnDescription:
                 return QVariant(item.item_descript)
             elif col == self.ColumnShipmentTime:
-                return QVariant(self._dicts["period"][item.item_shipment_time])
+                return QVariant(self._dicts["period"].getData(item.item_shipment_time))
             elif col == self.ColumnStatus:
-                return QVariant(self._dicts["status"][item.item_status])
+                return QVariant(self._dicts["status"].getData(item.item_status))
             elif col == self.ColumnPriority:
-                return QVariant(self._dicts["priority"][item.item_priority])
+                return QVariant(self._dicts["priority"].getData(item.item_priority))
             elif col == self.ColumnShipmentDate:
                 return QVariant(item.item_shipment_date)
             elif col == self.ColumnShipmentStatus:
-                return QVariant(self._dicts["shipment"][item.item_shipment_status])
+                return QVariant(self._dicts["shipment"].getData(item.item_shipment_status))
             elif col == self.ColumnPaymentWeek:
                 return QVariant(item.item_payment_week)
             elif col == self.ColumnNote:
@@ -121,3 +124,15 @@ class BillTableModel(QAbstractTableModel):
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
         return QVariant()
+
+    @pyqtSlot(int, int)
+    def itemsInserted(self, first: int, last: int):
+        self.beginInsertRows(QModelIndex(), first, last)
+        # print("table model slot:", first, last)
+        self.endInsertRows()
+
+    @pyqtSlot(int, int)
+    def itemsRemoved(self, first: int, last: int):
+        self.beginRemoveRows(QModelIndex(), first, last)
+        # print("table model slot:", first, last)
+        self.endRemoveRows()

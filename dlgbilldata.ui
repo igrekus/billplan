@@ -58,7 +58,11 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="editBillName"/>
+        <widget class="QLineEdit" name="editBillName">
+         <property name="placeholderText">
+          <string>введите название счёта...</string>
+         </property>
+        </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="lblCategory">
@@ -68,47 +72,51 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QComboBox" name="comboBox"/>
+        <widget class="QComboBox" name="comboCategory"/>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="lblVendor">
          <property name="text">
           <string>Поставщик:</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QComboBox" name="comboBox_2"/>
+        <widget class="QComboBox" name="comboVendor"/>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="lblCost">
          <property name="text">
           <string>Сумма:</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
-        <widget class="QSpinBox" name="spinBox"/>
-       </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="lblProject">
          <property name="text">
           <string>Работа:</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QComboBox" name="comboBox_3"/>
+        <widget class="QComboBox" name="comboProject"/>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="lblDescript">
          <property name="text">
           <string>Назначение:</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QPlainTextEdit" name="plainTextEdit"/>
+        <widget class="QPlainTextEdit" name="textDescript">
+         <property name="plainText">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>введите назначение счёта...</string>
+         </property>
+        </widget>
        </item>
        <item row="7" column="1">
         <spacer name="verticalSpacer">
@@ -125,6 +133,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="spinCost">
+         <property name="suffix">
+          <string> руб.</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -150,14 +165,14 @@
         <enum>QLayout::SetMaximumSize</enum>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="lblPeriod">
          <property name="text">
           <string>Срок:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox_4">
+        <widget class="QComboBox" name="comboPeriod">
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -167,58 +182,62 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="lblStatus">
          <property name="text">
           <string>Статус:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QComboBox" name="comboBox_5"/>
+        <widget class="QComboBox" name="comboStatus"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="lblPriority">
          <property name="text">
           <string>Приоритет:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QComboBox" name="comboBox_6"/>
+        <widget class="QComboBox" name="comboPriority"/>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="lblDateShipment">
          <property name="text">
           <string>Дата поставки:</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QDateEdit" name="dateEdit_2">
+        <widget class="QDateEdit" name="dateShipment">
          <property name="calendarPopup">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="lblShipment">
          <property name="text">
           <string>Отгрузка:</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QComboBox" name="comboBox_7"/>
+        <widget class="QComboBox" name="comboShipment"/>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="lblWeek">
          <property name="text">
           <string>Неделя №:</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QSpinBox" name="spinBox_2"/>
+        <widget class="QSpinBox" name="spinWeek">
+         <property name="maximum">
+          <number>52</number>
+         </property>
+        </widget>
        </item>
        <item row="6" column="0">
         <widget class="QLabel" name="lblNote">
@@ -228,7 +247,11 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="editNote"/>
+        <widget class="QLineEdit" name="editNote">
+         <property name="placeholderText">
+          <string>введите примечание...</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

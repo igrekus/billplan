@@ -5,8 +5,8 @@ from billtablemodel import BillTableModel
 from persistencefacade import PersistenceFacade
 from uifacade import UiFacade
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QHeaderView
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel
 
 
 class MainWindow(QMainWindow):
@@ -65,6 +65,8 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
 
+        # self.ui.tableBill.setSpan(0, 0, 1, 3)
+
         # create actions
         self.initActions()
 
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow):
         self.ui.btnAddBill.clicked.connect(self.onBtnAddBillClicked)
         self.ui.btnEditBill.clicked.connect(self.onBtnEditBillClicked)
         self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
+        self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
 
     def initActions(self):
         # TODO move actions to main window, call ui facade methods with user request parameters
@@ -125,6 +128,9 @@ class MainWindow(QMainWindow):
     def onBtnDeleteBillClicked(self):
         self.actDeleteBillRecord.trigger()
 
+    def onTableBillDoubleClicked(self):
+        self.actEditBillRecord.trigger()
+
     # misc events
     def resizeEvent(self, event):
         # print("resize event")
@@ -139,11 +145,16 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.resizeRowsToContents()
 
     def procActAddBillRecord(self):
-        print("act add record trigger")
-        self._uiFacade.requestAddBillRecord()
+        # print("act add record trigger")
+        row = self._uiFacade.requestAddBillRecord()
+
+        index = self._modelSearchProxy.mapFromSource(self._modelBillTable.index(row, 0))
+        self.ui.tableBill.scrollTo(index)
+        self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
+                                                           | QItemSelectionModel.Rows)
 
     def procActEditRecord(self):
-        print("act edit record trigger")
+        # print("act edit record trigger")
         if not self.ui.tableBill.selectionModel().hasSelection():
             QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
             return
@@ -152,5 +163,10 @@ class MainWindow(QMainWindow):
         self._uiFacade.requestEditBillRecord(self._modelSearchProxy.mapToSource(selectedIndex))
 
     def procActDeleteRecord(self):
-        print("act delete record trigger")
-        self._uiFacade.requestDeleteRecord()
+        # print("act delete record trigger")
+        if not self.ui.tableBill.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка", "Удалить: пожалуйста, выберите запись.")
+            return
+
+        selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestDeleteRecord(self._modelSearchProxy.mapToSource(selectedIndex))

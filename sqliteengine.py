@@ -1,4 +1,6 @@
+import csv
 import sqlite3
+from billitem import BillItem
 from PyQt5.QtCore import QObject
 
 
@@ -12,12 +14,21 @@ class SqliteEngine(QObject):
         self._connection = None
 
     def initEngine(self, fileName=None):
-        print("init SQLite engine")
+        print("init sqlite engine")
         self._inFileName = fileName
         self._connection = sqlite3.connect(self._inFileName)
 
-    def fetchAllData(self):
-        print("fetch all records")
+        # with open("ref/1.csv") as f:
+        #     reader = csv.reader(f, delimiter=";")
+        #     with self._connection:
+        #         for n, l in enumerate(reader):
+        #             cursor = self._connection.execute("UPDATE bill SET bill_desc = '" + str(l[7]) + "'"
+        #                                               " WHERE bill_id = " + str(n + 1))
+        #             print(n, l[7])
+
+
+    def fetchAllBillRecords(self):
+        print("sqlite fetch all records")
         with self._connection:
             cursor = self._connection.execute("SELECT main.bill.bill_id AS id"
                                               ", main.bill.bill_date"
@@ -35,18 +46,33 @@ class SqliteEngine(QObject):
                                               ", main.bill.bill_week"
                                               ", main.bill.bill_note"
                                               "  FROM bill "
-                                              " WHERE bill.bill_id > 0")
+                                              " WHERE bill.bill_id > 0"
+                                              "   AND archive = 0")
             return cursor.fetchall()
 
     def fetchDicts(self, dict_list: list):
-        print("fetch dicts")
+        print("sqlite engine fetch dicts")
 
         def fetchDict(connection, dict_name: str):
             cursor = connection.execute("SELECT " + dict_name + "_id, " + dict_name + "_name"
-                                        "  FROM " + dict_name + " ")
+                                        "  FROM " + dict_name + " "
+                                        " WHERE " + dict_name + "_id > 0")
             return cursor.fetchall()
 
         return [fetchDict(self._connection, d) for d in dict_list]
 
     def shutdownEngine(self):
         self._connection.close()
+
+    def updateBillRecrod(self, record: BillItem):
+        print("sqlite engine update bill record:", record)
+
+    def insertBillRecord(self, record: BillItem):
+        print("sqlite engine insert bill record:", record)
+        if record.item_id is None:
+            return 1000
+        else:
+            return 9999
+
+    def deleteBillRecord(self, record: BillItem):
+        print("sqlite engine delete bill record", record)

@@ -1,6 +1,8 @@
 import const
 from dlgbilldata import DlgBillData
-from PyQt5.QtCore import QObject, pyqtSlot, QModelIndex
+from billitem import BillItem
+from PyQt5.QtCore import QObject, QModelIndex
+from PyQt5.QtWidgets import QDialog, QMessageBox
 
 
 class UiFacade(QObject):
@@ -18,20 +20,31 @@ class UiFacade(QObject):
         print("ui facade refresh request")
 
     def requestAddBillRecord(self):
+        dummyItem = None
         print("ui facade add record request")
-        self._domainModel.addBillRecord()
-        # dialog = DlgBillData()
-        # dialog.exec()
 
-    def requestEditBillRecord(self, selectedIndex: QModelIndex):
-        oldItem = self._domainModel.getItemAtRow(selectedIndex.row())
+        dialog = DlgBillData(item=dummyItem, domainModel=self._domainModel)
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        return self._domainModel.addBillItem(dialog.getData())
+
+    def requestEditBillRecord(self, targetIndex: QModelIndex):
+        oldItem = self._domainModel.getItemAtIndex(targetIndex)
         print("ui facade edit record request:", oldItem)
 
         dialog = DlgBillData(item=oldItem, domainModel=self._domainModel)
-        dialog.exec()
-        # self._domainModel.editBillRecord(selectedIndex.data(const.RoleNodeId))
+        if dialog.exec() != QDialog.Accepted:
+            return
 
-    def requestDeleteRecord(self):
-        print("ui facade add record request")
-        self._domainModel.deleteBillRecord()
+        self._domainModel.updateBillItem(targetIndex, dialog.getData())
+
+    def requestDeleteRecord(self, targetIndex: QModelIndex):
+        print("ui facade delete record request")
+        result = QMessageBox.question(self.parent(), "Вопрос",
+                                      "Вы действительно хотите удалить выбранную запись?")
+        if result != QMessageBox.Yes:
+            return
+
+        self._domainModel.deleteBillItem(targetIndex)
 
