@@ -25,7 +25,7 @@ class UiFacade(QObject):
 
         dialog = DlgBillData(item=dummyItem, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
-            return
+            return None
 
         return self._domainModel.addBillItem(dialog.getData())
 

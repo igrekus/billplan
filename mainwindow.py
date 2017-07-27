@@ -148,10 +148,11 @@ class MainWindow(QMainWindow):
         # print("act add record trigger")
         row = self._uiFacade.requestAddBillRecord()
 
-        index = self._modelSearchProxy.mapFromSource(self._modelBillTable.index(row, 0))
-        self.ui.tableBill.scrollTo(index)
-        self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
-                                                           | QItemSelectionModel.Rows)
+        if row is not None:
+            index = self._modelSearchProxy.mapFromSource(self._modelBillTable.index(row, 0))
+            self.ui.tableBill.scrollTo(index)
+            self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
+                                                               | QItemSelectionModel.Rows)
 
     def procActEditRecord(self):
         # print("act edit record trigger")
