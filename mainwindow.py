@@ -2,6 +2,7 @@ from csvengine import CsvEngine
 from sqliteengine import SqliteEngine
 from domainmodel import DomainModel
 from billtablemodel import BillTableModel
+from billplanmodel import BillPlanModel
 from persistencefacade import PersistenceFacade
 from uifacade import UiFacade
 from PyQt5 import uic
@@ -30,11 +31,17 @@ class MainWindow(QMainWindow):
         self._uiFacade = UiFacade(parent=self)
 
         # models
+        # domain
         self._modelDomain = DomainModel(parent=self, persistenceFacade=self._persistenceFacade)
         self._uiFacade.setDomainModel(self._modelDomain)
-        self._modelBillTable = BillTableModel(parent=self, domainModel=self._modelDomain)
-        self._modelSearchProxy = QSortFilterProxyModel(parent=self)
-        self._modelSearchProxy.setSourceModel(self._modelBillTable)
+        # bill list + search proxy
+        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain)
+        self._modelBillSearchProxy = QSortFilterProxyModel(parent=self)
+        self._modelBillSearchProxy.setSourceModel(self._modelBillList)
+        # bill plan + search proxy
+        self._modelBillPlan = BillPlanModel(parent=self, domainModel=self._modelDomain)
+        self._modelPlanSearchProxy = QSortFilterProxyModel(parent=self)
+        self._modelPlanSearchProxy.setSourceModel(self._modelBillPlan)
 
         # actions
         self.actRefresh = QAction("Обновить", self)
@@ -49,10 +56,12 @@ class MainWindow(QMainWindow):
         self._persistenceFacade.initFacade()
         # self._uiFacade.initFacade()
         self._modelDomain.initModel()
-        self._modelBillTable.initModel()
+        self._modelBillList.initModel()
+        self._modelBillPlan.initModel()
 
         # init UI
-        self.ui.tableBill.setModel(self._modelSearchProxy)
+        # bill list table
+        self.ui.tableBill.setModel(self._modelBillSearchProxy)
         self.ui.tableBill.setSelectionMode(QAbstractItemView.SingleSelection)
         self.ui.tableBill.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.tableBill.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -64,8 +73,23 @@ class MainWindow(QMainWindow):
         # self.ui.tableBill.verticalHeader().setDefaultSectionSize(40)
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
-
         # self.ui.tableBill.setSpan(0, 0, 1, 3)
+
+        # bill plan table
+        self.ui.tablePlan.setModel(self._modelPlanSearchProxy)
+        self.ui.tablePlan.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.ui.tablePlan.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.ui.tablePlan.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.ui.tablePlan.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
+        self.ui.tablePlan.horizontalHeader().setHighlightSections(False)
+        self.ui.tablePlan.horizontalHeader().setFixedHeight(24)
+        self.ui.tablePlan.horizontalHeader().setStretchLastSection(True)
+        self.ui.tablePlan.verticalHeader().setVisible(False)
+        # self.ui.tablePlan.verticalHeader().setDefaultSectionSize(40)
+        self.ui.tablePlan.setWordWrap(True)
+        self.ui.tablePlan.resizeRowsToContents()
+        # self.ui.tablePlan.setSpan(0, 0, 1, 3)
+
 
         # create actions
         self.initActions()
@@ -149,7 +173,7 @@ class MainWindow(QMainWindow):
         row = self._uiFacade.requestAddBillRecord()
 
         if row is not None:
-            index = self._modelSearchProxy.mapFromSource(self._modelBillTable.index(row, 0))
+            index = self._modelBillSearchProxy.mapFromSource(self._modelBillList.index(row, 0))
             self.ui.tableBill.scrollTo(index)
             self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
                                                                | QItemSelectionModel.Rows)
@@ -161,7 +185,7 @@ class MainWindow(QMainWindow):
             return
 
         selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
-        self._uiFacade.requestEditBillRecord(self._modelSearchProxy.mapToSource(selectedIndex))
+        self._uiFacade.requestEditBillRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
     def procActDeleteRecord(self):
         # print("act delete record trigger")
@@ -170,4 +194,4 @@ class MainWindow(QMainWindow):
             return
 
         selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
-        self._uiFacade.requestDeleteRecord(self._modelSearchProxy.mapToSource(selectedIndex))
+        self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))

@@ -30,7 +30,7 @@ class UiFacade(QObject):
         return self._domainModel.addBillItem(dialog.getData())
 
     def requestEditBillRecord(self, targetIndex: QModelIndex):
-        oldItem = self._domainModel.getItemAtIndex(targetIndex)
+        oldItem = self._domainModel.getBillItemAtIndex(targetIndex)
         print("ui facade edit record request:", oldItem)
 
         dialog = DlgBillData(item=oldItem, domainModel=self._domainModel)

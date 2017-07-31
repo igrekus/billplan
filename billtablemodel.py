@@ -62,7 +62,7 @@ class BillTableModel(QAbstractTableModel):
 
         col = index.column()
         row = index.row()
-        item = self._modelDomain.getItemAtRow(row)
+        item = self._modelDomain.getBillItemAtRow(row)
 
         if role == Qt.DisplayRole:
             if col == self.ColumnId:

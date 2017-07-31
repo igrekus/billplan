@@ -87,7 +87,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTableView" name="tablePlan"/>
         </item>
        </layout>
       </widget>

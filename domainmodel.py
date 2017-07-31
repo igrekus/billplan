@@ -13,24 +13,36 @@ class DomainModel(QObject):
         super(DomainModel, self).__init__(parent)
 
         self._persistenceFacade = persistenceFacade
-        self._data = list()
+        self._billData = list()
         self.dicts = dict()
+
+        self._planData = list()
+
+    def buildPlanData(self):
+        print("building plan data")
+        for d in self._billData:
+            print(d)
 
     def initModel(self):
         print("init domain model")
 
         self.dicts = self._persistenceFacade.fetchDicts(self.dict_list)
 
-        self._data = self._persistenceFacade.fetchAllBillItems()
+        self._billData = self._persistenceFacade.fetchAllBillItems()
+
+        self.buildPlanData()
 
     def billListRowCount(self):
-        return len(self._data)
+        return len(self._billData)
 
-    def getItemAtRow(self, row: int):
-        return self._data[row]
+    def getBillItemAtRow(self, row: int):
+        return self._billData[row]
 
-    def getItemAtIndex(self, index: QModelIndex):
-        return self._data[index.row()]
+    def getBillItemAtIndex(self, index: QModelIndex):
+        return self._billData[index.row()]
+
+    def getPlanItemAtRow(self, row: int):
+        return self._billData[row]
 
     def getDicts(self):
         return self.dicts
@@ -43,8 +55,8 @@ class DomainModel(QObject):
         newId = self._persistenceFacade.insertBillItem(newItem)
         newItem.item_id = newId
 
-        self._data.append(newItem)
-        row = len(self._data) - 1
+        self._billData.append(newItem)
+        row = len(self._billData) - 1
 
         self.billItemsInserted.emit(row, row)
         return row
@@ -53,13 +65,13 @@ class DomainModel(QObject):
         row = index.row()
         print("domain model update bill item call, row:", row, updatedItem)
         self._persistenceFacade.updateBillItem(updatedItem)
-        self._data[row] = updatedItem
+        self._billData[row] = updatedItem
 
     def deleteBillItem(self, index: QModelIndex):
         row = index.row()
         print("domain model delete bill item call, row", row)
-        self._persistenceFacade.deleteBillItem(self._data[row])
-        del self._data[row]
+        self._persistenceFacade.deleteBillItem(self._billData[row])
+        del self._billData[row]
         self.billItemsRemoved.emit(row, row)
 
     def getBillItemById(self):
