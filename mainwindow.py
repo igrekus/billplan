@@ -79,17 +79,19 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setModel(self._modelPlanSearchProxy)
         self.ui.tablePlan.setSelectionMode(QAbstractItemView.SingleSelection)
         self.ui.tablePlan.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.ui.tablePlan.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.ui.tablePlan.setEditTriggers(QAbstractItemView.SelectedClicked)
         self.ui.tablePlan.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
         self.ui.tablePlan.horizontalHeader().setHighlightSections(False)
         self.ui.tablePlan.horizontalHeader().setFixedHeight(24)
         self.ui.tablePlan.horizontalHeader().setStretchLastSection(True)
         self.ui.tablePlan.verticalHeader().setVisible(False)
+        self.ui.tablePlan.hideColumn(0)
+        # self.ui.tablePlan.hideColumn(3)
+        self.ui.tablePlan.hideColumn(4)
         # self.ui.tablePlan.verticalHeader().setDefaultSectionSize(40)
         self.ui.tablePlan.setWordWrap(True)
         self.ui.tablePlan.resizeRowsToContents()
         # self.ui.tablePlan.setSpan(0, 0, 1, 3)
-
 
         # create actions
         self.initActions()
@@ -100,6 +102,7 @@ class MainWindow(QMainWindow):
         self.ui.btnEditBill.clicked.connect(self.onBtnEditBillClicked)
         self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
+        self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
 
     def initActions(self):
         # TODO move actions to main window, call ui facade methods with user request parameters
@@ -154,6 +157,10 @@ class MainWindow(QMainWindow):
 
     def onTableBillDoubleClicked(self):
         self.actEditBillRecord.trigger()
+
+    def onTabBarCurrentChanged(self, index):
+        if index == 1:
+            self._modelDomain.buildPlanData()
 
     # misc events
     def resizeEvent(self, event):

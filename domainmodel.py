@@ -20,8 +20,12 @@ class DomainModel(QObject):
 
     def buildPlanData(self):
         print("building plan data")
-        for d in self._billData:
-            print(d)
+        if self._planData:
+            self._planData.clear()
+        for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):
+            # TODO fix hardcoded magic numbers
+            if d.item_status != 1:
+                self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, None])
 
     def initModel(self):
         print("init domain model")
@@ -41,11 +45,17 @@ class DomainModel(QObject):
     def getBillItemAtIndex(self, index: QModelIndex):
         return self._billData[index.row()]
 
+    def planListRowCount(self):
+        return len(self._planData)
+
     def getPlanItemAtRow(self, row: int):
-        return self._billData[row]
+        return self._planData[row]
 
     def getDicts(self):
         return self.dicts
+
+    def getTotalForWeek(self, week):
+        return sum(p[4] for p in self._planData if p[5] == week)
 
     def refreshData(self):
         print("domain model refresh call")
