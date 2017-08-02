@@ -28,7 +28,6 @@ class DlgBillData(QDialog):
         # setup signals
         self.ui.btnOk.clicked.connect(self.onBtnOkClicked)
 
-        # TODO new item = item_id = None -> resetWidgets()
         if self._currentItem is None:
             self.resetWidgets()
         else:

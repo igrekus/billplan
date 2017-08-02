@@ -21,6 +21,9 @@ class PersistenceFacade(QObject):
     def fetchAllBillItems(self):
         return [BillItem.fromSqliteTuple(r) for r in self._engine.fetchAllBillRecords()]
 
+    def fetchRawPlanData(self):
+        return {r[1]: [r[2], r[3]] for r in self._engine.fetchAllPlanRecrods()}
+
     def updateBillItem(self, item):
         self._engine.updateBillRecrod(item)
 
@@ -31,3 +34,7 @@ class PersistenceFacade(QObject):
     def deleteBillItem(self, item):
         print("persistence facade delete call:", item)
         self._engine.deleteBillRecord(item)
+
+    def persistPlanData(self, data):
+        print("persistence facade persist plan data call")
+        return self._engine.updatePlanData([tuple([d[5][0], d[5][1], d[2]]) for d in data])

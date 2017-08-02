@@ -48,3 +48,9 @@ class UiFacade(QObject):
 
         self._domainModel.deleteBillItem(targetIndex)
 
+    def requestExit(self):
+        print("ui facade exit request...")
+        if self._domainModel.savePlanData():
+            print("...exit request ok")
+        else:
+            raise RuntimeError("DB connection error")

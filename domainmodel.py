@@ -16,6 +16,7 @@ class DomainModel(QObject):
         self._billData = list()
         self.dicts = dict()
 
+        self._rawPlanData = dict()
         self._planData = list()
 
     def buildPlanData(self):
@@ -25,7 +26,7 @@ class DomainModel(QObject):
         for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):
             # TODO fix hardcoded magic numbers
             if d.item_status != 1:
-                self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, None])
+                self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, self._rawPlanData[d.item_id]])
 
     def initModel(self):
         print("init domain model")
@@ -33,6 +34,8 @@ class DomainModel(QObject):
         self.dicts = self._persistenceFacade.fetchDicts(self.dict_list)
 
         self._billData = self._persistenceFacade.fetchAllBillItems()
+
+        self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
 
         self.buildPlanData()
 
@@ -86,3 +89,7 @@ class DomainModel(QObject):
 
     def getBillItemById(self):
         raise NotImplementedError("implement if needed")
+
+    def savePlanData(self):
+        print("domain model persist plan data call")
+        return self._persistenceFacade.persistPlanData(self._planData)

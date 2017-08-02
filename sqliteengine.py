@@ -61,6 +61,17 @@ class SqliteEngine(QObject):
 
         return [fetchDict(self._connection, d) for d in dict_list]
 
+    def fetchAllPlanRecrods(self):
+        print("sqlite engine fetch raw plan data")
+        with self._connection:
+            cursor = self._connection.execute("SELECT main.bill_plan.plan_id"
+                                              ", main.bill_plan.plan_billRef"
+                                              ", main.bill_plan.plan_year"
+                                              ", main.bill_plan.plan_week"
+                                              "  FROM main.bill_plan"
+                                              " WHERE main.bill_plan.plan_id > 0")
+            return cursor.fetchall()
+
     def shutdownEngine(self):
         self._connection.close()
 
@@ -75,4 +86,16 @@ class SqliteEngine(QObject):
             return 9999
 
     def deleteBillRecord(self, record: BillItem):
-        print("sqlite engine delete bill record", record)
+        print("sqlite engine delete bill record:", record)
+
+    def updatePlanData(self, data):
+        # TODO error handling
+        print("sqlite engine update plan data...")
+        with self._connection:
+            cursor = self._connection.cursor()
+            cursor.executemany("UPDATE bill_plan"
+                               "   SET plan_year = ? "
+                               "     , plan_week = ? "
+                               " WHERE plan_billRef = ?", data)
+        print("...update end")
+        return True
