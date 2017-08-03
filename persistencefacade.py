@@ -24,12 +24,13 @@ class PersistenceFacade(QObject):
     def fetchRawPlanData(self):
         return {r[1]: [r[2], r[3]] for r in self._engine.fetchAllPlanRecrods()}
 
-    def updateBillItem(self, item):
-        self._engine.updateBillRecrod(item)
+    def updateBillItem(self, item: BillItem):
+        print("persistence facade update call:", item)
+        self._engine.updateBillRecord(item.toTuple())
 
-    def insertBillItem(self, item) -> int:
+    def insertBillItem(self, item: BillItem) -> int:
         print("persistence facade insert call:", item)
-        return self._engine.insertBillRecord(item)
+        return self._engine.insertBillRecord(item.toTuple())
 
     def deleteBillItem(self, item):
         print("persistence facade delete call:", item)

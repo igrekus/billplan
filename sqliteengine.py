@@ -45,14 +45,15 @@ class SqliteEngine(QObject):
                                               ", main.bill.bill_shipment_status"
                                               ", main.bill.bill_week"
                                               ", main.bill.bill_note"
+                                              ", main.bill_plan.plan_week"
                                               "  FROM bill "
+                                              " INNER JOIN bill_plan ON bill_plan.plan_billRef = bill.bill_id"
                                               " WHERE bill.bill_id > 0"
                                               "   AND archive = 0")
             return cursor.fetchall()
 
     def fetchDicts(self, dict_list: list):
         print("sqlite engine fetch dicts")
-
         def fetchDict(connection, dict_name: str):
             cursor = connection.execute("SELECT " + dict_name + "_id, " + dict_name + "_name"
                                         "  FROM " + dict_name + " "
@@ -75,18 +76,65 @@ class SqliteEngine(QObject):
     def shutdownEngine(self):
         self._connection.close()
 
-    def updateBillRecrod(self, record: BillItem):
-        print("sqlite engine update bill record:", record)
+    def updateBillRecord(self, data: list):
+        print("sqlite engine update bill record:", data)
+        with self._connection:
+            cursor = self._connection.cursor()
+            cursor.execute("UPDATE bill "
+                           "   SET bill_date = ?"
+                           "     , bill_name = ?"
+                           "     , bill_category = ?"
+                           "     , bill_vendor = ?"
+                           "     , bill_cost = ?"
+                           "     , bill_project = ?"
+                           "     , bill_desc = ?"
+                           "     , bill_shipment_time = ?"
+                           "     , bill_status = ?"
+                           "     , bill_priority = ?"
+                           "     , bill_shipment_date = ?"
+                           "     , bill_shipment_status = ?"
+                           "     , bill_week = ?"
+                           "     , bill_note = ?"
+                           "     , archive = 0"
+                           " WHERE bill_id = ?", data)
 
-    def insertBillRecord(self, record: BillItem):
-        print("sqlite engine insert bill record:", record)
-        if record.item_id is None:
-            return 1000
-        else:
-            return 9999
+    def insertBillRecord(self, data: list):
+        print("sqlite engine insert bill record:", data)
+        with self._connection:
+            cursor = self._connection.execute(" INSERT INTO bill "
+                                              "      ( bill_date"
+                                              "      , bill_name"
+                                              "      , bill_category"
+                                              "      , bill_vendor"
+                                              "      , bill_cost"
+                                              "      , bill_project"
+                                              "      , bill_desc"
+                                              "      , bill_shipment_time"
+                                              "      , bill_status"
+                                              "      , bill_priority"
+                                              "      , bill_shipment_date"
+                                              "      , bill_shipment_status"
+                                              "      , bill_week"
+                                              "      , bill_note"
+                                              "      , archive"
+                                              "      , bill_id)"
+                                              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)", data[:-1])
+            rec_id = cursor.lastrowid
+            cursor = self._connection.execute(" INSERT INTO bill_plan"
+                                              "           ( plan_id"
+                                              "           , plan_billRef"
+                                              "           , plan_year"
+                                              "           , plan_week)"
+                                              "      VALUES (NULL, ?, 0, 0)", (rec_id, ))
+        return rec_id
 
     def deleteBillRecord(self, record: BillItem):
         print("sqlite engine delete bill record:", record)
+        with self._connection:
+            cursor = self._connection.cursor()
+            cursor.execute("UPDATE bill"
+                           "   SET archive = 1 "
+                           " WHERE bill_id = ?", (record.item_id, ))
 
     def updatePlanData(self, data):
         # TODO error handling

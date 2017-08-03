@@ -21,6 +21,7 @@ class DomainModel(QObject):
 
     def buildPlanData(self):
         print("building plan data")
+        # self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
         if self._planData:
             self._planData.clear()
         for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):

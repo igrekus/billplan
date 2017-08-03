@@ -76,7 +76,7 @@ class BillItem:
                    , priority=sqlite_tuple[10]
                    , shipment_date=sqlite_tuple[11]
                    , shipment_status=sqlite_tuple[12]
-                   , payment_week=sqlite_tuple[13]
+                   , payment_week=sqlite_tuple[15]   # sqlite_tuple[13] - not used
                    , note=sqlite_tuple[14])
 
 
@@ -93,3 +93,20 @@ class BillItem:
         #            , status=record.value(6)
         #            , is_dirty=False)
         pass
+
+    def toTuple(self):
+        return tuple([self.item_date,
+                      self.item_name,
+                      self.item_category,
+                      self.item_vendor,
+                      self.item_cost,
+                      self.item_project,
+                      self.item_descript,
+                      self.item_shipment_time,
+                      self.item_status,
+                      self.item_priority,
+                      self.item_shipment_date,
+                      self.item_shipment_status,
+                      self.item_payment_week,
+                      self.item_note,
+                      self.item_id])

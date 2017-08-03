@@ -110,10 +110,13 @@ class BillPlanModel(QAbstractTableModel):
         # FIXME should notify ui facade to modify domain model through the facade
         row = index.row()
         col = index.column()
+        item_id = self._modelDomain._planData[row][2]
         if value == 2:
             self._modelDomain._planData[row][5] = self._weeksInHeader[col - 5]
+            self._modelDomain._rawPlanData[item_id] = self._weeksInHeader[col - 5]
         elif value == 0:
             self._modelDomain._planData[row][5] = [0, 0]
+            self._modelDomain._rawPlanData[item_id] = [0, 0]
 
         self.dataChanged.emit(self.index(row, 0, QModelIndex()), self.index(row, self.ColumnCount - 1, QModelIndex()), [])
         return True

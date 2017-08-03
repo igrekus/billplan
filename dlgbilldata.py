@@ -43,6 +43,9 @@ class DlgBillData(QDialog):
         self.ui.comboPriority.setModel(self._domainModel.dicts["priority"])
         self.ui.comboShipment.setModel(self._domainModel.dicts["shipment"])
 
+        self.ui.lblWeek.setVisible(False)
+        self.ui.spinWeek.setVisible(False)
+
     def updateWidgets(self):
         self.ui.dateBill.setDate(QDate().fromString(self._currentItem.item_date, "dd.MM.yyyy"))
         self.ui.editBillName.setText(self._currentItem.item_name)
