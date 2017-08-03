@@ -23,8 +23,6 @@ class BillPlanModel(QAbstractTableModel):
         super(BillPlanModel, self).__init__(parent)
         self._modelDomain = domainModel
         self._dicts = dict()
-        self._modelDomain.billItemsInserted.connect(self.itemsInserted)
-        self._modelDomain.billItemsRemoved.connect(self.itemsRemoved)
 
         self._firstWeekNumber = firstWeekNumber
         if self._firstWeekNumber is None:
@@ -33,6 +31,9 @@ class BillPlanModel(QAbstractTableModel):
         self._weeksInHeader = list()
 
         self.updateHeader(self._firstWeekNumber)
+
+        self._modelDomain.planItemsInserted.connect(self.itemsInserted)
+        self._modelDomain.planItemsRemoved.connect(self.itemsRemoved)
 
     def clear(self):
         pass
@@ -88,9 +89,7 @@ class BillPlanModel(QAbstractTableModel):
             self._weeksInHeader.append([year, num])
 
         self.headerDataChanged.emit(Qt.Horizontal, self.ColumnCount - self.WeekCount, self.ColumnCount)
-
-        # self._weeksInHeader = [[year, n] for n in range(firstWeekNumber, firstWeekNumber + self.WeekCount)]
-        print(self._weeksInHeader)
+        # print(self._weeksInHeader)
 
     def headerData(self, section, orientation, role=None):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole and section < len(self._header):
@@ -98,6 +97,7 @@ class BillPlanModel(QAbstractTableModel):
         return QVariant()
 
     def rowCount(self, parent=None, *args, **kwargs):
+        # print("rowcount", self._modelDomain.planListRowCount())
         if parent.isValid():
             return 0
         return self._modelDomain.planListRowCount() + 1
@@ -184,11 +184,11 @@ class BillPlanModel(QAbstractTableModel):
     @pyqtSlot(int, int)
     def itemsInserted(self, first: int, last: int):
         self.beginInsertRows(QModelIndex(), first, last)
-        # print("table model slot:", first, last)
+        # print("plan model slot:", first, last)
         self.endInsertRows()
 
     @pyqtSlot(int, int)
     def itemsRemoved(self, first: int, last: int):
         self.beginRemoveRows(QModelIndex(), first, last)
-        # print("table model slot:", first, last)
+        # print("plan model slot:", first, last)
         self.endRemoveRows()

@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
 
         # bill plan table
         self.ui.tablePlan.setModel(self._modelPlanSearchProxy)
-        self.ui.tablePlan.setSelectionMode(QAbstractItemView.NoSelection    )
+        self.ui.tablePlan.setSelectionMode(QAbstractItemView.NoSelection)
         self.ui.tablePlan.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.tablePlan.setEditTriggers(QAbstractItemView.SelectedClicked)
         self.ui.tablePlan.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
@@ -138,44 +138,43 @@ class MainWindow(QMainWindow):
         self.actDeleteBillRecord.triggered.connect(self.procActDeleteRecord)
 
     def refreshView(self):
-        if self.ui.tabWidget.currentIndex() == 0:
-            twidth = self.ui.tableBill.frameGeometry().width() - 30
-            if twidth < 200:
-                twidth = 800
-            self.ui.tableBill.setColumnWidth(0, twidth * 0.035)
-            self.ui.tableBill.setColumnWidth(1, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(2, twidth * 0.07)
-            self.ui.tableBill.setColumnWidth(3, twidth * 0.07)
-            self.ui.tableBill.setColumnWidth(4, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(5, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(6, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(7, twidth * 0.175)
-            self.ui.tableBill.setColumnWidth(8, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(9, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(10, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(11, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(12, twidth * 0.06)
-            self.ui.tableBill.setColumnWidth(13, twidth * 0.04)
-            self.ui.tableBill.setColumnWidth(14, twidth * 0.03)
+        twidth = self.ui.tableBill.frameGeometry().width() - 30
+        if twidth < 700:
+            twidth = 1900
+        self.ui.tableBill.setColumnWidth(0, twidth * 0.03)
+        self.ui.tableBill.setColumnWidth(1, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(2, twidth * 0.07)
+        self.ui.tableBill.setColumnWidth(3, twidth * 0.07)
+        self.ui.tableBill.setColumnWidth(4, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(5, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(6, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(7, twidth * 0.20)
+        self.ui.tableBill.setColumnWidth(8, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(9, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(10, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(11, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(12, twidth * 0.06)
+        self.ui.tableBill.setColumnWidth(13, twidth * 0.04)
+        self.ui.tableBill.setColumnWidth(14, twidth * 0.03)
+        self.ui.tableBill.setColumnWidth(15, twidth * 0.01)
 
-        elif self.ui.tabWidget.currentIndex() == 1:
-            twidth = self.ui.tablePlan.frameGeometry().width() - 30
-            if twidth < 200:
-                twidth = 800
-            # 1 2 3 5 .. week count - 1
-            # self.ui.tablePlan.setColumnWidth(0, twidth * 0.035)
-            self.ui.tablePlan.setColumnWidth(1, twidth * 0.13)
-            self.ui.tablePlan.setColumnWidth(2, twidth * 0.05)
-            self.ui.tablePlan.setColumnWidth(3, twidth * 0.10)
-            # self.ui.tablePlan.setColumnWidth(4, twidth * 0.06)
-            self.ui.tablePlan.setColumnWidth(5, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(6, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(7, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(8, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(9, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(10, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(11, twidth * 0.09)
-            self.ui.tablePlan.setColumnWidth(12, twidth * 0.09)
+        twidth = self.ui.tablePlan.frameGeometry().width() - 30
+        if twidth < 700:
+            twidth = 1900
+        # 1 2 3 5 .. week count - 1
+        # self.ui.tablePlan.setColumnWidth(0, twidth * 0.035)
+        self.ui.tablePlan.setColumnWidth(1, twidth * 0.13)
+        self.ui.tablePlan.setColumnWidth(2, twidth * 0.05)
+        self.ui.tablePlan.setColumnWidth(3, twidth * 0.10)
+        # self.ui.tablePlan.setColumnWidth(4, twidth * 0.06)
+        self.ui.tablePlan.setColumnWidth(5, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(6, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(7, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(8, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(9, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(10, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(11, twidth * 0.09)
+        self.ui.tablePlan.setColumnWidth(12, twidth * 0.09)
 
     # ui events
     def onBtnRefreshClicked(self):

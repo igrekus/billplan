@@ -20,10 +20,11 @@ class BillTableModel(QAbstractTableModel):
     ColumnShipmentStatus = 12
     ColumnPaymentWeek = 13
     ColumnNote = 14
-    ColumnCount = 15
+    ColumnActive = 15
+    ColumnCount = 16
 
     _headers = ["Номер", "Дата", "Счёт", "Категория", "Поставщик", "Сумма", "Работа", "Назначение", "Срок",
-                "Статус", "Приоритет", "Дата", "Отгрузка", "Неделя", "Примечание"]
+                "Статус", "Приоритет", "Дата", "Отгрузка", "Неделя", "Примечание", "+"]
 
     def __init__(self, parent=None, domainModel=None):
         super(BillTableModel, self).__init__(parent)
@@ -55,6 +56,14 @@ class BillTableModel(QAbstractTableModel):
 
     def columnCount(self, parent=None, *args, **kwargs):
         return self.ColumnCount
+
+    def setData(self, index, value, role):
+        # FIXME modifiex domain model directly, use facade
+        if value == 0:
+            self._modelDomain._billData[index.row()].item_active = 0
+        elif value > 0:
+            self._modelDomain._billData[index.row()].item_active = 1
+        return True
 
     def data(self, index, role=None):
         if not index.isValid():
@@ -95,6 +104,16 @@ class BillTableModel(QAbstractTableModel):
                 return QVariant(item.item_payment_week)
             elif col == self.ColumnNote:
                 return QVariant(item.item_note)
+            elif col == self.ColumnActive:
+                return QVariant()
+
+        elif role == Qt.CheckStateRole:
+            if col == self.ColumnActive:
+                if item.item_active > 0:
+                    return QVariant(2)
+                elif item.item_active == 0:
+                    return QVariant(0)
+
         elif role == Qt.BackgroundRole:
             # FIXME hardcoded ids for coloring - add color codes to SQL table?
             retcolor = Qt.white;
@@ -124,6 +143,12 @@ class BillTableModel(QAbstractTableModel):
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
         return QVariant()
+
+    def flags(self, index):
+        f = super(BillTableModel, self).flags(index)
+        if index.column() == self.ColumnActive:
+            f = f | Qt.ItemIsUserCheckable
+        return f
 
     @pyqtSlot(int, int)
     def itemsInserted(self, first: int, last: int):

@@ -9,6 +9,9 @@ class DomainModel(QObject):
     billItemsInserted = pyqtSignal(int, int)
     billItemsRemoved = pyqtSignal(int, int)
 
+    planItemsInserted = pyqtSignal(int, int)
+    planItemsRemoved = pyqtSignal(int, int)
+
     def __init__(self, parent=None, persistenceFacade=None):
         super(DomainModel, self).__init__(parent)
 
@@ -22,12 +25,16 @@ class DomainModel(QObject):
     def buildPlanData(self):
         print("building plan data")
         # self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
-        if self._planData:
-            self._planData.clear()
+        oldsize = len(self._planData)
+        self.planItemsRemoved.emit(0, oldsize*2 - 1)
+        self._planData.clear()
+
         for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):
             # TODO fix hardcoded magic numbers
-            if d.item_status != 1:
+            if d.item_active == 1:
                 self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, self._rawPlanData[d.item_id]])
+
+        self.planItemsInserted.emit(0, len(self._planData))
 
     def initModel(self):
         print("init domain model")

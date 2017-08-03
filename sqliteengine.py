@@ -46,6 +46,7 @@ class SqliteEngine(QObject):
                                               ", main.bill.bill_week"
                                               ", main.bill.bill_note"
                                               ", main.bill_plan.plan_week"
+                                              ", main.bill_plan.plan_active"
                                               "  FROM bill "
                                               " INNER JOIN bill_plan ON bill_plan.plan_billRef = bill.bill_id"
                                               " WHERE bill.bill_id > 0"
