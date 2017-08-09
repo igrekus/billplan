@@ -70,8 +70,10 @@ class SqliteEngine(QObject):
                                               ", main.bill_plan.plan_billRef"
                                               ", main.bill_plan.plan_year"
                                               ", main.bill_plan.plan_week"
+                                              ", main.bill_plan.plan_active"
                                               "  FROM main.bill_plan"
                                               " WHERE main.bill_plan.plan_id > 0")
+            # print(cursor.fetchall())
             return cursor.fetchall()
 
     def shutdownEngine(self):
@@ -145,6 +147,7 @@ class SqliteEngine(QObject):
             cursor.executemany("UPDATE bill_plan"
                                "   SET plan_year = ? "
                                "     , plan_week = ? "
+                               "     , plan_active = ?"
                                " WHERE plan_billRef = ?", data)
         print("...update end")
         return True

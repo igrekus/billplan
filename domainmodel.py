@@ -6,11 +6,18 @@ class DomainModel(QObject):
 
     dict_list = ["category", "period", "priority", "project", "shipment", "status", "vendor"]
 
+    billItemsBeginInsert = pyqtSignal(int, int)
+    billItemsEndInsert = pyqtSignal()
+    billItemsBeginRemove = pyqtSignal(int, int)
+    billItemsEndRemove = pyqtSignal()
+
+    planItemsBeginInsert = pyqtSignal(int, int)
+    planItemsEndInsert = pyqtSignal()
+    planItemsBeginRemove = pyqtSignal(int, int)
+    planItemsEndRemove = pyqtSignal()
+
     billItemsInserted = pyqtSignal(int, int)
     billItemsRemoved = pyqtSignal(int, int)
-
-    planItemsInserted = pyqtSignal(int, int)
-    planItemsRemoved = pyqtSignal(int, int)
 
     def __init__(self, parent=None, persistenceFacade=None):
         super(DomainModel, self).__init__(parent)
@@ -24,17 +31,19 @@ class DomainModel(QObject):
 
     def buildPlanData(self):
         print("building plan data")
-        # self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
         oldsize = len(self._planData)
-        self.planItemsRemoved.emit(0, oldsize*2 - 1)
-        self._planData.clear()
 
+        self.planItemsBeginRemove.emit(0, oldsize + 2)
+        self._planData.clear()
+        self.planItemsEndRemove.emit()
+
+        self.planItemsBeginInsert.emit(0, sum([v[2] for v in self._rawPlanData.values()]) + 1)
         for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):
             # TODO fix hardcoded magic numbers
-            if d.item_active == 1:
+            if self._rawPlanData[d.item_id][2] == 1:
                 self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, self._rawPlanData[d.item_id]])
-
-        self.planItemsInserted.emit(0, len(self._planData))
+                # print(self._planData[-1])
+        self.planItemsEndInsert.emit()
 
     def initModel(self):
         print("init domain model")
@@ -68,6 +77,27 @@ class DomainModel(QObject):
     def getTotalForWeek(self, week):
         return sum(p[4] for p in self._planData if p[5] == week)
 
+    def getTotal(self):
+        # total = sum([self._modelDomain.getTotalForWeek(w) for w in self._weeksInHeader])
+        return 999
+
+    def getPayedTotal(self):
+        return 1000
+
+    def getRemainingTotal(self):
+        return 1001
+
+    def setWeekForBill(self, bill_id, week):
+        for i, d in enumerate(self._billData):
+            if d.item_id == bill_id:
+                break
+        self._billData[i].item_payment_week = week
+
+    def getBillItemById(self, bill_id):
+        for d in self._billData:
+            if d.item_id == bill_id:
+                return d
+
     def refreshData(self):
         print("domain model refresh call")
 
@@ -95,9 +125,6 @@ class DomainModel(QObject):
         del self._billData[row]
         self.billItemsRemoved.emit(row, row)
 
-    def getBillItemById(self):
-        raise NotImplementedError("implement if needed")
-
     def savePlanData(self):
         print("domain model persist plan data call")
-        return self._persistenceFacade.persistPlanData(self._planData)
+        return self._persistenceFacade.persistPlanData(self._rawPlanData)

@@ -32,8 +32,10 @@ class BillPlanModel(QAbstractTableModel):
 
         self.updateHeader(self._firstWeekNumber)
 
-        self._modelDomain.planItemsInserted.connect(self.itemsInserted)
-        self._modelDomain.planItemsRemoved.connect(self.itemsRemoved)
+        self._modelDomain.planItemsBeginInsert.connect(self.planItemsBeginInsert)
+        self._modelDomain.planItemsEndInsert.connect(self.planItemsEndInsert)
+        self._modelDomain.planItemsBeginRemove.connect(self.planItemsBeginRemove)
+        self._modelDomain.planItemsEndRemove.connect(self.planItemsEndRemove)
 
     def clear(self):
         pass
@@ -86,7 +88,7 @@ class BillPlanModel(QAbstractTableModel):
                 num = num % last_week.week
                 year = year + 1
             self._header.append(str(num) + ": " + d1.strftime("%d.%m") + "-" + d2.strftime("%d.%m"))
-            self._weeksInHeader.append([year, num])
+            self._weeksInHeader.append([year, num, 1])
 
         self.headerDataChanged.emit(Qt.Horizontal, self.ColumnCount - self.WeekCount, self.ColumnCount)
         # print(self._weeksInHeader)
@@ -100,7 +102,7 @@ class BillPlanModel(QAbstractTableModel):
         # print("rowcount", self._modelDomain.planListRowCount())
         if parent.isValid():
             return 0
-        return self._modelDomain.planListRowCount() + 1
+        return self._modelDomain.planListRowCount() + 2
 
     def columnCount(self, parent=None, *args, **kwargs):
         return self.ColumnCount
@@ -111,12 +113,16 @@ class BillPlanModel(QAbstractTableModel):
         row = index.row()
         col = index.column()
         item_id = self._modelDomain._planData[row][2]
+
         if value == 2:
-            self._modelDomain._planData[row][5] = self._weeksInHeader[col - 5]
-            self._modelDomain._rawPlanData[item_id] = self._weeksInHeader[col - 5]
+            tmplist = self._weeksInHeader[col - 5]
         elif value == 0:
-            self._modelDomain._planData[row][5] = [0, 0]
-            self._modelDomain._rawPlanData[item_id] = [0, 0]
+            tmplist = [0, 0, 1]
+
+        self._modelDomain._planData[row][5] = tmplist
+        self._modelDomain._rawPlanData[item_id] = tmplist
+
+        self._modelDomain.setWeekForBill(item_id, tmplist[1])
 
         self.dataChanged.emit(self.index(row, 0, QModelIndex()), self.index(row, self.ColumnCount - 1, QModelIndex()), [])
         return True
@@ -131,8 +137,29 @@ class BillPlanModel(QAbstractTableModel):
                 return QVariant()
 
             if index.column() > self.ColumnBillCost:
-                total = self._modelDomain.getTotalForWeek(self._weeksInHeader[index.column() - 5])
-                return QVariant("Итого: " + "{:.2f}".format(float(total / 100)) + " руб")
+                week_total = self._modelDomain.getTotalForWeek(self._weeksInHeader[index.column() - 5])
+                return QVariant("Неделя:\n " + "{:,.2f}".format(float(week_total / 100)).replace(",", " ") + " руб")
+
+            return QVariant()
+        elif index.row() == self._modelDomain.planListRowCount() + 1:
+
+            if role == Qt.DisplayRole:
+                # TODO: !!! total calculations !!!
+                if index.column() == self.ColumnBillCost + 1:
+                    return QVariant("Итого:\n " +
+                                    "{:,.2f}".format(float(self._modelDomain.getTotal() / 100)).replace(",", " ") + " руб")
+                elif index.column() == self.ColumnBillCost + 2:
+                    return QVariant("Оплачено:\n " +
+                                    "{:,.2f}".format(float(self._modelDomain.getPayedTotal() / 100)).replace(",", " ") + " руб")
+                elif index.column() == self.ColumnBillCost + 3:
+                    return QVariant("Осталось: \n" +
+                                    "{:,.2f}".format(float(self._modelDomain.getRemainingTotal() / 100)).replace(",", " ") + " руб")
+
+            elif role == Qt.BackgroundRole:
+                if index.column() == self.ColumnBillCost + 2:
+                    return QVariant(QBrush(QColor(const.COLOR_PAYMENT_FINISHED)))
+                elif index.column() == self.ColumnBillCost + 3:
+                    return QVariant(QBrush(QColor(const.COLOR_PAYMENT_PENDING)))
 
             return QVariant()
 
@@ -153,12 +180,7 @@ class BillPlanModel(QAbstractTableModel):
                 return QVariant(item[4])
             elif col > self.ColumnBillCost:
                 if item[5] == self._weeksInHeader[col - 5]:
-                    return QVariant(str(item[2]) + ": " + "{:.2f}".format(float(item[4] / 100)) + " руб")
-
-        # elif role == Qt.BackgroundRole:
-        #     if col > self.ColumnBillCost:
-        #         if item[5] is not None and item[5] == self._firstWeekNumber + col - self.WeekCount:
-        #             return QVariant(QBrush(QColor(const.COLOR_PAYMENT_FINISHED)))
+                    return QVariant(str(item[2]) + ": " + "{:,.2f}".format(float(item[4] / 100)).replace(",", " ") + " руб")
 
         elif role == Qt.CheckStateRole:
             if col > self.ColumnBillCost:
@@ -167,6 +189,14 @@ class BillPlanModel(QAbstractTableModel):
                 else:
                     return QVariant(0)
 
+        elif role == Qt.BackgroundRole:
+            if col > self.ColumnBillCost:
+                bill = self._modelDomain.getBillItemById(item[2])
+                if bill.item_status == 1 and item[5] == self._weeksInHeader[col - 5]:
+                    return QVariant(QBrush(QColor(const.COLOR_PAYMENT_FINISHED)))
+
+            return QVariant()
+
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
 
@@ -174,7 +204,10 @@ class BillPlanModel(QAbstractTableModel):
 
     def flags(self, index):
         f = super(BillPlanModel, self).flags(index)
+
         if index.row() == self._modelDomain.planListRowCount():
+            return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        elif index.row() == self._modelDomain.planListRowCount() + 1:
             return Qt.NoItemFlags | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
         if index.column() > self.ColumnBillCost:
@@ -182,13 +215,17 @@ class BillPlanModel(QAbstractTableModel):
         return f
 
     @pyqtSlot(int, int)
-    def itemsInserted(self, first: int, last: int):
+    def planItemsBeginInsert(self, first: int, last: int):
         self.beginInsertRows(QModelIndex(), first, last)
-        # print("plan model slot:", first, last)
+
+    @pyqtSlot()
+    def planItemsEndInsert(self):
         self.endInsertRows()
 
     @pyqtSlot(int, int)
-    def itemsRemoved(self, first: int, last: int):
+    def planItemsBeginRemove(self, first: int, last: int):
         self.beginRemoveRows(QModelIndex(), first, last)
-        # print("plan model slot:", first, last)
+
+    @pyqtSlot()
+    def planItemsEndRemove(self):
         self.endRemoveRows()

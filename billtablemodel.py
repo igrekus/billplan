@@ -59,10 +59,17 @@ class BillTableModel(QAbstractTableModel):
 
     def setData(self, index, value, role):
         # FIXME modifiex domain model directly, use facade
+        item = self._modelDomain.getBillItemAtIndex(index)
+        # print(item)
+        tmplist = self._modelDomain._rawPlanData[item.item_id].copy()
+
         if value == 0:
-            self._modelDomain._billData[index.row()].item_active = 0
+            tmplist[2] = 0
         elif value > 0:
-            self._modelDomain._billData[index.row()].item_active = 1
+            tmplist[2] = 1
+
+        self._modelDomain._rawPlanData[item.item_id] = tmplist
+        # print(self._modelDomain._rawPlanData[item.item_id])
         return True
 
     def data(self, index, role=None):
@@ -85,7 +92,7 @@ class BillTableModel(QAbstractTableModel):
             elif col == self.ColumnVendor:
                 return QVariant(self._dicts["vendor"].getData(item.item_vendor))
             elif col == self.ColumnCost:
-                return QVariant("{:.2f}".format(float(item.item_cost/100)))
+                return QVariant("{:,.2f}".format(float(item.item_cost/100)).replace(",", " "))
             elif col == self.ColumnProject:
                 return QVariant(self._dicts["project"].getData(item.item_project))
             elif col == self.ColumnDescription:
@@ -109,9 +116,10 @@ class BillTableModel(QAbstractTableModel):
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnActive:
-                if item.item_active > 0:
+                active = self._modelDomain._rawPlanData[item.item_id][2]
+                if active > 0:
                     return QVariant(2)
-                elif item.item_active == 0:
+                elif active == 0:
                     return QVariant(0)
 
         elif role == Qt.BackgroundRole:

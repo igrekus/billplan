@@ -45,6 +45,8 @@ class DlgBillData(QDialog):
 
         self.ui.lblWeek.setVisible(False)
         self.ui.spinWeek.setVisible(False)
+        self.ui.lblStatus.setVisible(False)
+        self.ui.comboStatus.setVisible(False)
 
     def updateWidgets(self):
         self.ui.dateBill.setDate(QDate().fromString(self._currentItem.item_date, "dd.MM.yyyy"))
