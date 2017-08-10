@@ -1,15 +1,19 @@
 from csvengine import CsvEngine
+from sqliteengine import SqliteEngine
+from printengine import PrintEngine
 import datetime
 import isoweek
-from sqliteengine import SqliteEngine
+import const
+from reportmanager import ReportManager
 from domainmodel import DomainModel
 from billtablemodel import BillTableModel
 from billplanmodel import BillPlanModel
 from persistencefacade import PersistenceFacade
+from billsearchproxymodel import BillSearchProxyModel
 from uifacade import UiFacade
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QHeaderView
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate
 
 
 class MainWindow(QMainWindow):
@@ -24,32 +28,47 @@ class MainWindow(QMainWindow):
         # ui
         self.ui = uic.loadUi("mainwindow.ui", self)
 
+        # report manager
+        self._reportManager = ReportManager(parent=self)
+
+        # report engines
+        # self._xlsxEngine = XlsxEngine(parent=self)
+        self._printEngine = PrintEngine(parent=self)
+        self._reportManager.setEngine(self._printEngine)
+
         # persistence engine
         # self._persistenceEngine = CsvEngine(parent=self)
         self._persistenceEngine = SqliteEngine(parent=self)
 
         # facades
         self._persistenceFacade = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
-        self._uiFacade = UiFacade(parent=self)
+        self._uiFacade = UiFacade(parent=self, reportManager=self._reportManager)
 
         # models
         # domain
         self._modelDomain = DomainModel(parent=self, persistenceFacade=self._persistenceFacade)
-        self._uiFacade.setDomainModel(self._modelDomain)
+
         # bill list + search proxy
         self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain)
-        self._modelBillSearchProxy = QSortFilterProxyModel(parent=self)
+        self._modelBillSearchProxy = BillSearchProxyModel(parent=self)
         self._modelBillSearchProxy.setSourceModel(self._modelBillList)
+
         # bill plan + search proxy
         self._modelBillPlan = BillPlanModel(parent=self, domainModel=self._modelDomain)
         self._modelPlanSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelPlanSearchProxy.setSourceModel(self._modelBillPlan)
+
+        # connect ui facade to models
+        self._uiFacade.setDomainModel(self._modelDomain)
+        self._uiFacade.setBillModel(self._modelBillSearchProxy)
+        self._uiFacade.setPlanModel(self._modelPlanSearchProxy)
 
         # actions
         self.actRefresh = QAction("Обновить", self)
         self.actAddBillRecord = QAction("Добавить счёт...", self)
         self.actEditBillRecord = QAction("Изменить счёт...", self)
         self.actDeleteBillRecord = QAction("Удалить счёт...", self)
+        self.actPrint = QAction("Распечатать...", self)
 
     def buildWeekSelectionCombo(self):
         year, week, day = datetime.datetime.now().isocalendar()
@@ -68,6 +87,7 @@ class MainWindow(QMainWindow):
         self._persistenceFacade.initFacade()
         # self._uiFacade.initFacade()
         self._modelDomain.initModel()
+        self._modelDomain.buildPlanData()
         self._modelBillList.initModel()
         self._modelBillPlan.initModel()
 
@@ -107,7 +127,15 @@ class MainWindow(QMainWindow):
         # self.ui.tablePlan.setSpan(0, 0, 1, 3)
         self.ui.tablePlan.setStyleSheet("QTableView { gridline-color : black}")
 
-        self.btnRefresh.setVisible(False)
+        # setup filter widgets
+        self.ui.comboProjectFilter.setModel(self._modelDomain.dicts["project"])
+        self.ui.comboStatusFilter.setModel(self._modelDomain.dicts["status"])
+        self.ui.comboPriorityFilter.setModel(self._modelDomain.dicts["priority"])
+        self.ui.comboShipmentFilter.setModel(self._modelDomain.dicts["shipment"])
+        self.ui.dateFromFilter.setDate(QDate.fromString(self._modelDomain.getEarliestBillDate(), "dd.MM.yyyy"))
+        self.ui.dateUntilFilter.setDate(QDate.currentDate())
+
+        # self.btnRefresh.setVisible(False)
 
         self.buildWeekSelectionCombo()
 
@@ -115,13 +143,28 @@ class MainWindow(QMainWindow):
         self.initActions()
 
         # setup ui widget signals
+        # buttons
         self.ui.btnRefresh.clicked.connect(self.onBtnRefreshClicked)
         self.ui.btnAddBill.clicked.connect(self.onBtnAddBillClicked)
         self.ui.btnEditBill.clicked.connect(self.onBtnEditBillClicked)
         self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
+        self.ui.btnPrint.clicked.connect(self.onBtnPrintClicked)
+
+        # table widgets
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
         self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
+
+        # search widgets
         self.ui.comboWeek.currentIndexChanged.connect(self.onComboWeekCurrentIndexChanged)
+        self.ui.editSearch.textChanged.connect(self.setSearchFilter)
+        self.ui.comboProjectFilter.currentIndexChanged.connect(self.setSearchFilter)
+        self.ui.comboStatusFilter.currentIndexChanged.connect(self.setSearchFilter)
+        self.ui.comboPriorityFilter.currentIndexChanged.connect(self.setSearchFilter)
+        self.ui.comboShipmentFilter.currentIndexChanged.connect(self.setSearchFilter)
+        self.ui.dateFromFilter.dateChanged.connect(self.setSearchFilter)
+        self.ui.dateUntilFilter.dateChanged.connect(self.setSearchFilter)
+
+        self.setSearchFilter()
 
     def initActions(self):
         self.actRefresh.setShortcut("Ctrl+R")
@@ -133,13 +176,15 @@ class MainWindow(QMainWindow):
         self.actAddBillRecord.triggered.connect(self.procActAddBillRecord)
 
         # self.actEditBillRecord.setShortcut("Ctrl+A")
-
         self.actEditBillRecord.setStatusTip("Добавить новый счёт")
         self.actEditBillRecord.triggered.connect(self.procActEditRecord)
 
         # self.actDeleteBillRecord.setShortcut("Ctrl+A")
         self.actDeleteBillRecord.setStatusTip("Добавить новый счёт")
         self.actDeleteBillRecord.triggered.connect(self.procActDeleteRecord)
+
+        self.actPrint.setStatusTip("Напечатать текущую таблицу")
+        self.actPrint.triggered.connect(self.procActPrint)
 
     def refreshView(self):
         tbwidth = self.ui.tableBill.geometry().width() - 30
@@ -152,9 +197,9 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setColumnWidth(4, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(5, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(6, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.20)
+        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.195)
         self.ui.tableBill.setColumnWidth(8, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(9, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(9, tbwidth * 0.065)
         self.ui.tableBill.setColumnWidth(10, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(11, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(12, tbwidth * 0.06)
@@ -192,6 +237,9 @@ class MainWindow(QMainWindow):
 
     def onBtnDeleteBillClicked(self):
         self.actDeleteBillRecord.trigger()
+
+    def onBtnPrintClicked(self):
+        self.actPrint.trigger()
 
     def onTableBillDoubleClicked(self):
         self.actEditBillRecord.trigger()
@@ -251,3 +299,16 @@ class MainWindow(QMainWindow):
 
         selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
         self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
+
+    def procActPrint(self):
+        self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex())
+
+    def setSearchFilter(self, dummy=0):
+        self._modelBillSearchProxy.filterString = self.ui.editSearch.text()
+        self._modelBillSearchProxy.filterProject = self.ui.comboProjectFilter.currentData(const.RoleNodeId)
+        self._modelBillSearchProxy.filterStatus = self.ui.comboStatusFilter.currentData(const.RoleNodeId)
+        self._modelBillSearchProxy.filterPriority = self.ui.comboPriorityFilter.currentData(const.RoleNodeId)
+        self._modelBillSearchProxy.filterShipment = self.ui.comboShipmentFilter.currentData(const.RoleNodeId)
+        self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
+        self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
+        self._modelBillSearchProxy.invalidate()

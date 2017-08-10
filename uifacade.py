@@ -1,18 +1,26 @@
 import const
 from dlgbilldata import DlgBillData
 from billitem import BillItem
-from PyQt5.QtCore import QObject, QModelIndex
+from PyQt5.QtCore import QObject, QModelIndex, Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
 
 class UiFacade(QObject):
-
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, domainModel=None, reportManager=None):
         super(UiFacade, self).__init__(parent)
-        self._domainModel = None
+        self._domainModel = domainModel
+        self._billModel = None
+        self._planModel = None
+        self._reportManager = reportManager
 
     def setDomainModel(self, domainModel=None):
         self._domainModel = domainModel
+
+    def setBillModel(self, model):
+        self._billModel = model
+
+    def setPlanModel(self, model):
+        self._planModel = model
 
     # process ui requests
     def requestRefresh(self):
@@ -47,6 +55,24 @@ class UiFacade(QObject):
             return
 
         self._domainModel.deleteBillItem(targetIndex)
+
+    def requestPrint(self, tableIndex):
+
+        def modelRowToList(model, row):
+            return [model.data(model.index(row, col), Qt.DisplayRole) for col in range(model.columnCount())], [
+                model.data(model.index(row, col), Qt.BackgroundRole) for col in range(model.columnCount())]
+
+        print("ui facade print request")
+        mdl = None
+        if tableIndex == 0:
+            print("making bill list export data...")
+            mdl = self._billModel
+
+        elif tableIndex == 1:
+            print("making plan export data...")
+            mdl = self._planModel
+
+        self._reportManager.makeReport([modelRowToList(mdl, i) for i in range(mdl.rowCount())])
 
     def requestExit(self):
         print("ui facade exit request...")

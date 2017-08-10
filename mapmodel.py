@@ -48,7 +48,7 @@ class MapModel(QAbstractListModel):
             return QVariant
 
         row = index.row()
-        if role == Qt.DisplayRole:
+        if role == Qt.DisplayRole or role == Qt.ToolTipRole:
             return QVariant(self.strList[row])
         elif role == const.RoleNodeId:
             return QVariant(self.getId(self.strList[row]))

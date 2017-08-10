@@ -58,19 +58,32 @@ class BillTableModel(QAbstractTableModel):
         return self.ColumnCount
 
     def setData(self, index, value, role):
-        # FIXME modifiex domain model directly, use facade
+        # FIXME modifies domain model directly, use facade
         item = self._modelDomain.getBillItemAtIndex(index)
-        # print(item)
-        tmplist = self._modelDomain._rawPlanData[item.item_id].copy()
+        if index.column() == self.ColumnActive:
+            tmplist = self._modelDomain._rawPlanData[item.item_id].copy()
+            if value == 0:
+                tmplist[2] = 0
+            elif value > 0:
+                tmplist[2] = 1
+            self._modelDomain._rawPlanData[item.item_id] = tmplist
+            return True
 
-        if value == 0:
-            tmplist[2] = 0
-        elif value > 0:
-            tmplist[2] = 1
+        if index.column() == self.ColumnStatus:
+            if value == 0:
+                item.item_status = 2
+                item.item_priority = 3
+            elif value == 2:
+                item.item_status = 1
+                item.item_priority = 1
 
-        self._modelDomain._rawPlanData[item.item_id] = tmplist
-        # print(self._modelDomain._rawPlanData[item.item_id])
-        return True
+            self._modelDomain.updateBillItem(index, item)
+
+            self.dataChanged.emit(self.index(index.row(), self.ColumnId, QModelIndex()),
+                                  self.index(index.row(), self.ColumnActive, QModelIndex()), [])
+            return True
+
+        return False
 
     def data(self, index, role=None):
         if not index.isValid():
@@ -121,6 +134,11 @@ class BillTableModel(QAbstractTableModel):
                     return QVariant(2)
                 elif active == 0:
                     return QVariant(0)
+            if col == self.ColumnStatus:
+                if item.item_status == 1:
+                    return QVariant(2)
+                if item.item_status == 2:
+                    return QVariant(0)
 
         elif role == Qt.BackgroundRole:
             # FIXME hardcoded ids for coloring - add color codes to SQL table?
@@ -150,11 +168,21 @@ class BillTableModel(QAbstractTableModel):
             return QVariant(QBrush(QColor(retcolor)))
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
+        elif role == const.RoleProject:
+            return QVariant(item.item_project)
+        elif role == const.RoleStatus:
+            return QVariant(item.item_status)
+        elif role == const.RolePriority:
+            return QVariant(item.item_priority)
+        elif role == const.RoleShipment:
+            return QVariant(item.item_shipment_status)
+        elif role == const.RoleDate:
+            return QVariant(QDate.fromString(item.item_date, "dd.MM.yyyy"))
         return QVariant()
 
     def flags(self, index):
         f = super(BillTableModel, self).flags(index)
-        if index.column() == self.ColumnActive:
+        if index.column() == self.ColumnActive or index.column() == self.ColumnStatus:
             f = f | Qt.ItemIsUserCheckable
         return f
 

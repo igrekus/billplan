@@ -141,25 +141,31 @@ class BillPlanModel(QAbstractTableModel):
                 return QVariant("Неделя:\n " + "{:,.2f}".format(float(week_total / 100)).replace(",", " ") + " руб")
 
             return QVariant()
+
         elif index.row() == self._modelDomain.planListRowCount() + 1:
 
             if role == Qt.DisplayRole:
                 # TODO: !!! total calculations !!!
                 if index.column() == self.ColumnBillCost + 1:
-                    return QVariant("Итого:\n " +
-                                    "{:,.2f}".format(float(self._modelDomain.getTotal() / 100)).replace(",", " ") + " руб")
+                    return QVariant("Итого:\n "
+                                    + "{:,.2f}".format(float(self._modelDomain.getTotal(self._weeksInHeader) / 100)).replace(",", " ")
+                                    + " руб")
                 elif index.column() == self.ColumnBillCost + 2:
-                    return QVariant("Оплачено:\n " +
-                                    "{:,.2f}".format(float(self._modelDomain.getPayedTotal() / 100)).replace(",", " ") + " руб")
+                    return QVariant("Оплачено:\n "
+                                    + "{:,.2f}".format(float(self._modelDomain.getPayedTotal(self._weeksInHeader) / 100)).replace(",", " ")
+                                    + " руб")
                 elif index.column() == self.ColumnBillCost + 3:
-                    return QVariant("Осталось: \n" +
-                                    "{:,.2f}".format(float(self._modelDomain.getRemainingTotal() / 100)).replace(",", " ") + " руб")
+                    return QVariant("Осталось: \n"
+                                    + "{:,.2f}".format(float(self._modelDomain.getRemainingTotal(self._weeksInHeader) / 100)).replace(",", " ")
+                                    + " руб")
 
             elif role == Qt.BackgroundRole:
                 if index.column() == self.ColumnBillCost + 2:
                     return QVariant(QBrush(QColor(const.COLOR_PAYMENT_FINISHED)))
                 elif index.column() == self.ColumnBillCost + 3:
                     return QVariant(QBrush(QColor(const.COLOR_PAYMENT_PENDING)))
+
+                return QVariant()
 
             return QVariant()
 

@@ -1,5 +1,5 @@
 from billitem import BillItem
-from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal
+from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
 
 
 class DomainModel(QObject):
@@ -77,15 +77,20 @@ class DomainModel(QObject):
     def getTotalForWeek(self, week):
         return sum(p[4] for p in self._planData if p[5] == week)
 
-    def getTotal(self):
-        # total = sum([self._modelDomain.getTotalForWeek(w) for w in self._weeksInHeader])
-        return 999
+    def getPayedTotalForWeek(self, week):
+        return sum(p[4] for p in self._planData if p[5] == week and self.getBillItemById(p[2]).item_status == 1)
 
-    def getPayedTotal(self):
-        return 1000
+    def getRemainingTotalForWeek(self, week):
+        return sum(p[4] for p in self._planData if p[5] == week and self.getBillItemById(p[2]).item_status != 1)
 
-    def getRemainingTotal(self):
-        return 1001
+    def getTotal(self, weeks):
+        return sum([self.getTotalForWeek(w) for w in weeks])
+
+    def getPayedTotal(self, weeks):
+        return sum([self.getPayedTotalForWeek(w) for w in weeks])
+
+    def getRemainingTotal(self, weeks):
+        return sum([self.getRemainingTotalForWeek(w) for w in weeks])
 
     def setWeekForBill(self, bill_id, week):
         for i, d in enumerate(self._billData):
@@ -97,6 +102,11 @@ class DomainModel(QObject):
         for d in self._billData:
             if d.item_id == bill_id:
                 return d
+
+    def getEarliestBillDate(self):
+        return min([d.item_date for d in self._billData],
+                   key=lambda d: QDate.fromString(d, "dd.MM.yyyy"),
+                   default=QDate.currentDate())
 
     def refreshData(self):
         print("domain model refresh call")
