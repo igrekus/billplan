@@ -1,6 +1,7 @@
 from csvengine import CsvEngine
 from sqliteengine import SqliteEngine
 from printengine import PrintEngine
+from xlsxengine import XlsxEngine
 import datetime
 import isoweek
 import const
@@ -32,9 +33,10 @@ class MainWindow(QMainWindow):
         self._reportManager = ReportManager(parent=self)
 
         # report engines
-        # self._xlsxEngine = XlsxEngine(parent=self)
-        self._printEngine = PrintEngine(parent=self)
-        self._reportManager.setEngine(self._printEngine)
+        self._xlsxEngine = XlsxEngine(parent=self)
+        self._reportManager.setEngine(self._xlsxEngine)
+        # self._printEngine = PrintEngine(parent=self)
+        # self._reportManager.setEngine(self._printEngine)
 
         # persistence engine
         # self._persistenceEngine = CsvEngine(parent=self)
@@ -165,6 +167,8 @@ class MainWindow(QMainWindow):
         self.ui.dateUntilFilter.dateChanged.connect(self.setSearchFilter)
 
         self.setSearchFilter()
+
+        self.ui.btnRefresh.setVisible(False)
 
     def initActions(self):
         self.actRefresh.setShortcut("Ctrl+R")

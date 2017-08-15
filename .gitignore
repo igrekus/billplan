@@ -155,3 +155,5 @@ fabric.properties
 \.idea/
 
 ref/
+
+report/

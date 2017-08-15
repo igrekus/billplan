@@ -1,4 +1,5 @@
 import const
+from datetime import datetime
 from dlgbilldata import DlgBillData
 from billitem import BillItem
 from PyQt5.QtCore import QObject, QModelIndex, Qt
@@ -58,21 +59,68 @@ class UiFacade(QObject):
 
     def requestPrint(self, tableIndex):
 
-        def modelRowToList(model, row):
-            return [model.data(model.index(row, col), Qt.DisplayRole) for col in range(model.columnCount())], [
-                model.data(model.index(row, col), Qt.BackgroundRole) for col in range(model.columnCount())]
-
         print("ui facade print request")
-        mdl = None
+        title = None
+        data = list()
+        color = list()
+        header = list()
+        footer_data = list()
+        footer_color = list()
+        widths = list()
+
         if tableIndex == 0:
             print("making bill list export data...")
-            mdl = self._billModel
+
+            title = "Отчёт о состоянии счетов на " + datetime.now().strftime("%d.%m.%Y")
+
+            header = [self._billModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
+                      range(self._billModel.columnCount() - 5)]
+
+            for i in range(self._billModel.rowCount() - 1):
+                d = [self._billModel.data(self._billModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._billModel.columnCount() - 5)]
+                c = [self._billModel.data(self._billModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._billModel.columnCount() - 5)]
+                data.append(d)
+                color.append(c)
+
+            for i in range(self._billModel.rowCount() - 1, self._billModel.rowCount()):
+                d = [self._billModel.data(self._billModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._billModel.columnCount() - 5)]
+                c = [self._billModel.data(self._billModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._billModel.columnCount() - 5)]
+                footer_data.append(d)
+                footer_color.append(c)
+
+            widths = [0.03, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.195, 0.06, 0.065, 0.06, 0.06, 0.06, 0.04, 0.03, 0.01]
 
         elif tableIndex == 1:
             print("making plan export data...")
-            mdl = self._planModel
+            title = "План оплаты счетов на " + self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole) + " - " + \
+                    self._planModel.headerData(self._planModel.columnCount() - 1, Qt.Horizontal, Qt.DisplayRole) + \
+                    " недели"
+            header = [self._planModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
+                      range(self._planModel.columnCount()) if i != 0 and i != 4]
 
-        self._reportManager.makeReport([modelRowToList(mdl, i) for i in range(mdl.rowCount())])
+            for i in range(self._planModel.rowCount() - 2):
+                d = [self._planModel.data(self._planModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._planModel.columnCount()) if j != 0 and j != 4]
+                c = [self._planModel.data(self._planModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._planModel.columnCount()) if j != 0 and j != 4]
+                data.append(d)
+                color.append(c)
+
+            for i in range(self._planModel.rowCount() - 2, self._planModel.rowCount()):
+                d = [self._planModel.data(self._planModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._planModel.columnCount()) if j != 0 and j != 4]
+                c = [self._planModel.data(self._planModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._planModel.columnCount()) if j != 0 and j != 4]
+                footer_data.append(d)
+                footer_color.append(c)
+
+            widths = [0.13, 0.05, 0.10, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09]
+
+        self._reportManager.makeReport(title, header, data, color, footer_data, footer_color, widths)
 
     def requestExit(self):
         print("ui facade exit request...")

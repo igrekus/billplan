@@ -337,7 +337,7 @@
       <item>
        <widget class="QPushButton" name="btnPrint">
         <property name="text">
-         <string>Печать</string>
+         <string>В Excel</string>
         </property>
        </widget>
       </item>
