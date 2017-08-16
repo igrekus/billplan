@@ -138,3 +138,22 @@ class DomainModel(QObject):
     def savePlanData(self):
         print("domain model persist plan data call")
         return self._persistenceFacade.persistPlanData(self._rawPlanData)
+
+    def addDictRecord(self, dictName, data):
+        print("domain model add dict record:", dictName, data)
+        newId = self._persistenceFacade.addDictRecord(dictName, data)
+
+        self.dicts[dictName].addItem(100, data)
+
+    def editDictRecord(self, dictName, data):
+        print("domain model edit dict record:", dictName, data)
+        self._persistenceFacade.editDictRecord(dictName, data)
+
+        self.dicts[dictName].updateItem(data[0], data[1])
+
+    def deleteDictRecord(self, dictName, data):
+        # TODO: check for existing references
+        print("domain model delete dict record:", dictName, data)
+        self._persistenceFacade.deleteDictRecord(dictName, data)
+
+        self.dicts[dictName].removeItem(data)

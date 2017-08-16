@@ -45,6 +45,8 @@ class DlgBillData(QDialog):
 
         self.ui.lblWeek.setVisible(False)
         self.ui.spinWeek.setVisible(False)
+        self.ui.lblNote.setVisible(False)
+        self.ui.editNote.setVisible(False)
         # self.ui.lblStatus.setVisible(False)
         # self.ui.comboStatus.setVisible(False)
 

@@ -1,7 +1,6 @@
 import const
 import os
 from PyQt5.QtCore import QObject
-import openpyxl
 import xlsxwriter
 
 
@@ -19,7 +18,18 @@ class XlsxEngine(QObject):
         wb = xlsxwriter.Workbook(r"report/" + title + ".xlsx")
         ws = wb.add_worksheet("Sheet1")
 
+        fmtTitle = wb.add_format({
+            'font_name': 'Times New Roman',
+            'font_size': 14,
+            # 'bold': True,
+            # 'border': 2,
+            'valign': 'vcenter'
+            # 'align': 'center',
+            # 'bg_color': '#E2E2E2'
+        })
+
         fmtHeader = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 10,
             'bold': True,
             'border': 2,
@@ -29,6 +39,7 @@ class XlsxEngine(QObject):
         })
 
         fmtCellGood = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 9,
             'border': 1,
             'border_color': '#848484',
@@ -39,6 +50,7 @@ class XlsxEngine(QObject):
         })
 
         fmtCellBad = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 9,
             'border': 1,
             'border_color': '#848484',
@@ -49,6 +61,7 @@ class XlsxEngine(QObject):
         })
 
         fmtCellNormal = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 9,
             'border': 1,
             'border_color': '#848484',
@@ -59,6 +72,7 @@ class XlsxEngine(QObject):
         })
 
         fmtCellPriorityLow = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 9,
             'border': 1,
             'border_color': '#848484',
@@ -69,6 +83,7 @@ class XlsxEngine(QObject):
         })
 
         fmtCellPriorityMid = wb.add_format({
+            'font_name': 'Times New Roman',
             'font_size': 9,
             'border': 1,
             'border_color': '#848484',
@@ -78,7 +93,7 @@ class XlsxEngine(QObject):
             'text_wrap': True
         })
 
-        ws.write('A1', title)
+        ws.write('A1', title, fmtTitle)
 
         for col in range(len(header)):
             ws.write(2, col, header[col], fmtHeader)
@@ -97,7 +112,11 @@ class XlsxEngine(QObject):
                     elif clr == const.COLOR_PRIORITY_MEDIUM:
                         fmt = fmtCellPriorityMid
 
-                ws.write(row + 3, col, data[row][col], fmt)
+                if data[row][col] is not None:
+                    ws.write(row + 3, col, data[row][col], fmt)
+                # else:
+                #     ws.write(row + 3, col, " ", fmt)
+                print(row + 3, col, data[row][col], fmt)
 
         for row in range(len(footer_data)):
             for col in range(len(footer_data[row])):
@@ -113,7 +132,12 @@ class XlsxEngine(QObject):
                     elif clr == const.COLOR_PRIORITY_MEDIUM:
                         fmt = fmtCellPriorityMid
 
-                ws.write(row + 3 + len(data), col, footer_data[row][col], fmt)
+                if footer_data[row][col] is not None:
+                    ws.write(row + 3 + len(data), col, footer_data[row][col], fmt)
+                # else:
+                #     ws.write(row + 3 + len(data), col, "", fmt)
+                print(row + 3 + len(data), col, footer_data[row][col], fmt)
+
 
         # FIXME hack, allows to resize both rables
         k = 200
@@ -122,7 +146,7 @@ class XlsxEngine(QObject):
         for col, w in enumerate(widths):
             ws.set_column(col, col, k*w)
 
-        # print(len(widths), 200/len(widths))
+        print(len(widths), 200/len(widths))
 
         wb.close()
 

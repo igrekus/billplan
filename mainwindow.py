@@ -1,6 +1,8 @@
 from csvengine import CsvEngine
+from sectionheaderview import SectionHeaderView
 from sqliteengine import SqliteEngine
 from printengine import PrintEngine
+from tablerowdelegate import TableRowDelegate
 from xlsxengine import XlsxEngine
 import datetime
 import isoweek
@@ -13,7 +15,7 @@ from persistencefacade import PersistenceFacade
 from billsearchproxymodel import BillSearchProxyModel
 from uifacade import UiFacade
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate
 
 
@@ -71,6 +73,7 @@ class MainWindow(QMainWindow):
         self.actEditBillRecord = QAction("Изменить счёт...", self)
         self.actDeleteBillRecord = QAction("Удалить счёт...", self)
         self.actPrint = QAction("Распечатать...", self)
+        self.actOpenDictEditor = QAction("Словари", self)
 
     def buildWeekSelectionCombo(self):
         year, week, day = datetime.datetime.now().isocalendar()
@@ -95,19 +98,36 @@ class MainWindow(QMainWindow):
 
         # init UI
         # bill list table
+        self.ui.tableBill: QTableView
         self.ui.tableBill.setModel(self._modelBillSearchProxy)
         self.ui.tableBill.setSelectionMode(QAbstractItemView.SingleSelection)
         self.ui.tableBill.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.tableBill.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # draw delegates
+        # self.ui.tableBill.setItemDelegateForRow(0, TableRowDelegate(self.ui.tableBill))
+        # self.ui.tableBill.setHorizontalHeader(SectionHeaderView(Qt.Horizontal, parent=self.ui.tableBill))
+        # formatting
         self.ui.tableBill.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
         self.ui.tableBill.horizontalHeader().setHighlightSections(False)
         self.ui.tableBill.horizontalHeader().setFixedHeight(24)
         self.ui.tableBill.horizontalHeader().setStretchLastSection(True)
+        self.ui.tableBill.horizontalHeader().setStyleSheet("QHeaderView::section {"
+                                                           "    padding: 4px;"
+                                                           "    border-style: none;"
+                                                           "    border-color: #000000;"
+                                                           "    border-bottom: 1px solid #000000;"
+                                                           "    border-right: 1px solid #000000;"
+                                                           "}"
+                                                           "QHeaderView::section:horizontal {"
+                                                           "    border-right: 1px solid #000000"
+                                                           "}")
+        # self.ui.tableBill.horizontalHeader().setAutoFillBackground(False)
         self.ui.tableBill.verticalHeader().setVisible(False)
         # self.ui.tableBill.verticalHeader().setDefaultSectionSize(40)
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
         self.ui.tableBill.setStyleSheet("QTableView { gridline-color : black}")
+        self.ui.tableBill.hideColumn(14)
         # self.ui.tableBill.setSpan(0, 0, 1, 3)
 
         # bill plan table
@@ -119,6 +139,16 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.horizontalHeader().setHighlightSections(False)
         self.ui.tablePlan.horizontalHeader().setFixedHeight(24)
         self.ui.tablePlan.horizontalHeader().setStretchLastSection(True)
+        self.ui.tablePlan.horizontalHeader().setStyleSheet("QHeaderView::section {"
+                                                           "    padding: 4px;"
+                                                           "    border-style: none;"
+                                                           "    border-color: #000000;"
+                                                           "    border-bottom: 1px solid #000000;"
+                                                           "    border-right: 1px solid #000000;"
+                                                           "}"
+                                                           "QHeaderView::section:horizontal {"
+                                                           "    border-right: 1px solid #000000"
+                                                           "}")
         self.ui.tablePlan.verticalHeader().setVisible(False)
         self.ui.tablePlan.hideColumn(0)
         # self.ui.tablePlan.hideColumn(3)
@@ -127,7 +157,8 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setWordWrap(True)
         self.ui.tablePlan.resizeRowsToContents()
         # self.ui.tablePlan.setSpan(0, 0, 1, 3)
-        self.ui.tablePlan.setStyleSheet("QTableView { gridline-color : black}")
+        self.ui.tablePlan.setStyleSheet("QTableView { gridline-color : black }")
+        # self.ui.tablePlan.setItemDelegateForRow(0, TableRowDelegate(self.ui.tablePlan))
 
         # setup filter widgets
         self.ui.comboProjectFilter.setModel(self._modelDomain.dicts["project"])
@@ -151,6 +182,7 @@ class MainWindow(QMainWindow):
         self.ui.btnEditBill.clicked.connect(self.onBtnEditBillClicked)
         self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
         self.ui.btnPrint.clicked.connect(self.onBtnPrintClicked)
+        self.ui.btnDictEditor.clicked.connect(self.onBtnDictEditorClicked)
 
         # table widgets
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
@@ -190,30 +222,31 @@ class MainWindow(QMainWindow):
         self.actPrint.setStatusTip("Напечатать текущую таблицу")
         self.actPrint.triggered.connect(self.procActPrint)
 
+        self.actOpenDictEditor.setStatusTip("Открыть редактор словарей")
+        self.actOpenDictEditor.triggered.connect(self.procActOpenDictEditor)
+
     def refreshView(self):
-        tbwidth = self.ui.tableBill.geometry().width() - 30
-        if tbwidth < 700:
-            tbwidth = 1900
-        self.ui.tableBill.setColumnWidth(0, tbwidth * 0.03)
+        screenRect = QApplication.desktop().screenGeometry()
+
+        tbwidth = screenRect.width() - 50
+        self.ui.tableBill.setColumnWidth(0, tbwidth * 0.04)  # +0.01
         self.ui.tableBill.setColumnWidth(1, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(2, tbwidth * 0.07)
         self.ui.tableBill.setColumnWidth(3, tbwidth * 0.07)
         self.ui.tableBill.setColumnWidth(4, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(5, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(6, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.195)
+        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.215)  # +0.02
         self.ui.tableBill.setColumnWidth(8, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(9, tbwidth * 0.065)
         self.ui.tableBill.setColumnWidth(10, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(11, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(12, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(13, tbwidth * 0.04)
-        self.ui.tableBill.setColumnWidth(14, tbwidth * 0.03)
+        # self.ui.tableBill.setColumnWidth(14, tbwidth * 0.03)
         self.ui.tableBill.setColumnWidth(15, tbwidth * 0.01)
 
-        tpwidth = self.ui.tablePlan.geometry().width() - 30
-        if tpwidth < 700:
-            tpwidth = 1900
+        tpwidth = screenRect.width() - 45
         # 1 2 3 5 .. week count - 1
         # self.ui.tablePlan.setColumnWidth(0, tpwidth * 0.035)
         self.ui.tablePlan.setColumnWidth(1, tpwidth * 0.13)
@@ -241,6 +274,9 @@ class MainWindow(QMainWindow):
 
     def onBtnDeleteBillClicked(self):
         self.actDeleteBillRecord.trigger()
+
+    def onBtnDictEditorClicked(self):
+        self.actOpenDictEditor.trigger()
 
     def onBtnPrintClicked(self):
         self.actPrint.trigger()
@@ -316,3 +352,6 @@ class MainWindow(QMainWindow):
         self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
         self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
         self._modelBillSearchProxy.invalidate()
+
+    def procActOpenDictEditor(self):
+        self._uiFacade.requestOpenDictEditor()

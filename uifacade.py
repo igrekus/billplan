@@ -1,6 +1,7 @@
 import const
 from datetime import datetime
 from dlgbilldata import DlgBillData
+from dlgdicteditor import DlgDictEditor
 from billitem import BillItem
 from PyQt5.QtCore import QObject, QModelIndex, Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
@@ -92,13 +93,14 @@ class UiFacade(QObject):
                 footer_data.append(d)
                 footer_color.append(c)
 
-            widths = [0.03, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.195, 0.06, 0.065, 0.06, 0.06, 0.06, 0.04, 0.03, 0.01]
+            widths = [0.04, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.215, 0.06, 0.065, 0.06, 0.06, 0.06, 0.04, 0.001, 0.01]
 
         elif tableIndex == 1:
             print("making plan export data...")
-            title = "План оплаты счетов на " + self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole) + " - " + \
-                    self._planModel.headerData(self._planModel.columnCount() - 1, Qt.Horizontal, Qt.DisplayRole) + \
-                    " недели"
+            title = "План оплаты счетов с " + \
+                    self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole).replace(": ", "(") + ") по " + \
+                    self._planModel.headerData(self._planModel.columnCount() - 1, Qt.Horizontal,
+                                               Qt.DisplayRole).replace(": ", "(") + ")"
             header = [self._planModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
                       range(self._planModel.columnCount()) if i != 0 and i != 4]
 
@@ -121,6 +123,12 @@ class UiFacade(QObject):
             widths = [0.13, 0.05, 0.10, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09]
 
         self._reportManager.makeReport(title, header, data, color, footer_data, footer_color, widths)
+
+    def requestOpenDictEditor(self):
+        print("ui facade open dict editor request...")
+        dialog = DlgDictEditor(domainModel=self._domainModel)
+
+        dialog.exec()
 
     def requestExit(self):
         print("ui facade exit request...")

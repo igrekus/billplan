@@ -132,6 +132,7 @@ class SqliteEngine(QObject):
         return rec_id
 
     def deleteBillRecord(self, record: BillItem):
+        # TODO make list of tuples with facade, only write here
         print("sqlite engine delete bill record:", record)
         with self._connection:
             cursor = self._connection.cursor()
@@ -151,3 +152,31 @@ class SqliteEngine(QObject):
                                " WHERE plan_billRef = ?", data)
         print("...update end")
         return True
+
+    def insertDictRecord(self, dictName, data):
+        print("sqlite engine insert dict record:", dictName, data)
+
+        with self._connection:
+            cursor = self._connection.execute(" INSERT INTO " + dictName +
+                                              "      (" + dictName + "_id" +
+                                              "      , " + dictName + "_name" + ")"
+                                              " VALUES (NULL, ?)", data)
+            rec_id = cursor.lastrowid
+
+        return rec_id
+
+    def updateDictRecord(self, dictName, data):
+        print("sqlite engine update dict record:", dictName, data)
+
+        with self._connection:
+            cursor = self._connection.execute(" UPDATE " + dictName +
+                                              "    SET " + dictName + "_name = ?" +
+                                              "  WHERE " + dictName + "_id = ?", data)
+
+    def deleteDictRecord(self, dictName, data):
+        print("sqlite engine delete dict record:", dictName, data)
+
+        with self._connection:
+            cursor = self._connection.execute(" DELETE "
+                                              "   FROM " + dictName +
+                                              "  WHERE " + dictName + "_id = ?", data)

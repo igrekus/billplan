@@ -1,3 +1,5 @@
+import bisect
+
 import const
 from PyQt5.QtCore import Qt, QAbstractListModel, QModelIndex, QVariant
 
@@ -17,16 +19,46 @@ class MapModel(QAbstractListModel):
         self.beginInsertRows(QModelIndex(), 0, count)
         self.mapData = data
         self.strList = list(sorted(self.mapData.values()))
-        # self.strList.sort()
-        self.mapData[0] = "Все"
-        self.strList.insert(0, "Все")
         self.endInsertRows()
+
+        self.addItemAtPosition(0, 0, "Все")
 
     def clear(self):
         self.beginRemoveRows(QModelIndex(), 0, len(self.mapData) - 1)
         self.mapData.clear()
         self.strList.clear()
         self.endRemoveRows()
+
+    def addItemAtPosition(self, pos, id_, string):
+        self.beginInsertRows(QModelIndex(), pos, pos);
+        self.mapData[id_] = string
+        self.strList.insert(pos, string)
+        self.endInsertRows()
+
+    def addItem(self, id_, string):
+        self.mapData[id_] = string
+
+        tmplist = self.strList.copy()[1:]
+
+        pos = bisect.bisect_left(tmplist, string) + 1
+
+        self.beginInsertRows(QModelIndex(), pos, pos)
+        self.strList.insert(pos, string)
+        self.endInsertRows()
+
+    def updateItem(self, id_, string):
+        pos = self.strList.index(self.mapData[id_])
+
+        self.mapData[id_] = string
+        self.strList[pos] = string
+
+        # self.dataChanged(self.index(pos, 0, QModelIndex()), self.index(pos, 0, QModelIndex()))
+
+    def removeItem(self, id_):
+        # self.beginRemoveRows()
+        self.strList.remove(self.mapData[id_])
+        del self.mapData[id_]
+        # self.endRemoveRows()
 
     def isEmpty(self):
         return not bool(self.strList)
@@ -62,59 +94,6 @@ class MapModel(QAbstractListModel):
         return self.mapData[id_]
 
 #     void
-#     MapModel::addItem(const
-#     qint32
-#     id, const
-#     QString & str)
-#     {
-#     auto
-#     rowIter = std::find_if(m_strList.begin(), m_strList.end(), [ & str](const
-#     QString & it){
-#     return it > str;
-#     });
-#     qint32
-#     row = std::distance(m_strList.begin(), rowIter);
-#     m_mapData.id.insert(id, str);
-#     m_mapData.di.insert(str, id);
-#
-#     beginInsertRows(QModelIndex(), row, row);
-#     m_strList.insert(row, str);
-#     endInsertRows();
-#     }
-#
-#     void
-#     MapModel::addItemAtPosition(const
-#     qint32
-#     pos, const
-#     qint32
-#     id, const
-#     QString & str)
-#     {
-#         beginInsertRows(QModelIndex(), pos, pos);
-#     m_strList.insert(pos, str);
-#     m_mapData.id.insert(id, str);
-#     m_mapData.di.insert(str, id);
-#     endInsertRows();
-#     }
-#
-#     void
-#     MapModel::editItem(const
-#     qint32
-#     id, const
-#     QString & name)
-#     {
-#         qint32
-#     row = m_strList.indexOf(m_mapData.id.value(id));
-#
-#     m_mapData.di.remove(m_mapData.id.value(id));
-#     m_mapData.id.replace(id, name);
-#     m_mapData.di.insert(name, id);
-#
-#     m_strList.replace(row, name);
-#     dataChanged(index(row, 0, QModelIndex()), index(row, 0, QModelIndex()));
-#     }
-#
-#     void
 #     MapModel::removeItem(const
 #     qint32
 #     id)
@@ -129,12 +108,3 @@ class MapModel(QAbstractListModel):
 #     m_strList.removeAt(row);
 #     endRemoveRows();
 #     }
-#
-#     QString
-#     MapModel::getData(const
-#     qint32
-#     id)
-#     {
-#     return m_mapData.id.value(id);
-#
-# }
