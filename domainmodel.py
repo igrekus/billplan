@@ -56,6 +56,11 @@ class DomainModel(QObject):
 
         self.buildPlanData()
 
+    def refreshPlanData(self):
+        if self._rawPlanData:
+            self._rawPlanData.clear()
+        self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
+
     def billListRowCount(self):
         return len(self._billData)
 
@@ -117,6 +122,9 @@ class DomainModel(QObject):
         newItem.item_id = newId
 
         self._billData.append(newItem)
+        self._rawPlanData[newItem.item_id] = [0, 0, 0]
+        # self.refreshPlanData()
+
         row = len(self._billData) - 1
 
         self.billItemsInserted.emit(row, row)

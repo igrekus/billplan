@@ -352,6 +352,7 @@ class MainWindow(QMainWindow):
         self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
         self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
         self._modelBillSearchProxy.invalidate()
+        self.ui.tableBill.hideColumn(14)
 
     def procActOpenDictEditor(self):
         self._uiFacade.requestOpenDictEditor()

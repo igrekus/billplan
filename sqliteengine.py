@@ -104,6 +104,8 @@ class SqliteEngine(QObject):
     def insertBillRecord(self, data: list):
         print("sqlite engine insert bill record:", data)
         with self._connection:
+        # try:
+        #     print("begin insert bill")
             cursor = self._connection.execute(" INSERT INTO bill "
                                               "      ( bill_date"
                                               "      , bill_name"
@@ -122,13 +124,19 @@ class SqliteEngine(QObject):
                                               "      , archive"
                                               "      , bill_id)"
                                               " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)", data[:-1])
-            rec_id = cursor.lastrowid
-            cursor = self._connection.execute(" INSERT INTO bill_plan"
-                                              "           ( plan_id"
-                                              "           , plan_billRef"
-                                              "           , plan_year"
-                                              "           , plan_week)"
-                                              "      VALUES (NULL, ?, 0, 0)", (rec_id, ))
+        # except sqlite3.Error as e:
+        #     print(e.args[0])
+        #     print("end insert bill")
+        rec_id = cursor.lastrowid
+        # print("begin insert plan")
+        cursor = self._connection.execute(" INSERT INTO bill_plan"
+                                          "           ( plan_id"
+                                          "           , plan_billRef"
+                                          "           , plan_year"
+                                          "           , plan_week"
+                                          "           , plan_active)"
+                                          "      VALUES (NULL, ?, 0, 0, 0)", (rec_id, ))
+            # print("end insert plan")
         return rec_id
 
     def deleteBillRecord(self, record: BillItem):

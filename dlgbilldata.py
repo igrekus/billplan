@@ -75,7 +75,7 @@ class DlgBillData(QDialog):
         self.ui.comboProject.setCurrentIndex(0)
         self.ui.textDescript.setPlainText("")
         self.ui.comboPeriod.setCurrentIndex(1)
-        self.ui.comboStatus.setCurrentIndex(2)
+        self.ui.comboStatus.setCurrentIndex(1)
         self.ui.comboPriority.setCurrentIndex(4)
         self.ui.dateShipment.setDate(QDate().currentDate())
         self.ui.comboShipment.setCurrentIndex(3)

@@ -6,7 +6,7 @@ class BillItem:
     # TODO make properties
     def __init__(self, id_=None, date=None, name=None, category=None, vendor=None, cost=None, project=None,
                  descript=None, shipment_time=None, status=None, priority=None, shipment_date=None,
-                 shipment_status=None, payment_week=None, note=None, active=None):
+                 shipment_status=None, payment_week=None, note=None):
         self.item_id = id_
         self.item_date = date
         self.item_name = name
@@ -22,7 +22,6 @@ class BillItem:
         self.item_shipment_status = shipment_status
         self.item_payment_week = payment_week
         self.item_note = note
-        self.item_active = active
 
     def __str__(self):
         return "BillItem(" + "id:" + str(self.item_id) + " " \
@@ -39,8 +38,7 @@ class BillItem:
                + "ship date:" + str(self.item_shipment_date) + " " \
                + "ship stat:" + str(self.item_shipment_status) + " " \
                + "week:" + str(self.item_payment_week) + " " \
-               + "note:" + str(self.item_note) + " "\
-               + "active:" + str(self.item_active) + ")"
+               + "note:" + str(self.item_note) + ")"
 
     @classmethod
     def fromRawList(cls, raw_list):
@@ -80,8 +78,7 @@ class BillItem:
                    , shipment_date=sqlite_tuple[11]
                    , shipment_status=sqlite_tuple[12]
                    , payment_week=sqlite_tuple[15]   # sqlite_tuple[13] - not used
-                   , note=sqlite_tuple[14]
-                   , active=sqlite_tuple[16])
+                   , note=sqlite_tuple[14])
 
 
     @classmethod
