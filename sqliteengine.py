@@ -73,6 +73,7 @@ class SqliteEngine(QObject):
                                               ", main.bill_plan.plan_active"
                                               "  FROM main.bill_plan"
                                               " WHERE main.bill_plan.plan_id > 0")
+                                              # "   AND main.bill.archive = 0")
             # print(cursor.fetchall())
             return cursor.fetchall()
 

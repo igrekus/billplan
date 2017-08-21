@@ -1,13 +1,18 @@
-import const
 from datetime import datetime
+
+from PyQt5.QtGui import QBrush, QColor
+
+import const
 from dlgbilldata import DlgBillData
 from dlgdicteditor import DlgDictEditor
-from billitem import BillItem
-from PyQt5.QtCore import QObject, QModelIndex, Qt
+from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
 
 class UiFacade(QObject):
+
+    totalsChanged = pyqtSignal()
+
     def __init__(self, parent=None, domainModel=None, reportManager=None):
         super(UiFacade, self).__init__(parent)
         self._domainModel = domainModel
@@ -37,7 +42,9 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        return self._domainModel.addBillItem(dialog.getData())
+        row = self._domainModel.addBillItem(dialog.getData())
+        self.totalsChanged.emit()
+        return row
 
     def requestEditBillRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getBillItemAtIndex(targetIndex)
@@ -48,6 +55,7 @@ class UiFacade(QObject):
             return
 
         self._domainModel.updateBillItem(targetIndex, dialog.getData())
+        self.totalsChanged.emit()
 
     def requestDeleteRecord(self, targetIndex: QModelIndex):
         print("ui facade delete record request")
@@ -57,8 +65,9 @@ class UiFacade(QObject):
             return
 
         self._domainModel.deleteBillItem(targetIndex)
+        self.totalsChanged.emit()
 
-    def requestPrint(self, tableIndex):
+    def requestPrint(self, tableIndex, totals):
 
         print("ui facade print request")
         title = None
@@ -77,7 +86,7 @@ class UiFacade(QObject):
             header = [self._billModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
                       range(self._billModel.columnCount() - 5)]
 
-            for i in range(self._billModel.rowCount() - 1):
+            for i in range(self._billModel.rowCount()):
                 d = [self._billModel.data(self._billModel.index(i, j), Qt.DisplayRole) for j in
                      range(self._billModel.columnCount() - 5)]
                 c = [self._billModel.data(self._billModel.index(i, j), Qt.BackgroundRole) for j in
@@ -85,11 +94,19 @@ class UiFacade(QObject):
                 data.append(d)
                 color.append(c)
 
-            for i in range(self._billModel.rowCount() - 1, self._billModel.rowCount()):
-                d = [self._billModel.data(self._billModel.index(i, j), Qt.DisplayRole) for j in
-                     range(self._billModel.columnCount() - 5)]
-                c = [self._billModel.data(self._billModel.index(i, j), Qt.BackgroundRole) for j in
-                     range(self._billModel.columnCount() - 5)]
+            for i in range(3):
+                labels = ["Оплачено:", "Осталось:", "Всего:"]
+                cols = [QBrush(QColor(const.COLOR_PAYMENT_FINISHED)),
+                        QBrush(QColor(const.COLOR_PAYMENT_PENDING)),
+                        None]
+
+                d = [""]*11
+                d[4] = labels[i]
+                d[5] = "{:,.2f}".format(float(totals[i] / 100)).replace(",", " ")
+
+                c = [None]*11
+                c[5] = cols[i]
+
                 footer_data.append(d)
                 footer_color.append(c)
 

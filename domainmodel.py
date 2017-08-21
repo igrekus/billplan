@@ -97,6 +97,11 @@ class DomainModel(QObject):
     def getRemainingTotal(self, weeks):
         return sum([self.getRemainingTotalForWeek(w) for w in weeks])
 
+    def getBillTotals(self):
+        payed = sum(d.item_cost for d in self._billData if d.item_status == 1)
+        remaining = sum(d.item_cost for d in self._billData if d.item_status == 2)
+        return payed, remaining, payed + remaining
+
     def setWeekForBill(self, bill_id, week):
         for i, d in enumerate(self._billData):
             if d.item_id == bill_id:

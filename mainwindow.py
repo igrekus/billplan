@@ -16,7 +16,7 @@ from billsearchproxymodel import BillSearchProxyModel
 from uifacade import UiFacade
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot
 
 
 class MainWindow(QMainWindow):
@@ -188,6 +188,9 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
         self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
 
+        # totals update
+        self._uiFacade.totalsChanged.connect(self.updateTotals)
+
         # search widgets
         self.ui.comboWeek.currentIndexChanged.connect(self.onComboWeekCurrentIndexChanged)
         self.ui.editSearch.textChanged.connect(self.setSearchFilter)
@@ -201,6 +204,7 @@ class MainWindow(QMainWindow):
         self.setSearchFilter()
 
         self.ui.btnRefresh.setVisible(False)
+        self.updateTotals()
 
     def initActions(self):
         self.actRefresh.setShortcut("Ctrl+R")
@@ -341,7 +345,7 @@ class MainWindow(QMainWindow):
         self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
     def procActPrint(self):
-        self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex())
+        self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex(), self._modelDomain.getBillTotals())
 
     def setSearchFilter(self, dummy=0):
         self._modelBillSearchProxy.filterString = self.ui.editSearch.text()
@@ -356,3 +360,14 @@ class MainWindow(QMainWindow):
 
     def procActOpenDictEditor(self):
         self._uiFacade.requestOpenDictEditor()
+
+    @pyqtSlot()
+    def updateTotals(self):
+        print("update totals")
+        p, r, t = self._modelDomain.getBillTotals()
+        self.ui.lblTotal.setText('Оплачено: <span style="background-color:#92D050">' +
+                                 "{:,.2f}".format(float(p/100)).replace(',', ' ') + '</span><br>' +
+                                 'Осталось: <span style="background-color:#FF6767">' +
+                                 "{:,.2f}".format(float(r/100)).replace(",", " ") + '</span><br>' +
+                                 'Всего: ' +
+                                 "{:,.2f}".format(float(t/100)).replace(",", " "))

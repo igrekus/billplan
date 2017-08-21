@@ -185,6 +185,13 @@
          <widget class="QTableView" name="tableBill"/>
         </item>
         <item>
+         <widget class="QLabel" name="lblTotal">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <spacer name="horizontalSpacer_2">
@@ -245,7 +252,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="lblStartFrom">
             <property name="text">
              <string>Начать с недели №:</string>
             </property>
@@ -312,7 +319,7 @@
      <x>0</x>
      <y>0</y>
      <width>934</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

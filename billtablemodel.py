@@ -1,6 +1,5 @@
 import const
-# from billitem import BillItem
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor
 
 

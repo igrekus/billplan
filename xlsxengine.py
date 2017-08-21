@@ -116,7 +116,7 @@ class XlsxEngine(QObject):
                     ws.write(row + 3, col, data[row][col], fmt)
                 # else:
                 #     ws.write(row + 3, col, " ", fmt)
-                print(row + 3, col, data[row][col], fmt)
+                # print(row + 3, col, data[row][col], fmt)
 
         for row in range(len(footer_data)):
             for col in range(len(footer_data[row])):
@@ -136,7 +136,7 @@ class XlsxEngine(QObject):
                     ws.write(row + 3 + len(data), col, footer_data[row][col], fmt)
                 # else:
                 #     ws.write(row + 3 + len(data), col, "", fmt)
-                print(row + 3 + len(data), col, footer_data[row][col], fmt)
+                # print(row + 3 + len(data), col, footer_data[row][col], fmt)
 
 
         # FIXME hack, allows to resize both rables
@@ -146,7 +146,7 @@ class XlsxEngine(QObject):
         for col, w in enumerate(widths):
             ws.set_column(col, col, k*w)
 
-        print(len(widths), 200/len(widths))
+        # print(len(widths), 200/len(widths))
 
         wb.close()
 
