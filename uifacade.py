@@ -147,8 +147,14 @@ class UiFacade(QObject):
 
         dialog.exec()
 
-    def requestExit(self):
+    def requestExit(self, index):
+        # TODO make settings class if needed, only current week is saved for now
         print("ui facade exit request...")
+        print("saving preferences...", index)
+        # TODO extract saving process into settings class, only send a message from UI
+        with open("settings.ini", mode='tw') as f:
+            f.write("week="+str(index + 1))
+
         if self._domainModel.savePlanData():
             print("...exit request ok")
         else:

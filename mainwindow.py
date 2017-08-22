@@ -1,3 +1,5 @@
+import os
+
 from csvengine import CsvEngine
 from sectionheaderview import SectionHeaderView
 from sqliteengine import SqliteEngine
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow):
         self.actOpenDictEditor = QAction("Словари", self)
 
     def buildWeekSelectionCombo(self):
+        # TODO if more settings is needed, move all settings-related code to a separate class
         year, week, day = datetime.datetime.now().isocalendar()
         week_list = list()
         for i in range(1, isoweek.Week.last_week_of_year(year).week + 1):
@@ -83,7 +86,16 @@ class MainWindow(QMainWindow):
             week_list.append(str(i) + ": " + str(w.monday().strftime("%d.%m")) + "-" + str(w.friday().strftime("%d.%m")))
 
         self.ui.comboWeek.addItems(week_list)
-        self.ui.comboWeek.setCurrentIndex(week - 1)
+
+        # TODO read settings
+        if os.path.isfile("settings.ini"):
+            with open("settings.ini", mode='tr') as f:
+                line = f.readline()
+            index = int(line.split("=")[1])
+        else:
+            index = week
+
+        self.ui.comboWeek.setCurrentIndex(index - 1)
 
     def initApp(self):
         # init instances
@@ -304,7 +316,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, *args, **kwargs):
         # TODO error handling on saving before exiting
-        self._uiFacade.requestExit()
+        self._uiFacade.requestExit(self.ui.comboWeek.currentIndex())
         super(MainWindow, self).closeEvent(*args, **kwargs)
 
     # action processing
