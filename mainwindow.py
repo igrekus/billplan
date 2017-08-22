@@ -96,6 +96,7 @@ class MainWindow(QMainWindow):
             index = week
 
         self.ui.comboWeek.setCurrentIndex(index - 1)
+        self._modelBillPlan.updateHeader(index)
 
     def initApp(self):
         # init instances
