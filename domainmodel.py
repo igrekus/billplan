@@ -156,7 +156,7 @@ class DomainModel(QObject):
         print("domain model add dict record:", dictName, data)
         newId = self._persistenceFacade.addDictRecord(dictName, data)
 
-        self.dicts[dictName].addItem(100, data)
+        self.dicts[dictName].addItem(newId, data)
 
     def editDictRecord(self, dictName, data):
         print("domain model edit dict record:", dictName, data)
