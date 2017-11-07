@@ -43,12 +43,18 @@ class DlgBillData(QDialog):
         self.ui.comboPriority.setModel(self._domainModel.dicts["priority"])
         self.ui.comboShipment.setModel(self._domainModel.dicts["shipment"])
 
+        # widget tweaks
         self.ui.lblWeek.setVisible(False)
         self.ui.spinWeek.setVisible(False)
         self.ui.lblNote.setVisible(False)
         self.ui.editNote.setVisible(False)
+        self.ui.lblDateShipment.setVisible(False)
+        self.ui.dateShipment.setVisible(False)
         # self.ui.lblStatus.setVisible(False)
         # self.ui.comboStatus.setVisible(False)
+
+        # setup signals
+        self.ui.comboCategory.currentIndexChanged.connect(self.onComboCategoryCurrentIndexChanged)
 
     def updateWidgets(self):
         self.ui.dateBill.setDate(QDate().fromString(self._currentItem.item_date, "dd.MM.yyyy"))
@@ -161,3 +167,9 @@ class DlgBillData(QDialog):
 
         self.collectData()
         self.accept()
+
+    def onComboCategoryCurrentIndexChanged(self, index):
+        if index == 1:
+            self.ui.comboShipment.setCurrentIndex(2)
+        elif index == 2:
+            self.ui.comboShipment.setCurrentIndex(3)

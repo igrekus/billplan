@@ -140,6 +140,7 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
         self.ui.tableBill.setStyleSheet("QTableView { gridline-color : black}")
+        self.ui.tableBill.hideColumn(11)
         self.ui.tableBill.hideColumn(14)
         # self.ui.tableBill.setSpan(0, 0, 1, 3)
 
@@ -216,6 +217,7 @@ class MainWindow(QMainWindow):
 
         self.setSearchFilter()
 
+        # widget tweaks
         self.ui.btnRefresh.setVisible(False)
         self.updateTotals()
 
@@ -249,15 +251,15 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setColumnWidth(0, tbwidth * 0.04)  # +0.01
         self.ui.tableBill.setColumnWidth(1, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(2, tbwidth * 0.07)
-        self.ui.tableBill.setColumnWidth(3, tbwidth * 0.07)
-        self.ui.tableBill.setColumnWidth(4, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(3, tbwidth * 0.07)  # +0.03
+        self.ui.tableBill.setColumnWidth(4, tbwidth * 0.09)
         self.ui.tableBill.setColumnWidth(5, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(6, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.215)  # +0.02
+        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.245)  # +0.02, +0.03
         self.ui.tableBill.setColumnWidth(8, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(9, tbwidth * 0.065)
         self.ui.tableBill.setColumnWidth(10, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(11, tbwidth * 0.06)
+        # self.ui.tableBill.setColumnWidth(11, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(12, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(13, tbwidth * 0.04)
         # self.ui.tableBill.setColumnWidth(14, tbwidth * 0.03)
@@ -369,6 +371,7 @@ class MainWindow(QMainWindow):
         self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
         self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
         self._modelBillSearchProxy.invalidate()
+        self.ui.tableBill.hideColumn(11)
         self.ui.tableBill.hideColumn(14)
 
     def procActOpenDictEditor(self):
