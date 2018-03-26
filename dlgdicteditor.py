@@ -37,6 +37,7 @@ class DlgDictEditor(QDialog):
         self.ui.comboDict.setCurrentIndex(0)
         self.ui.listView.setModel(self._modelDomain.dicts["category"])
         self.ui.listView.setRowHidden(0, True)
+        self.ui.btnDelete.setVisible(False)
 
     def onBtnAddClicked(self):
         self.addRecord()

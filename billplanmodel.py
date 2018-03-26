@@ -72,7 +72,7 @@ class BillPlanModel(QAbstractTableModel):
 
         self._header.clear()
         self._header = self._defaultHeader.copy()
-        self._firstWeekNumber = firstWeekNumber
+        self._firstWeekNumber = firstWeekNumber   # needed to trigger header redraw
 
         self._weeksInHeader.clear()
 

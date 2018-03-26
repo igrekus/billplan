@@ -18,16 +18,7 @@ class SqliteEngine(QObject):
         self._inFileName = fileName
         self._connection = sqlite3.connect(self._inFileName)
 
-        # with open("ref/1.csv") as f:
-        #     reader = csv.reader(f, delimiter=";")
-        #     with self._connection:
-        #         for n, l in enumerate(reader):
-        #             cursor = self._connection.execute("UPDATE bill SET bill_desc = '" + str(l[7]) + "'"
-        #                                               " WHERE bill_id = " + str(n + 1))
-        #             print(n, l[7])
-
-
-    def fetchAllBillRecords(self):
+    def fetchMainData(self):
         print("sqlite fetch all records")
         with self._connection:
             cursor = self._connection.execute("SELECT main.bill.bill_id AS id"
@@ -47,6 +38,7 @@ class SqliteEngine(QObject):
                                               ", main.bill.bill_note"
                                               ", main.bill_plan.plan_week"
                                               ", main.bill_plan.plan_active"
+                                              ", main.bill.bill_doc"
                                               "  FROM bill "
                                               " INNER JOIN bill_plan ON bill_plan.plan_billRef = bill.bill_id"
                                               " WHERE bill.bill_id > 0"
@@ -56,9 +48,9 @@ class SqliteEngine(QObject):
     def fetchDicts(self, dict_list: list):
         print("sqlite engine fetch dicts")
         def fetchDict(connection, dict_name: str):
-            cursor = connection.execute("SELECT " + dict_name + "_id, " + dict_name + "_name"
-                                        "  FROM " + dict_name + " "
-                                        " WHERE " + dict_name + "_id > 0")
+            cursor = connection.execute("SELECT {n}_id, {n}_name"
+                                        "  FROM {n} "
+                                        " WHERE {n}_id > 0".format(n=dict_name))
             return cursor.fetchall()
 
         return [fetchDict(self._connection, d) for d in dict_list]
@@ -99,6 +91,7 @@ class SqliteEngine(QObject):
                            "     , bill_shipment_status = ?"
                            "     , bill_week = ?"
                            "     , bill_note = ?"
+                           "     , bill_doc = ?"
                            "     , archive = 0"
                            " WHERE bill_id = ?", data)
 
@@ -122,9 +115,10 @@ class SqliteEngine(QObject):
                                               "      , bill_shipment_status"
                                               "      , bill_week"
                                               "      , bill_note"
+                                              "      , bill_doc"
                                               "      , archive"
                                               "      , bill_id)"
-                                              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)", data[:-1])
+                                              " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)", data[:-1])
         # except sqlite3.Error as e:
         #     print(e.args[0])
         #     print("end insert bill")
@@ -162,30 +156,25 @@ class SqliteEngine(QObject):
         print("...update end")
         return True
 
-    def insertDictRecord(self, dictName, data):
-        print("sqlite engine insert dict record:", dictName, data)
-
+    def insertDictRecord(self, dict_name, data):
+        print("sqlite engine insert dict record:", dict_name, data)
+        sql = "INSERT INTO {n} ({n}_id, {n}_name) VALUES (NULL, ?)".format(n=dict_name)
         with self._connection:
-            cursor = self._connection.execute(" INSERT INTO " + dictName +
-                                              "      (" + dictName + "_id" +
-                                              "      , " + dictName + "_name" + ")"
-                                              " VALUES (NULL, ?)", data)
+            cursor = self._connection.execute(sql, data)
             rec_id = cursor.lastrowid
 
         return rec_id
 
-    def updateDictRecord(self, dictName, data):
-        print("sqlite engine update dict record:", dictName, data)
+    def updateDictRecord(self, dict_name, data):
+        print("sqlite engine update dict record:", dict_name, data)
 
+        sql = "UPDATE {n} SET {n}_name = ? WHERE {n}_id = ?".format(n=dict_name)
+        print(sql)
         with self._connection:
-            cursor = self._connection.execute(" UPDATE " + dictName +
-                                              "    SET " + dictName + "_name = ?" +
-                                              "  WHERE " + dictName + "_id = ?", data)
+            cursor = self._connection.execute(sql, data)
 
-    def deleteDictRecord(self, dictName, data):
-        print("sqlite engine delete dict record:", dictName, data)
-
+    def deleteDictRecord(self, dict_name, data):
+        print("sqlite engine delete dict record:", dict_name, data)
+        sql = " DELETE FROM {n} WHERE {n}_id = ?".format(n=dict_name)
         with self._connection:
-            cursor = self._connection.execute(" DELETE "
-                                              "   FROM " + dictName +
-                                              "  WHERE " + dictName + "_id = ?", data)
+            cursor = self._connection.execute(sql, data)

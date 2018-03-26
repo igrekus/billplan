@@ -1,6 +1,9 @@
 import os
+import subprocess
 
+from billitem import BillItem
 from csvengine import CsvEngine
+from mysqlengine import MysqlEngine
 from sectionheaderview import SectionHeaderView
 from sqliteengine import SqliteEngine
 from printengine import PrintEngine
@@ -17,6 +20,7 @@ from persistencefacade import PersistenceFacade
 from billsearchproxymodel import BillSearchProxyModel
 from uifacade import UiFacade
 from PyQt5 import uic
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot
 
@@ -44,7 +48,8 @@ class MainWindow(QMainWindow):
 
         # persistence engine
         # self._persistenceEngine = CsvEngine(parent=self)
-        self._persistenceEngine = SqliteEngine(parent=self)
+        # self._persistenceEngine = SqliteEngine(parent=self)
+        self._persistenceEngine = MysqlEngine(parent=self, dbItemClass=BillItem)
 
         # facades
         self._persistenceFacade = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
@@ -55,7 +60,8 @@ class MainWindow(QMainWindow):
         self._modelDomain = DomainModel(parent=self, persistenceFacade=self._persistenceFacade)
 
         # bill list + search proxy
-        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain)
+        # TODO: use settings to set icon
+        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain, icon=QPixmap("./icons/doc.png", "PNG"))
         self._modelBillSearchProxy = BillSearchProxyModel(parent=self)
         self._modelBillSearchProxy.setSourceModel(self._modelBillList)
 
@@ -101,7 +107,8 @@ class MainWindow(QMainWindow):
     def initApp(self):
         # init instances
         # self._persistenceEngine.initEngine(fileName="ref/1.csv")
-        self._persistenceEngine.initEngine(fileName="sqlite3.db")
+        # self._persistenceEngine.initEngine(fileName="sqlite3.db")
+        self._persistenceEngine.initEngine()
         self._persistenceFacade.initFacade()
         # self._uiFacade.initFacade()
         self._modelDomain.initModel()
@@ -140,8 +147,7 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
         self.ui.tableBill.setStyleSheet("QTableView { gridline-color : black}")
-        self.ui.tableBill.hideColumn(11)
-        self.ui.tableBill.hideColumn(14)
+        self.hideBillTableColumns()
         # self.ui.tableBill.setSpan(0, 0, 1, 3)
 
         # bill plan table
@@ -200,6 +206,7 @@ class MainWindow(QMainWindow):
 
         # table widgets
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
+        self.ui.tableBill.clicked.connect(self.onTableBillClicked)
         self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
 
         # totals update
@@ -248,22 +255,23 @@ class MainWindow(QMainWindow):
         screenRect = QApplication.desktop().screenGeometry()
 
         tbwidth = screenRect.width() - 50
-        self.ui.tableBill.setColumnWidth(0, tbwidth * 0.04)  # +0.01
-        self.ui.tableBill.setColumnWidth(1, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(0, tbwidth * 0.03)
+        self.ui.tableBill.setColumnWidth(1, tbwidth * 0.05)
         self.ui.tableBill.setColumnWidth(2, tbwidth * 0.07)
-        self.ui.tableBill.setColumnWidth(3, tbwidth * 0.07)  # +0.03
+        self.ui.tableBill.setColumnWidth(3, tbwidth * 0.05)  # +0.01
         self.ui.tableBill.setColumnWidth(4, tbwidth * 0.09)
         self.ui.tableBill.setColumnWidth(5, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(6, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.245)  # +0.02, +0.03
+        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.21)  # +0.02
         self.ui.tableBill.setColumnWidth(8, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(9, tbwidth * 0.065)
-        self.ui.tableBill.setColumnWidth(10, tbwidth * 0.06)
-        # self.ui.tableBill.setColumnWidth(11, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(9, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(10, tbwidth * 0.055)
+        self.ui.tableBill.setColumnWidth(11, tbwidth * 0.055)
         self.ui.tableBill.setColumnWidth(12, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(13, tbwidth * 0.04)
+        self.ui.tableBill.setColumnWidth(13, tbwidth * 0.035)
         # self.ui.tableBill.setColumnWidth(14, tbwidth * 0.03)
         self.ui.tableBill.setColumnWidth(15, tbwidth * 0.01)
+        self.ui.tableBill.setColumnWidth(16, tbwidth * 0.01)
 
         tpwidth = screenRect.width() - 45
         # 1 2 3 5 .. week count - 1
@@ -280,6 +288,10 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setColumnWidth(10, tpwidth * 0.09)
         self.ui.tablePlan.setColumnWidth(11, tpwidth * 0.09)
         self.ui.tablePlan.setColumnWidth(12, tpwidth * 0.09)
+
+    def hideBillTableColumns(self):
+        # self.ui.tableBill.hideColumn(11)
+        self.ui.tableBill.hideColumn(14)
 
     # ui events
     def onBtnRefreshClicked(self):
@@ -300,7 +312,13 @@ class MainWindow(QMainWindow):
     def onBtnPrintClicked(self):
         self.actPrint.trigger()
 
-    def onTableBillDoubleClicked(self):
+    def onTableBillClicked(self, index):
+        if index.column() == self._modelBillList.ColumnDoc:
+            doc = index.data(Qt.EditRole)
+            if doc:
+                subprocess.Popen(r'explorer /select,"' + index.data(Qt.EditRole).replace("/", "\\") + '"')
+
+    def onTableBillDoubleClicked(self, index):
         self.actEditBillRecord.trigger()
 
     def onTabBarCurrentChanged(self, index):
@@ -371,8 +389,9 @@ class MainWindow(QMainWindow):
         self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
         self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
         self._modelBillSearchProxy.invalidate()
-        self.ui.tableBill.hideColumn(11)
-        self.ui.tableBill.hideColumn(14)
+
+        self.hideBillTableColumns()
+        self.refreshView()
 
     def procActOpenDictEditor(self):
         self._uiFacade.requestOpenDictEditor()

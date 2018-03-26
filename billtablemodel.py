@@ -1,4 +1,6 @@
 import const
+
+from billitem import BillItem
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QBrush, QColor
 
@@ -20,18 +22,24 @@ class BillTableModel(QAbstractTableModel):
     ColumnPaymentWeek = 13
     ColumnNote = 14
     ColumnActive = 15
-    ColumnCount = 16
+    ColumnDoc = 16
+    ColumnCount = 17
 
     _headers = ["Номер", "Дата", "Счёт", "Категория", "Поставщик", "Сумма (руб.)", "Работа", "Назначение", "Срок",
-                "Статус", "Приоритет", "Дата", "Отгрузка", "Неделя", "Примечание", "+"]
+                "Статус", "Приоритет", "Поставка", "Отгрузка", "Неделя", "Примечание", "+", "Счёт"]
 
-    def __init__(self, parent=None, domainModel=None):
+    def __init__(self, parent=None, domainModel=None, icon=None):
         super(BillTableModel, self).__init__(parent)
         self._modelDomain = domainModel
         self._dicts = dict()
 
         self._modelDomain.billItemsInserted.connect(self.itemsInserted)
         self._modelDomain.billItemsRemoved.connect(self.itemsRemoved)
+
+        if icon is not None:
+            self.decoration = icon
+        else:
+            self.decoration = QColor(const.COLOR_PRIORITY_MEDIUM)
 
     def clear(self):
         pass
@@ -44,8 +52,13 @@ class BillTableModel(QAbstractTableModel):
         self._dicts = self._modelDomain.getDicts()
 
     def headerData(self, section, orientation, role=None):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole and section < len(self._headers):
-            return QVariant(self._headers[section])
+        if orientation == Qt.Horizontal:
+            if role == Qt.DisplayRole:
+                if section < len(self._headers):
+                    return QVariant(self._headers[section])
+            elif role == Qt.DecorationRole:
+                if section == len(self._headers) - 1:
+                    return QColor(const.COLOR_ARRIVAL_PENDING)
         return QVariant()
 
     def rowCount(self, parent=None, *args, **kwargs):
@@ -90,7 +103,7 @@ class BillTableModel(QAbstractTableModel):
 
         col = index.column()
         row = index.row()
-        item = self._modelDomain.getBillItemAtRow(row)
+        item: BillItem = self._modelDomain.getBillItemAtRow(row)
 
         if role == Qt.DisplayRole:
             if col == self.ColumnId:
@@ -125,6 +138,15 @@ class BillTableModel(QAbstractTableModel):
                 return QVariant(item.item_note)
             elif col == self.ColumnActive:
                 return QVariant()
+
+        elif role == Qt.EditRole:
+            if col == self.ColumnDoc:
+                return QVariant(item.item_doc)
+
+        elif role == Qt.DecorationRole:
+            if col == self.ColumnDoc:
+                if item.item_doc:
+                    return QVariant(self.decoration)
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnActive:

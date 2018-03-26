@@ -1,12 +1,13 @@
-import codecs
 import const
+import codecs
+import datetime
 
 
 class BillItem:
     # TODO make properties
     def __init__(self, id_=None, date=None, name=None, category=None, vendor=None, cost=None, project=None,
                  descript=None, shipment_time=None, status=None, priority=None, shipment_date=None,
-                 shipment_status=None, payment_week=None, note=None):
+                 shipment_status=None, payment_week=None, note=None, doc=None):
         self.item_id = id_
         self.item_date = date
         self.item_name = name
@@ -22,6 +23,7 @@ class BillItem:
         self.item_shipment_status = shipment_status
         self.item_payment_week = payment_week
         self.item_note = note
+        self.item_doc = doc
 
     def __str__(self):
         return "BillItem(" + "id:" + str(self.item_id) + " " \
@@ -38,7 +40,8 @@ class BillItem:
                + "ship date:" + str(self.item_shipment_date) + " " \
                + "ship stat:" + str(self.item_shipment_status) + " " \
                + "week:" + str(self.item_payment_week) + " " \
-               + "note:" + str(self.item_note) + ")"
+               + "note:" + str(self.item_note) + " " \
+               + "doc:" + str(self.item_doc) + ")"
 
     @classmethod
     def fromRawList(cls, raw_list):
@@ -60,10 +63,11 @@ class BillItem:
                    , shipment_date="no date set"
                    , shipment_status=raw_list[11]
                    , payment_week=raw_list[12]
-                   , note="empty note")
+                   , note="empty note"
+                   , doc="")
 
     @classmethod
-    def fromSqliteTuple(cls, sqlite_tuple):
+    def fromSqlTuple(cls, sqlite_tuple):
         return cls(id_=sqlite_tuple[0]
                    , date=sqlite_tuple[1]
                    , name=sqlite_tuple[2]
@@ -77,8 +81,10 @@ class BillItem:
                    , priority=sqlite_tuple[10]
                    , shipment_date=sqlite_tuple[11]
                    , shipment_status=sqlite_tuple[12]
-                   , payment_week=sqlite_tuple[15]   # sqlite_tuple[13] - not used
-                   , note=sqlite_tuple[14])
+                   # sqlite_tuple[13] - not used
+                   , note=sqlite_tuple[14]
+                   , payment_week=sqlite_tuple[15]
+                   , doc=sqlite_tuple[17])
 
 
     @classmethod
@@ -96,6 +102,11 @@ class BillItem:
         pass
 
     def toTuple(self):
+        def formatDate(indate):
+            if isinstance(indate, datetime.date):
+                return indate.isoformat()
+            return "01.01.2000"
+
         return tuple([self.item_date,
                       self.item_name,
                       self.item_category,
@@ -110,4 +121,9 @@ class BillItem:
                       self.item_shipment_status,
                       self.item_payment_week,
                       self.item_note,
+                      self.item_doc,
                       self.item_id])
+
+    @classmethod
+    def itemListRequestString(self):
+        return str("CALL getBillList()")

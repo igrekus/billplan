@@ -48,11 +48,11 @@ class DomainModel(QObject):
     def initModel(self):
         print("init domain model")
 
-        self.dicts = self._persistenceFacade.fetchDicts(self.dict_list)
+        self.dicts = self._persistenceFacade.getDicts(self.dict_list)
 
-        self._billData = self._persistenceFacade.fetchAllBillItems()
+        self._billData = self._persistenceFacade.getBillList()
 
-        self._rawPlanData = self._persistenceFacade.fetchRawPlanData()
+        self._rawPlanData = self._persistenceFacade.getRawPlanData()
 
         self.buildPlanData()
 

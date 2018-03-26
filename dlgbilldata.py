@@ -1,8 +1,8 @@
-import billitem
 import const
 import sys
+from billitem import BillItem
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog, QMessageBox, QFileDialog
 from PyQt5.QtCore import Qt, QDate
 
 
@@ -19,14 +19,11 @@ class DlgBillData(QDialog):
         self.ui = uic.loadUi("dlgbilldata.ui", self)
 
         # init instances
-        self._currentItem = item
+        self._currentItem: BillItem = item
         self.newItem = None
         self._domainModel = domainModel
 
         self.initDialog()
-
-        # setup signals
-        self.ui.btnOk.clicked.connect(self.onBtnOkClicked)
 
         if self._currentItem is None:
             self.resetWidgets()
@@ -48,13 +45,15 @@ class DlgBillData(QDialog):
         self.ui.spinWeek.setVisible(False)
         self.ui.lblNote.setVisible(False)
         self.ui.editNote.setVisible(False)
-        self.ui.lblDateShipment.setVisible(False)
-        self.ui.dateShipment.setVisible(False)
+        # self.ui.lblDateShipment.setVisible(False)
+        # self.ui.dateShipment.setVisible(False)
         # self.ui.lblStatus.setVisible(False)
         # self.ui.comboStatus.setVisible(False)
 
         # setup signals
         self.ui.comboCategory.currentIndexChanged.connect(self.onComboCategoryCurrentIndexChanged)
+        self.ui.btnOk.clicked.connect(self.onBtnOkClicked)
+        self.ui.btnAddDoc.clicked.connect(self.onBtnAddDocClicked)
 
     def updateWidgets(self):
         self.ui.dateBill.setDate(QDate().fromString(self._currentItem.item_date, "dd.MM.yyyy"))
@@ -71,6 +70,7 @@ class DlgBillData(QDialog):
         self.ui.comboShipment.setCurrentText(self._domainModel.dicts["shipment"].getData(self._currentItem.item_shipment_status))
         self.ui.spinWeek.setValue(self._currentItem.item_payment_week)
         self.ui.editNote.setText(self._currentItem.item_note)
+        self.ui.editDoc.setText(self._currentItem.item_doc)
 
     def resetWidgets(self):
         self.ui.dateBill.setDate(QDate().currentDate())
@@ -87,6 +87,7 @@ class DlgBillData(QDialog):
         self.ui.comboShipment.setCurrentIndex(3)
         self.ui.spinWeek.setValue(0)
         self.ui.editNote.setText("")
+        self.ui.editDoc.setText("")
 
     def verifyInputData(self):
         if not self.ui.editBillName.text():
@@ -140,21 +141,22 @@ class DlgBillData(QDialog):
         if self.ui.comboStatus.currentData(const.RoleNodeId) == 1:
             priority = 1
 
-        self.newItem = billitem.BillItem(id_=id_
-                                         , date=self.ui.dateBill.date().toString("dd.MM.yyyy")
-                                         , name=self.ui.editBillName.text()
-                                         , category=self.ui.comboCategory.currentData(const.RoleNodeId)
-                                         , vendor=self.ui.comboVendor.currentData(const.RoleNodeId)
-                                         , cost=int(self.ui.spinCost.value()*100)
-                                         , project=self.ui.comboProject.currentData(const.RoleNodeId)
-                                         , descript=self.ui.textDescript.toPlainText()
-                                         , shipment_time=self.ui.comboPeriod.currentData(const.RoleNodeId)
-                                         , status=self.ui.comboStatus.currentData(const.RoleNodeId)
-                                         , priority=priority
-                                         , shipment_date=self.ui.dateShipment.date().toString("dd.MM.yyyy")
-                                         , shipment_status=self.ui.comboShipment.currentData(const.RoleNodeId)
-                                         , payment_week=self.ui.spinWeek.value()
-                                         , note=self.ui.editNote.text())
+        self.newItem = BillItem(id_=id_
+                                , date=self.ui.dateBill.date().toString("dd.MM.yyyy")
+                                , name=self.ui.editBillName.text()
+                                , category=self.ui.comboCategory.currentData(const.RoleNodeId)
+                                , vendor=self.ui.comboVendor.currentData(const.RoleNodeId)
+                                , cost=int(self.ui.spinCost.value() * 100)
+                                , project=self.ui.comboProject.currentData(const.RoleNodeId)
+                                , descript=self.ui.textDescript.toPlainText()
+                                , shipment_time=self.ui.comboPeriod.currentData(const.RoleNodeId)
+                                , status=self.ui.comboStatus.currentData(const.RoleNodeId)
+                                , priority=priority
+                                , shipment_date=self.ui.dateShipment.date().toString("dd.MM.yyyy")
+                                , shipment_status=self.ui.comboShipment.currentData(const.RoleNodeId)
+                                , payment_week=self.ui.spinWeek.value()
+                                , note=self.ui.editNote.text()
+                                , doc=self.ui.editDoc.text())
 
         # TODO verify data change, reject dialog if not changed
 
@@ -167,6 +169,11 @@ class DlgBillData(QDialog):
 
         self.collectData()
         self.accept()
+
+    def onBtnAddDocClicked(self):
+        fileName = QFileDialog.getOpenFileName(self, "Выбрать документ", "./", "Все файлы (*)")
+        self.ui.editDoc.setText(fileName[0])
+        print(fileName[0])
 
     def onComboCategoryCurrentIndexChanged(self, index):
         if index == 1:

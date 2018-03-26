@@ -9,32 +9,35 @@ class PersistenceFacade(QObject):
         super(PersistenceFacade, self).__init__(parent)
 
         self._engine = persistenceEngine
-        self.engineType = self._engine.engineType
+        self.engineType = self._engine._engineType
 
     def initFacade(self):
-        print("init persistence facade:", self._engine.engineType)
+        print("init persistence facade:", self._engine._engineType)
 
-    def fetchDicts(self, dict_list: list):
+    def getDicts(self, dict_list: list):
         # make domain model dicts from raw SQL records
-        return {n: MapModel(data=dict(d)) for n, d in zip(dict_list, self._engine.fetchDicts(dict_list))}
+        dicts = dict()
+        for n in dict_list:
+            dicts[n] = MapModel(data=dict(self._engine.fetchDict(n)))
+        return dicts
 
-    def fetchAllBillItems(self):
-        return [BillItem.fromSqliteTuple(r) for r in self._engine.fetchAllBillRecords()]
+    def getBillList(self):
+        return [BillItem.fromSqlTuple(r) for r in self._engine.fetchMainData()]
 
-    def fetchRawPlanData(self):
+    def getRawPlanData(self):
         return {r[1]: [r[2], r[3], r[4]] for r in self._engine.fetchAllPlanRecrods()}
 
     def updateBillItem(self, item: BillItem):
         print("persistence facade update call:", item)
-        self._engine.updateBillRecord(item.toTuple())
+        self._engine.updateMainDataRecord(item.toTuple())
 
     def insertBillItem(self, item: BillItem) -> int:
         print("persistence facade insert call:", item)
-        return self._engine.insertBillRecord(item.toTuple())
+        return self._engine.insertMainDataRecord(item.toTuple())
 
-    def deleteBillItem(self, item):
+    def deleteBillItem(self, item: BillItem):
         print("persistence facade delete call:", item)
-        self._engine.deleteBillRecord(item)
+        self._engine.deleteMainDataRecord((item.item_id, ))
 
     def persistPlanData(self, data):
         print("persistence facade persist plan data call")
