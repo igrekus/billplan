@@ -157,3 +157,5 @@ fabric.properties
 ref/
 
 report/
+
+sqlite3\.db
