@@ -150,6 +150,7 @@ class DomainModel(QObject):
 
     def savePlanData(self):
         print("domain model persist plan data call")
+        # TODO: collect and save only changed plan data
         return self._persistenceFacade.persistPlanData(self._rawPlanData)
 
     def addDictRecord(self, dictName, data):
