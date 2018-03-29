@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
 
         # bill list + search proxy
         # TODO: use settings to set icon
-        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain, icon=QPixmap("./icons/doc.png", "PNG"))
+        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain, icon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22))
         self._modelBillSearchProxy = BillSearchProxyModel(parent=self)
         self._modelBillSearchProxy.setSourceModel(self._modelBillList)
 

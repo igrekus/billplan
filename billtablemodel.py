@@ -2,7 +2,7 @@ import const
 
 from billitem import BillItem
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot, pyqtSignal
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtGui import QBrush, QColor, QFont
 
 
 class BillTableModel(QAbstractTableModel):
@@ -35,6 +35,9 @@ class BillTableModel(QAbstractTableModel):
 
         self._modelDomain.billItemsInserted.connect(self.itemsInserted)
         self._modelDomain.billItemsRemoved.connect(self.itemsRemoved)
+
+        self._font = QFont("OldEnglish", 8)
+        self._font.setStyleStrategy(QFont.PreferDefault)
 
         if icon is not None:
             self.decoration = icon
@@ -161,9 +164,12 @@ class BillTableModel(QAbstractTableModel):
                 if item.item_status == 2:
                     return QVariant(0)
 
+        elif role == Qt.FontRole:
+            return self._font
+
         elif role == Qt.BackgroundRole:
             # FIXME hardcoded ids for coloring - add color codes to SQL table?
-            retcolor = Qt.white;
+            retcolor = Qt.white
 
             if item.item_status == 1:
                 retcolor = const.COLOR_PAYMENT_FINISHED
