@@ -1,17 +1,13 @@
 import os
 import subprocess
-
-from billitem import BillItem
-from csvengine import CsvEngine
-from mysqlengine import MysqlEngine
-from sectionheaderview import SectionHeaderView
-from sqliteengine import SqliteEngine
-from printengine import PrintEngine
-from tablerowdelegate import TableRowDelegate
-from xlsxengine import XlsxEngine
 import datetime
 import isoweek
 import const
+
+from billitem import BillItem
+from mysqlengine import MysqlEngine
+from archivemanager import ArchiveManager
+from xlsxengine import XlsxEngine
 from reportmanager import ReportManager
 from domainmodel import DomainModel
 from billtablemodel import BillTableModel
@@ -23,6 +19,8 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot
+
+# arc_path = 'd:\\!archive'
 
 
 class MainWindow(QMainWindow):
@@ -39,6 +37,7 @@ class MainWindow(QMainWindow):
 
         # report manager
         self._reportManager = ReportManager(parent=self)
+        self._archiveManager = ArchiveManager(parent=self, arcPath=arc_path)
 
         # report engines
         self._xlsxEngine = XlsxEngine(parent=self)
@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
 
         # facades
         self._persistenceFacade = PersistenceFacade(parent=self, persistenceEngine=self._persistenceEngine)
-        self._uiFacade = UiFacade(parent=self, reportManager=self._reportManager)
+        self._uiFacade = UiFacade(parent=self, reportManager=self._reportManager, archiveManager=self._archiveManager)
 
         # models
         # domain

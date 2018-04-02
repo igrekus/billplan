@@ -1,8 +1,11 @@
+from copy import deepcopy
 from datetime import datetime
 
+import os
 from PyQt5.QtGui import QBrush, QColor
 
 import const
+from billitem import BillItem
 from dlgbilldata import DlgBillData
 from dlgdicteditor import DlgDictEditor
 from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
@@ -13,12 +16,14 @@ class UiFacade(QObject):
 
     totalsChanged = pyqtSignal()
 
-    def __init__(self, parent=None, domainModel=None, reportManager=None):
+    def __init__(self, parent=None, domainModel=None, reportManager=None, archiveManager=None):
         super(UiFacade, self).__init__(parent)
         self._domainModel = domainModel
         self._billModel = None
         self._planModel = None
         self._reportManager = reportManager
+        self._archiveManager = archiveManager
+        print("init facade")
 
     def setDomainModel(self, domainModel=None):
         self._domainModel = domainModel
@@ -29,20 +34,28 @@ class UiFacade(QObject):
     def setPlanModel(self, model):
         self._planModel = model
 
+    def saveDocument(self, item: BillItem):
+        ok, archivDocPath = self._archiveManager.storeDocument(item.item_doc, item.item_date)
+        if not ok:
+            QMessageBox.warning(self.parent(), "Ощибка", "Ошибка при сохранении документа.")
+        newItem = deepcopy(item)
+        newItem.item_doc = archivDocPath
+        return newItem
+
     # process ui requests
     def requestRefresh(self):
         self._domainModel.refreshData()
         print("ui facade refresh request")
 
     def requestAddBillRecord(self):
-        dummyItem = None
         print("ui facade add record request")
 
-        dialog = DlgBillData(item=dummyItem, domainModel=self._domainModel)
+        dialog = DlgBillData(item=None, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        row = self._domainModel.addBillItem(dialog.getData())
+        row = self._domainModel.addBillItem(self.saveDocument(dialog.getData()))
+
         self.totalsChanged.emit()
         return row
 
@@ -54,7 +67,8 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return
 
-        self._domainModel.updateBillItem(targetIndex, dialog.getData())
+        self._domainModel.updateBillItem(targetIndex, self.saveDocument(dialog.getData()))
+
         self.totalsChanged.emit()
 
     def requestDeleteRecord(self, targetIndex: QModelIndex):
@@ -68,7 +82,7 @@ class UiFacade(QObject):
         self.totalsChanged.emit()
 
     def requestPrint(self, tableIndex, totals):
-
+        # TODO: extract methods
         print("ui facade print request")
         title = None
         data = list()

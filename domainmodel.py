@@ -125,6 +125,7 @@ class DomainModel(QObject):
         print("domain model add bill item call:", newItem)
         newId = self._persistenceFacade.insertBillItem(newItem)
         newItem.item_id = newId
+        # newItem.item_id = 1000
 
         self._billData.append(newItem)
         self._rawPlanData[newItem.item_id] = [0, 0, 0]

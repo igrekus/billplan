@@ -173,7 +173,6 @@ class DlgBillData(QDialog):
     def onBtnAddDocClicked(self):
         fileName = QFileDialog.getOpenFileName(self, "Выбрать документ", "./", "Все файлы (*)")
         self.ui.editDoc.setText(fileName[0])
-        print(fileName[0])
 
     def onComboCategoryCurrentIndexChanged(self, index):
         if index == 1:
