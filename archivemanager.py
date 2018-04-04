@@ -1,6 +1,6 @@
 import datetime
 import os
-import pathlib
+import pathlib2
 
 import shutil
 from PyQt5.QtCore import QObject
@@ -19,15 +19,15 @@ class ArchiveManager(QObject):
     def makeDirForDate(self, date: str):
         month, year = date.split(".")[1:]
         directory = self._archivePath + '\\' + year + '\\' + month + "_" + local_months[int(month)]
-        pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
+        pathlib2.Path(directory).mkdir(parents=True, exist_ok=True)
         return directory
 
     def storeDocument(self, oldPath: str, date: str):
         if os.path.isfile(oldPath):
-            newDir = os.path.normcase(self.makeDirForDate(date))
-            newPath = os.path.normcase(newDir + "\\" + os.path.basename(oldPath))
+            newPath = os.path.normcase(self.makeDirForDate(date) + "\\" + os.path.basename(oldPath))
+            oldPath = os.path.normcase(oldPath)
 
-            if oldPath != newPath:
+            if os.path.normcase(oldPath) != newPath:
                 try:
                     shutil.copy2(oldPath, newPath)
                 except Exception as ex:
