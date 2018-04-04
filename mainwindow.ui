@@ -174,7 +174,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabBillStatus">
        <attribute name="title">
@@ -275,11 +275,50 @@
        <widget class="QTableView" name="tableOrder">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>20</y>
+          <x>11</x>
+          <y>11</y>
           <width>256</width>
           <height>192</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>240</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Добавить</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>240</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Изменить</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>240</y>
+          <width>93</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Удалить</string>
         </property>
        </widget>
       </widget>
@@ -334,7 +373,7 @@
      <x>0</x>
      <y>0</y>
      <width>1076</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

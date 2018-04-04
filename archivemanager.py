@@ -24,15 +24,17 @@ class ArchiveManager(QObject):
 
     def storeDocument(self, oldPath: str, date: str):
         if os.path.isfile(oldPath):
-            newPath = self.makeDirForDate(date)
+            newDir = os.path.normcase(self.makeDirForDate(date))
+            newPath = os.path.normcase(newDir + "\\" + os.path.basename(oldPath))
 
-            try:
-                shutil.copy2(oldPath, newPath)
-            except Exception as ex:
-                print('error copying file:', ex)
-                return False, ''
+            if oldPath != newPath:
+                try:
+                    shutil.copy2(oldPath, newPath)
+                except Exception as ex:
+                    print('error copying file:', ex)
+                    return False, ''
 
-            print(newPath + "\\" + os.path.basename(oldPath))
-            return True, newPath + "\\" + os.path.basename(oldPath)
+            print("storing", oldPath, "to", newPath)
+            return True, newPath
 
         return False, ''

@@ -81,7 +81,7 @@ class UiFacade(QObject):
         self._domainModel.deleteBillItem(targetIndex)
         self.totalsChanged.emit()
 
-    def requestPrint(self, tableIndex, totals):
+    def requestPrint(self, currentTab, totals):
         # TODO: extract methods
         print("ui facade print request")
         title = None
@@ -92,7 +92,7 @@ class UiFacade(QObject):
         footer_color = list()
         widths = list()
 
-        if tableIndex == 0:
+        if currentTab == 0:
             print("making bill list export data...")
 
             title = "Отчёт о состоянии счетов на " + datetime.now().strftime("%d.%m.%Y")
@@ -126,7 +126,7 @@ class UiFacade(QObject):
 
             widths = [0.04, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.215, 0.06, 0.065, 0.06, 0.06, 0.06, 0.04, 0.001, 0.01]
 
-        elif tableIndex == 1:
+        elif currentTab == 1:
             print("making plan export data...")
             title = "План оплаты счетов с " + \
                     self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole).replace(": ", "(") + ") по " + \
@@ -152,6 +152,10 @@ class UiFacade(QObject):
                 footer_color.append(c)
 
             widths = [0.13, 0.05, 0.10, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09]
+
+        elif currentTab == 2:
+            print("making order list report data...")
+            return
 
         self._reportManager.makeReport(title, header, data, color, footer_data, footer_color, widths)
 

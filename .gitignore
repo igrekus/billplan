@@ -159,3 +159,5 @@ ref/
 report/
 
 \.vscode/
+
+sqlite3\.db

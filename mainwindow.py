@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot
 
 # arc_path = 'd:\\!archive'
+arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
 
 
 class MainWindow(QMainWindow):
