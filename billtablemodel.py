@@ -74,29 +74,30 @@ class BillTableModel(QAbstractTableModel):
 
     def setData(self, index, value, role):
         # FIXME modifies domain model directly, use facade
-        item = self._modelDomain.getBillItemAtIndex(index)
-        if index.column() == self.ColumnActive:
-            tmplist = self._modelDomain._rawPlanData[item.item_id].copy()
-            if value == 0:
-                tmplist[2] = 0
-            elif value > 0:
-                tmplist[2] = 1
-            self._modelDomain._rawPlanData[item.item_id] = tmplist
-            return True
+        if role == Qt.CheckStateRole:
+            item = self._modelDomain.getBillItemAtIndex(index)
+            if index.column() == self.ColumnActive:
+                tmplist = self._modelDomain._rawPlanData[item.item_id].copy()
+                if value == 0:
+                    tmplist[2] = 0
+                elif value > 0:
+                    tmplist[2] = 1
+                self._modelDomain._rawPlanData[item.item_id] = tmplist
+                return True
 
-        if index.column() == self.ColumnStatus:
-            if value == 0:
-                item.item_status = 2
-                item.item_priority = 3
-            elif value == 2:
-                item.item_status = 1
-                item.item_priority = 1
+            if index.column() == self.ColumnStatus:
+                if value == 0:
+                    item.item_status = 2
+                    item.item_priority = 3
+                elif value == 2:
+                    item.item_status = 1
+                    item.item_priority = 1
 
-            self._modelDomain.updateBillItem(index, item)
+                self._modelDomain.updateBillItem(index, item)
 
-            self.dataChanged.emit(self.index(index.row(), self.ColumnId, QModelIndex()),
-                                  self.index(index.row(), self.ColumnActive, QModelIndex()), [])
-            return True
+                self.dataChanged.emit(self.index(index.row(), self.ColumnId, QModelIndex()),
+                                      self.index(index.row(), self.ColumnActive, QModelIndex()), [])
+                return True
 
         return False
 

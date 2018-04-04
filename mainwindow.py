@@ -18,7 +18,7 @@ from uifacade import UiFacade
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex
 
 # arc_path = 'd:\\!archive'
 arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
@@ -374,7 +374,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Ошибка", "Удалить: пожалуйста, выберите запись.")
             return
 
-        selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
+        selectedIndex: QModelIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
+        # TODO: HACK -- set active to false before deleting a bill
+        self._modelBillList.setData(selectedIndex, 2, Qt.CheckStateRole)
         self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
     def procActPrint(self):
