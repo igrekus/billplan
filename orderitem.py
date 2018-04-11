@@ -1,129 +1,46 @@
-import const
-import codecs
 import datetime
 
 
-class BillItem:
+class OrderItem:
     # TODO make properties
-    def __init__(self, id_=None, date=None, name=None, category=None, vendor=None, cost=None, project=None,
-                 descript=None, shipment_time=None, status=None, priority=None, shipment_date=None,
-                 shipment_status=None, payment_week=None, note=None, doc=None):
+    def __init__(self, id_=None, name=None, descript=None, qty=None, date_receive=None, priority=None, user=None,
+                 approved=None, approved_by=None):
         self.item_id = id_
-        self.item_date = date
         self.item_name = name
-        self.item_category = category
-        self.item_vendor = vendor
-        self.item_cost = cost
-        self.item_project = project
         self.item_descript = descript
-        self.item_shipment_time = shipment_time
-        self.item_status = status
+        self.item_quantity = qty
+        self.item_date_receive = date_receive
         self.item_priority = priority
-        self.item_shipment_date = shipment_date
-        self.item_shipment_status = shipment_status
-        self.item_payment_week = payment_week
-        self.item_note = note
-        self.item_doc = doc
+        self.item_user = user
+        self.item_approved = approved
+        self.item_approved_by = approved_by
 
     def __str__(self):
-        return "BillItem(" + "id:" + str(self.item_id) + " " \
-               + "date:" + str(self.item_date) + " " \
-               + "name:" + str(self.item_name) + " " \
-               + "cat:" + str(self.item_category) + " " \
-               + "vend:" + str(self.item_vendor) + " " \
-               + "cost:" + str(self.item_cost) + " " \
-               + "proj:" + str(self.item_project) + " " \
-               + "desc:" + str(self.item_descript) + " " \
-               + "due:" + str(self.item_shipment_time) + " " \
-               + "stat:" + str(self.item_status) + " " \
-               + "prior:" + str(self.item_priority) + " " \
-               + "ship date:" + str(self.item_shipment_date) + " " \
-               + "ship stat:" + str(self.item_shipment_status) + " " \
-               + "week:" + str(self.item_payment_week) + " " \
-               + "note:" + str(self.item_note) + " " \
-               + "doc:" + str(self.item_doc) + ")"
+        return '{}(id={}, name={}, desc={}, qty={}, receive={}, prior={}, user={}, approved={}, by={}'. \
+            format(self.__class__
+                   , self.item_id
+                   , self.item_name
+                   , self.item_descript
+                   , self.item_quantity
+                   , self.item_date_receive
+                   , self.item_priority
+                   , self.item_user
+                   , self.item_approved
+                   , self.item_approved_by)
 
     @classmethod
-    def fromRawList(cls, raw_list):
-        # TODO fixe format if needed
-        if not raw_list:
-            raise ValueError("Wrong war list.")
-
-        return cls(id_=raw_list[0]
-                   , date=raw_list[1]
-                   , name=raw_list[2]
-                   , category=raw_list[3]
-                   , vendor=raw_list[4]
-                   , cost=raw_list[5]
-                   , project=raw_list[6]
-                   , descript=raw_list[7]
-                   , shipment_time=raw_list[8]
-                   , status=raw_list[9]
-                   , priority=raw_list[10]
-                   , shipment_date="no date set"
-                   , shipment_status=raw_list[11]
-                   , payment_week=raw_list[12]
-                   , note="empty note"
-                   , doc="")
-
-    @classmethod
-    def fromSqlTuple(cls, sqlite_tuple):
-        return cls(id_=sqlite_tuple[0]
-                   , date=sqlite_tuple[1]
-                   , name=sqlite_tuple[2]
-                   , category=sqlite_tuple[3]
-                   , vendor=sqlite_tuple[4]
-                   , cost=sqlite_tuple[5]
-                   , project=sqlite_tuple[6]
-                   , descript=sqlite_tuple[7]
-                   , shipment_time=sqlite_tuple[8]
-                   , status=sqlite_tuple[9]
-                   , priority=sqlite_tuple[10]
-                   , shipment_date=sqlite_tuple[11]
-                   , shipment_status=sqlite_tuple[12]
-                   # sqlite_tuple[13] - not used
-                   , note=sqlite_tuple[14]
-                   , payment_week=sqlite_tuple[15]
-                   , doc=sqlite_tuple[17])
-
-
-    @classmethod
-    def fromQSqlRecord(cls, record):
-        # if not record:
-        #     raise ValueError("Wrong SQL record.")
-        # return cls(id_=record.value(0)
-        #            , date=record.value(1)
-        #            , text=codecs.decode(record.value(2).replace("Р", "РЄ").encode("cp1251")).replace("Ъ", "И")
-        #            , author=record.value(3)
-        #            , approver=record.value(4)
-        #            , is_active=record.value(5)
-        #            , status=record.value(6)
-        #            , is_dirty=False)
-        pass
+    def fromSqlTuple(cls, sql_tuple):
+        return cls(id_=sql_tuple[0],
+                   name=sql_tuple[1],
+                   descript=sql_tuple[2],
+                   qty=sql_tuple[3],
+                   date_receive=sql_tuple[4],
+                   priority=sql_tuple[5],
+                   user=sql_tuple[6],
+                   approved=sql_tuple[7],
+                   approved_by=sql_tuple[8])
 
     def toTuple(self):
         def formatDate(indate):
             if isinstance(indate, datetime.date):
                 return indate.isoformat()
-            return "01.01.2000"
-
-        return tuple([self.item_date,
-                      self.item_name,
-                      self.item_category,
-                      self.item_vendor,
-                      self.item_cost,
-                      self.item_project,
-                      self.item_descript,
-                      self.item_shipment_time,
-                      self.item_status,
-                      self.item_priority,
-                      self.item_shipment_date,
-                      self.item_shipment_status,
-                      self.item_payment_week,
-                      self.item_note,
-                      self.item_doc,
-                      self.item_id])
-
-    @classmethod
-    def itemListRequestString(self):
-        return str("CALL getBillList()")
