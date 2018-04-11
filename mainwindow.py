@@ -7,6 +7,7 @@ import const
 from billitem import BillItem
 from mysqlengine import MysqlEngine
 from archivemanager import ArchiveManager
+from ordertablemodel import OrderTableModel
 from xlsxengine import XlsxEngine
 from reportmanager import ReportManager
 from domainmodel import DomainModel
@@ -20,8 +21,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex
 
-# arc_path = 'd:\\!archive'
-arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
+arc_path = 'd:\\!archive'
+# arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
 
 
 class MainWindow(QMainWindow):
@@ -61,7 +62,9 @@ class MainWindow(QMainWindow):
 
         # bill list + search proxy
         # TODO: use settings to set icon
-        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain, icon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22))
+        self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain,
+                                             docIcon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22),
+                                             rightIcon=QPixmap("./icons/right.png", "PNG").scaled(22, 22))
         self._modelBillSearchProxy = BillSearchProxyModel(parent=self)
         self._modelBillSearchProxy.setSourceModel(self._modelBillList)
 
@@ -70,10 +73,17 @@ class MainWindow(QMainWindow):
         self._modelPlanSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelPlanSearchProxy.setSourceModel(self._modelBillPlan)
 
+        # orders + search proxy
+        self._modelOrderList = OrderTableModel(parent=self, domainModel=self._modelDomain,
+                                               rightIcon=QPixmap("./icons/right.png", "PNG").scaled(22, 22))
+        self._modelOrderSearchProxy = QSortFilterProxyModel(parent=self)
+        self._modelOrderSearchProxy.setSourceModel(self._modelOrderList)
+
         # connect ui facade to models
         self._uiFacade.setDomainModel(self._modelDomain)
         self._uiFacade.setBillModel(self._modelBillSearchProxy)
         self._uiFacade.setPlanModel(self._modelPlanSearchProxy)
+        self._uiFacade.setOrderModel(self._modelOrderSearchProxy)
 
         # actions
         self.actRefresh = QAction("Обновить", self)
@@ -82,6 +92,9 @@ class MainWindow(QMainWindow):
         self.actDeleteBillRecord = QAction("Удалить счёт...", self)
         self.actPrint = QAction("Распечатать...", self)
         self.actOpenDictEditor = QAction("Словари", self)
+        self.actMakeBillFromOrder = QAction("Создать счёт...", self)
+        self.actAddOrderRecord = QAction("Добавить заказ...", self)
+        self.actEditOrderRecord = QAction("Изменить заказ...", self)
 
     def buildWeekSelectionCombo(self):
         # TODO if more settings is needed, move all settings-related code to a separate class
@@ -115,6 +128,7 @@ class MainWindow(QMainWindow):
         self._modelDomain.buildPlanData()
         self._modelBillList.initModel()
         self._modelBillPlan.initModel()
+        self._modelOrderList.initModel()
 
         # init UI
         # bill list table
@@ -180,6 +194,32 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setStyleSheet("QTableView { gridline-color : black }")
         # self.ui.tablePlan.setItemDelegateForRow(0, TableRowDelegate(self.ui.tablePlan))
 
+        # bill order table
+        self.ui.tableOrder: QTableView
+        self.ui.tableOrder.setModel(self._modelOrderSearchProxy)
+        self.ui.tableOrder.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.ui.tableOrder.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.ui.tableOrder.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # formatting
+        self.ui.tableOrder.horizontalHeader().setDefaultAlignment(Qt.AlignCenter)
+        self.ui.tableOrder.horizontalHeader().setHighlightSections(False)
+        self.ui.tableOrder.horizontalHeader().setFixedHeight(24)
+        self.ui.tableOrder.horizontalHeader().setStretchLastSection(True)
+        self.ui.tableOrder.horizontalHeader().setStyleSheet("QHeaderView::section {"
+                                                           "    padding: 4px;"
+                                                           "    border-style: none;"
+                                                           "    border-color: #000000;"
+                                                           "    border-bottom: 1px solid #000000;"
+                                                           "    border-right: 1px solid #000000;"
+                                                           "}"
+                                                           "QHeaderView::section:horizontal {"
+                                                           "    border-right: 1px solid #000000"
+                                                           "}")
+        self.ui.tableOrder.verticalHeader().setVisible(False)
+        self.ui.tableOrder.setWordWrap(True)
+        self.ui.tableOrder.resizeRowsToContents()
+        self.ui.tableOrder.setStyleSheet("QTableView { gridline-color : black}")
+
         # setup filter widgets
         self.ui.comboProjectFilter.setModel(self._modelDomain.dicts["project"])
         self.ui.comboStatusFilter.setModel(self._modelDomain.dicts["status"])
@@ -203,10 +243,15 @@ class MainWindow(QMainWindow):
         self.ui.btnDeleteBill.clicked.connect(self.onBtnDeleteBillClicked)
         self.ui.btnPrint.clicked.connect(self.onBtnPrintClicked)
         self.ui.btnDictEditor.clicked.connect(self.onBtnDictEditorClicked)
+        self.ui.btnMakeBillFromOrder.clicked.connect(self.onBtnMakeBillFromOrderClicked)
+        self.ui.btnAddOrder.clicked.connect(self.onBtnAddOrderClicked)
+        self.ui.btnEditOrder.clicked.connect(self.onBtnEditOrderClicked)
 
         # table widgets
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
         self.ui.tableBill.clicked.connect(self.onTableBillClicked)
+        self.ui.tableOrder.doubleClicked.connect(self.onTableOrderDoubleClicked)
+        self.ui.tableOrder.clicked.connect(self.onTableOrderClicked)
         self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
 
         # totals update
@@ -251,18 +296,29 @@ class MainWindow(QMainWindow):
         self.actOpenDictEditor.setStatusTip("Открыть редактор словарей")
         self.actOpenDictEditor.triggered.connect(self.procActOpenDictEditor)
 
+        self.actMakeBillFromOrder.setStatusTip("Создать счёт из заказа")
+        self.actMakeBillFromOrder.triggered.connect(self.procActMakeBillFromOrder)
+
+        self.actAddOrderRecord.setStatusTip("Добавить заказ")
+        self.actAddOrderRecord.triggered.connect(self.procActAddOrderRecord)
+
+        self.actEditOrderRecord.setStatusTip("Изменить заказ")
+        self.actEditOrderRecord.triggered.connect(self.procActEditOrderRecord)
+
+
     def refreshView(self):
         screenRect = QApplication.desktop().screenGeometry()
 
+        # if self.ui.tabWidget.currentIndex() == 0:
         tbwidth = screenRect.width() - 50
         self.ui.tableBill.setColumnWidth(0, tbwidth * 0.03)
         self.ui.tableBill.setColumnWidth(1, tbwidth * 0.05)
         self.ui.tableBill.setColumnWidth(2, tbwidth * 0.07)
         self.ui.tableBill.setColumnWidth(3, tbwidth * 0.05)  # +0.01
-        self.ui.tableBill.setColumnWidth(4, tbwidth * 0.09)
-        self.ui.tableBill.setColumnWidth(5, tbwidth * 0.06)
+        self.ui.tableBill.setColumnWidth(4, tbwidth * 0.08)
+        self.ui.tableBill.setColumnWidth(5, tbwidth * 0.05)
         self.ui.tableBill.setColumnWidth(6, tbwidth * 0.06)
-        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.21)  # +0.02
+        self.ui.tableBill.setColumnWidth(7, tbwidth * 0.20)  # +0.01
         self.ui.tableBill.setColumnWidth(8, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(9, tbwidth * 0.06)
         self.ui.tableBill.setColumnWidth(10, tbwidth * 0.055)
@@ -272,7 +328,9 @@ class MainWindow(QMainWindow):
         # self.ui.tableBill.setColumnWidth(14, tbwidth * 0.03)
         self.ui.tableBill.setColumnWidth(15, tbwidth * 0.01)
         self.ui.tableBill.setColumnWidth(16, tbwidth * 0.01)
+        self.ui.tableBill.setColumnWidth(17, tbwidth * 0.01)   # +0.01
 
+        # elif self.ui.tabWidget.currentIndex() == 1:
         tpwidth = screenRect.width() - 45
         # 1 2 3 5 .. week count - 1
         # self.ui.tablePlan.setColumnWidth(0, tpwidth * 0.035)
@@ -288,6 +346,20 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setColumnWidth(10, tpwidth * 0.09)
         self.ui.tablePlan.setColumnWidth(11, tpwidth * 0.09)
         self.ui.tablePlan.setColumnWidth(12, tpwidth * 0.09)
+
+        # elif self.ui.tabWidget.currentIndex() == 2:
+        towidth = screenRect.width() - 45
+        self.ui.tableOrder.setColumnWidth(0, towidth * 0.02)
+        self.ui.tableOrder.setColumnWidth(1, towidth * 0.30)
+        self.ui.tableOrder.setColumnWidth(2, towidth * 0.30)
+        self.ui.tableOrder.setColumnWidth(3, towidth * 0.04)
+        self.ui.tableOrder.setColumnWidth(4, towidth * 0.06)
+        self.ui.tableOrder.setColumnWidth(5, towidth * 0.06)
+        self.ui.tableOrder.setColumnWidth(6, towidth * 0.07)
+        self.ui.tableOrder.setColumnWidth(7, towidth * 0.08)
+        self.ui.tableOrder.setColumnWidth(8, towidth * 0.04)
+        self.ui.tableOrder.setColumnWidth(9, towidth * 0.02)
+
 
     def hideBillTableColumns(self):
         # self.ui.tableBill.hideColumn(11)
@@ -312,14 +384,45 @@ class MainWindow(QMainWindow):
     def onBtnPrintClicked(self):
         self.actPrint.trigger()
 
+    def onBtnMakeBillFromOrderClicked(self):
+        self.actMakeBillFromOrder.trigger()
+
+    def onBtnAddOrderClicked(self):
+        self.actAddOrderRecord.trigger()
+
+    def onBtnEditOrderClicked(self):
+        self.actEditOrderRecord.trigger()
+
     def onTableBillClicked(self, index):
-        if index.column() == self._modelBillList.ColumnDoc:
+        col = index.column()
+        if col == self._modelBillList.ColumnDoc:
             doc = index.data(Qt.EditRole)
             if doc:
                 subprocess.Popen(r'explorer /select,"' + index.data(Qt.EditRole).replace("/", "\\") + '"')
+        elif col == self._modelBillList.ColumnOrder:
+            orderId = index.data(const.RoleOrderId)
+            if not orderId:
+                return
+            self.ui.tabWidget.setCurrentIndex(2)
+            rowToSelect = self._modelOrderList.getRowById(orderId)
+            indexToSelect = self._modelOrderSearchProxy.mapFromSource(self._modelOrderList.index(rowToSelect, 0, QModelIndex()))
+            self.ui.tableOrder.selectRow(indexToSelect.row())
 
     def onTableBillDoubleClicked(self, index):
         self.actEditBillRecord.trigger()
+
+    def onTableOrderClicked(self, index):
+        col = index.column()
+        if col == self._modelOrderList.ColumnBill:
+            billId = self._modelDomain.getBillIdForOrderId(index.data(const.RoleNodeId))
+            if billId:
+                self.ui.tabWidget.setCurrentIndex(0)
+                rowToSelect = self._modelBillList.getRowById(billId)
+                indexToSelect = self._modelBillSearchProxy.mapFromSource(self._modelBillList.index(rowToSelect, 0, QModelIndex()))
+                self.ui.tableBill.selectRow(indexToSelect.row())
+
+    def onTableOrderDoubleClicked(self, index):
+        self.actEditOrderRecord.trigger()
 
     def onTabBarCurrentChanged(self, index):
         if index == 1:
@@ -334,6 +437,7 @@ class MainWindow(QMainWindow):
         self.refreshView()
         # self.ui.tableBill.resizeRowsToContents()
         # self.ui.tablePlan.resizeRowsToContents()
+        self.ui.tableOrder.resizeRowsToContents()
 
     def closeEvent(self, *args, **kwargs):
         # TODO error handling on saving before exiting
@@ -350,7 +454,6 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.resizeRowsToContents()
 
     def procActAddBillRecord(self):
-        # print("act add record trigger")
         row = self._uiFacade.requestAddBillRecord()
 
         if row is not None:
@@ -360,7 +463,6 @@ class MainWindow(QMainWindow):
                                                                | QItemSelectionModel.Rows)
 
     def procActEditRecord(self):
-        # print("act edit record trigger")
         if not self.ui.tableBill.selectionModel().hasSelection():
             QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
             return
@@ -379,6 +481,26 @@ class MainWindow(QMainWindow):
         self._modelBillList.setData(selectedIndex, 2, Qt.CheckStateRole)
         self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
+    def procActMakeBillFromOrder(self):
+        print("make from order")
+
+    def procActAddOrderRecord(self):
+        row = self._uiFacade.requestAddOrderRecord()
+
+        if row is not None:
+            index = self._modelOrderSearchProxy.mapFromSource(self._modelOrderList.index(row, 0))
+            self.ui.tableOrder.scrollTo(index)
+            self.ui.tableOrder.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
+                                                                | QItemSelectionModel.Rows)
+
+    def procActEditOrderRecord(self):
+        if not self.ui.tableOrder.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
+            return
+
+        selectedIndex = self.ui.tableOrder.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestEditOrderRecord(self._modelOrderSearchProxy.mapToSource(selectedIndex))
+
     def procActPrint(self):
         self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex(), self._modelDomain.getBillTotals())
 
@@ -391,6 +513,12 @@ class MainWindow(QMainWindow):
         self._modelBillSearchProxy.filterFromDate = self.ui.dateFromFilter.date()
         self._modelBillSearchProxy.filterUntilDate = self.ui.dateUntilFilter.date()
         self._modelBillSearchProxy.invalidate()
+
+        # self._modelPlanSearchProxy.setFilterWildcard(self.ui.editSearch.text())
+        # self._modelPlanSearchProxy.invalidate()
+        #
+        # self._modelOrderSearchProxy.setFilterWildcard(self.ui.editSearch.text())
+        # self._modelPlanSearchProxy.invalidate()
 
         self.hideBillTableColumns()
         self.refreshView()

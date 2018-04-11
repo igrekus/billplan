@@ -37,4 +37,4 @@ class ArchiveManager(QObject):
             print("storing", oldPath, "to", newPath)
             return True, newPath
 
-        return False, ''
+        return True, ''

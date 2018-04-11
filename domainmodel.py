@@ -1,10 +1,11 @@
 from billitem import BillItem
+from orderitem import OrderItem
 from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
 
 
 class DomainModel(QObject):
 
-    dict_list = ["category", "period", "priority", "project", "shipment", "status", "vendor"]
+    dict_list = ["category", "period", "priority", "project", "shipment", "status", "vendor", "user"]
 
     billItemsBeginInsert = pyqtSignal(int, int)
     billItemsEndInsert = pyqtSignal()
@@ -28,6 +29,8 @@ class DomainModel(QObject):
 
         self._rawPlanData = dict()
         self._planData = list()
+
+        self._orderData = list()
 
     def buildPlanData(self):
         print("building plan data")
@@ -54,6 +57,8 @@ class DomainModel(QObject):
 
         self._rawPlanData = self._persistenceFacade.getRawPlanData()
 
+        self._orderData = self._persistenceFacade.getOrderList()
+
         self.buildPlanData()
 
     def refreshPlanData(self):
@@ -70,11 +75,50 @@ class DomainModel(QObject):
     def getBillItemAtIndex(self, index: QModelIndex):
         return self._billData[index.row()]
 
+    def getBillIdForOrderId(self, order: int):
+        for b in self._billData:
+            if b.item_order == order:
+                return b.item_id
+        return 0
+
+    def getBillRowById(self, id_):
+        for b in self._billData:
+            if b.item_id == id_:
+                return self._billData.index(b)
+        return 0
+
     def planListRowCount(self):
         return len(self._planData)
 
     def getPlanItemAtRow(self, row: int):
         return self._planData[row]
+
+    def getOrderListRowCount(self):
+        return len(self._orderData)
+
+    def getOrderItemAtRow(self, row: int):
+        return self._orderData[row]
+
+    def getOrderItemAtIndex(self, index: QModelIndex):
+        return self._orderData[index.row()]
+
+    def getOrderRowById(self, order: int):
+        try:
+            for o in self._orderData:
+                if o.item_id == order:
+                    return self._orderData.index(o)
+            else:
+                return 0
+        except Exception as ex:
+            print(ex)
+        return 0
+
+    def getOrderStatus(self, order):
+        for b in self._billData:
+            if b.item_order == order:
+                return b.item_status
+        else:
+            return 0
 
     def getDicts(self):
         return self.dicts
@@ -148,6 +192,11 @@ class DomainModel(QObject):
         self._persistenceFacade.deleteBillItem(self._billData[row])
         del self._billData[row]
         self.billItemsRemoved.emit(row, row)
+
+    def updateOrderItem(self, row: int, itemToUpdate: OrderItem):
+        print("domain model update order item call, row:", row, itemToUpdate)
+        self._persistenceFacade.updateOrderItem(itemToUpdate)
+        self._orderData[row] = itemToUpdate
 
     def savePlanData(self):
         print("domain model persist plan data call")

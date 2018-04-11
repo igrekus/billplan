@@ -11,6 +11,8 @@ from dlgdicteditor import DlgDictEditor
 from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
+from dlgorderdata import DlgOrderData
+
 
 class UiFacade(QObject):
 
@@ -21,6 +23,7 @@ class UiFacade(QObject):
         self._domainModel = domainModel
         self._billModel = None
         self._planModel = None
+        self._orderModel = None
         self._reportManager = reportManager
         self._archiveManager = archiveManager
         print("init facade")
@@ -33,6 +36,9 @@ class UiFacade(QObject):
 
     def setPlanModel(self, model):
         self._planModel = model
+
+    def setOrderModel(self, model):
+        self._orderModel = model
 
     def saveDocument(self, item: BillItem):
         ok, archivDocPath = self._archiveManager.storeDocument(item.item_doc, item.item_date)
@@ -48,7 +54,7 @@ class UiFacade(QObject):
         print("ui facade refresh request")
 
     def requestAddBillRecord(self):
-        print("ui facade add record request")
+        print("ui facade add bill record request")
 
         dialog = DlgBillData(item=None, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
@@ -61,7 +67,7 @@ class UiFacade(QObject):
 
     def requestEditBillRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getBillItemAtIndex(targetIndex)
-        print("ui facade edit record request:", oldItem)
+        print("ui facade edit bill record request:", oldItem)
 
         dialog = DlgBillData(item=oldItem, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
@@ -72,7 +78,7 @@ class UiFacade(QObject):
         self.totalsChanged.emit()
 
     def requestDeleteRecord(self, targetIndex: QModelIndex):
-        print("ui facade delete record request")
+        print("ui facade delete bill record request")
         result = QMessageBox.question(self.parent(), "Вопрос",
                                       "Вы действительно хотите удалить выбранную запись?")
         if result != QMessageBox.Yes:
@@ -80,6 +86,32 @@ class UiFacade(QObject):
 
         self._domainModel.deleteBillItem(targetIndex)
         self.totalsChanged.emit()
+
+    def requestAddOrderRecord(self):
+        print("ui facade add order record request")
+
+        dialog = DlgOrderData(item=None, domainModel=self._domainModel)
+        if dialog.exec() != QDialog.Accepted:
+            return None
+
+        print(dialog.getData())
+        row = 1
+        # row = self._domainModel.addOrderItem(dialog.getData())
+        return row
+
+    def requestEditOrderRecord(self, targetIndex: QModelIndex):
+        oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
+        print("ui facade edit order request:", oldItem)
+
+        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel)
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        print(dialog.getData())
+
+        # self._domainModel.updateBillItem(targetIndex, self.saveDocument(dialog.getData()))
+        #
+        # self.totalsChanged.emit()
 
     def requestPrint(self, currentTab, totals):
         # TODO: extract methods

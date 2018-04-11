@@ -23,12 +23,13 @@ class BillTableModel(QAbstractTableModel):
     ColumnNote = 14
     ColumnActive = 15
     ColumnDoc = 16
-    ColumnCount = 17
+    ColumnOrder = 17
+    ColumnCount = 18
 
-    _headers = ["Номер", "Дата", "Счёт", "Категория", "Поставщик", "Сумма (руб.)", "Работа", "Назначение", "Срок",
-                "Статус", "Приоритет", "Поставка", "Отгрузка", "Неделя", "Примечание", "+", "Счёт"]
+    _headers = ["Номер", "Дата", "Счёт", "Категория", "Поставщик", "Сумма", "Работа", "Назначение", "Срок",
+                "Статус", "Приоритет", "Поставка", "Отгрузка", "Неделя", "Примечание", "+", "Счёт", "Заказ"]
 
-    def __init__(self, parent=None, domainModel=None, icon=None):
+    def __init__(self, parent=None, domainModel=None, docIcon=None, rightIcon=None):
         super(BillTableModel, self).__init__(parent)
         self._modelDomain = domainModel
         self._dicts = dict()
@@ -39,10 +40,15 @@ class BillTableModel(QAbstractTableModel):
         self._font = QFont("OldEnglish", 8)
         self._font.setStyleStrategy(QFont.PreferDefault)
 
-        if icon is not None:
-            self.decoration = icon
+        if docIcon is not None:
+            self.docDecoration = docIcon
         else:
-            self.decoration = QColor(const.COLOR_PRIORITY_MEDIUM)
+            self.docDecoration = QColor(const.COLOR_PRIORITY_MEDIUM)
+
+        if rightIcon is not None:
+            self.rightDecoration = rightIcon
+        else:
+            self.rightDecoration = QColor(const.COLOR_PRIORITY_MEDIUM)
 
     def clear(self):
         pass
@@ -150,7 +156,10 @@ class BillTableModel(QAbstractTableModel):
         elif role == Qt.DecorationRole:
             if col == self.ColumnDoc:
                 if item.item_doc:
-                    return QVariant(self.decoration)
+                    return QVariant(self.docDecoration)
+            elif col == self.ColumnOrder:
+                if item.item_order:
+                    return QVariant(self.rightDecoration)
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnActive:
@@ -206,6 +215,8 @@ class BillTableModel(QAbstractTableModel):
             return QVariant(item.item_shipment_status)
         elif role == const.RoleDate:
             return QVariant(QDate.fromString(item.item_date, "dd.MM.yyyy"))
+        elif role == const.RoleOrderId:
+            return QVariant(item.item_order)
         return QVariant()
 
     def flags(self, index):
@@ -213,6 +224,9 @@ class BillTableModel(QAbstractTableModel):
         if index.column() == self.ColumnActive or index.column() == self.ColumnStatus:
             f = f | Qt.ItemIsUserCheckable
         return f
+
+    def getRowById(self, id_):
+        return self._modelDomain.getBillRowById(id_)
 
     @pyqtSlot(int, int)
     def itemsInserted(self, first: int, last: int):

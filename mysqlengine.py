@@ -82,14 +82,14 @@ class MysqlEngine(QObject):
 
     def insertMainDataRecord(self, data):
         # TODO: construct parameter list by number of data items
-        q = "CALL insertMainData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        q = "CALL insertMainData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         # print(q, data[:-1])
         cursor = self.execParametrizedQuery(q, data[:-1])
         rec_id = cursor.fetchone()[0]
         return rec_id
 
     def updateMainDataRecord(self, data):
-        q = "CALL updateMainData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        q = "CALL updateMainData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         # print(q, data)
         self.execParametrizedQuery(q, data)
 
@@ -127,3 +127,16 @@ class MysqlEngine(QObject):
         self.execBulkQuery(q, data)
         print("...update end")
         return True
+
+    def fetchOrderData(self):
+        return self.execSimpleQuery("CALL getOrderList()")
+
+    def updateOrderData(self, data):
+        print("mysql engine update order data:", data)
+        q = "CALL updateOrderData(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        # print(q, data)
+        try:
+            self.execParametrizedQuery(q, data)
+        except Exception as ex:
+            print(ex)
+

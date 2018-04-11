@@ -1,4 +1,5 @@
 from billitem import BillItem
+from orderitem import OrderItem
 from mapmodel import MapModel
 from PyQt5.QtCore import QObject
 
@@ -27,17 +28,24 @@ class PersistenceFacade(QObject):
     def getRawPlanData(self):
         return {r[1]: [r[2], r[3], r[4]] for r in self._engine.fetchAllPlanRecrods()}
 
+    def getOrderList(self):
+        return [OrderItem.fromSqlTuple(r) for r in self._engine.fetchOrderData()]
+
     def updateBillItem(self, item: BillItem):
-        print("persistence facade update call:", item)
+        print("persistence facade update bill call:", item)
         self._engine.updateMainDataRecord(item.toTuple())
 
     def insertBillItem(self, item: BillItem) -> int:
-        print("persistence facade insert call:", item)
+        print("persistence facade insert bill call:", item)
         return self._engine.insertMainDataRecord(item.toTuple())
 
     def deleteBillItem(self, item: BillItem):
-        print("persistence facade delete call:", item)
+        print("persistence facade delete bill call:", item)
         self._engine.deleteMainDataRecord((item.item_id, ))
+
+    def updateOrderItem(self, item: OrderItem):
+        print("persistence facade update order call:", item)
+        self._engine.updateOrderData(item.toTuple())
 
     def persistPlanData(self, data):
         print("persistence facade persist plan data call")

@@ -5,7 +5,7 @@ COLOR_PAYMENT_PENDING = 0xffFF6767
 
 COLOR_PRIORITY_LOW = 0xffAABF00
 COLOR_PRIORITY_MEDIUM = 0xffFFFF00
-COLOR_PRIORITY_HIGH = 0xffFFFF00
+COLOR_PRIORITY_HIGH = 0xffFFA7A7
 
 COLOR_ARRIVAL_PENDING = 0xffFF6767
 COLOR_ARRIVAL_PARTIAL = 0xffFF9462
@@ -17,3 +17,4 @@ RoleStatus = Qt.UserRole + 3
 RolePriority = Qt.UserRole + 4
 RoleShipment = Qt.UserRole + 5
 RoleDate = Qt.UserRole + 6
+RoleOrderId = Qt.UserRole + 7

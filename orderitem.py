@@ -7,7 +7,7 @@ class BillItem:
     # TODO make properties
     def __init__(self, id_=None, date=None, name=None, category=None, vendor=None, cost=None, project=None,
                  descript=None, shipment_time=None, status=None, priority=None, shipment_date=None,
-                 shipment_status=None, payment_week=None, note=None, doc=None, order=None):
+                 shipment_status=None, payment_week=None, note=None, doc=None):
         self.item_id = id_
         self.item_date = date
         self.item_name = name
@@ -24,7 +24,6 @@ class BillItem:
         self.item_payment_week = payment_week
         self.item_note = note
         self.item_doc = doc
-        self.item_order = order
 
     def __str__(self):
         return "BillItem(" + "id:" + str(self.item_id) + " " \
@@ -42,8 +41,7 @@ class BillItem:
                + "ship stat:" + str(self.item_shipment_status) + " " \
                + "week:" + str(self.item_payment_week) + " " \
                + "note:" + str(self.item_note) + " " \
-               + "doc:" + str(self.item_doc) + " " \
-               + "order:" + str(self.item_order) + ")"
+               + "doc:" + str(self.item_doc) + ")"
 
     @classmethod
     def fromRawList(cls, raw_list):
@@ -69,25 +67,24 @@ class BillItem:
                    , doc="")
 
     @classmethod
-    def fromSqlTuple(cls, sql_tuple):
-        return cls(id_=sql_tuple[0]
-                   , date=sql_tuple[1]
-                   , name=sql_tuple[2]
-                   , category=sql_tuple[3]
-                   , vendor=sql_tuple[4]
-                   , cost=sql_tuple[5]
-                   , project=sql_tuple[6]
-                   , descript=sql_tuple[7]
-                   , shipment_time=sql_tuple[8]
-                   , status=sql_tuple[9]
-                   , priority=sql_tuple[10]
-                   , shipment_date=sql_tuple[11]
-                   , shipment_status=sql_tuple[12]
+    def fromSqlTuple(cls, sqlite_tuple):
+        return cls(id_=sqlite_tuple[0]
+                   , date=sqlite_tuple[1]
+                   , name=sqlite_tuple[2]
+                   , category=sqlite_tuple[3]
+                   , vendor=sqlite_tuple[4]
+                   , cost=sqlite_tuple[5]
+                   , project=sqlite_tuple[6]
+                   , descript=sqlite_tuple[7]
+                   , shipment_time=sqlite_tuple[8]
+                   , status=sqlite_tuple[9]
+                   , priority=sqlite_tuple[10]
+                   , shipment_date=sqlite_tuple[11]
+                   , shipment_status=sqlite_tuple[12]
                    # sqlite_tuple[13] - not used
-                   , note=sql_tuple[14]
-                   , payment_week=sql_tuple[15]
-                   , doc=sql_tuple[17]
-                   , order=sql_tuple[18])
+                   , note=sqlite_tuple[14]
+                   , payment_week=sqlite_tuple[15]
+                   , doc=sqlite_tuple[17])
 
 
     @classmethod
@@ -125,7 +122,6 @@ class BillItem:
                       self.item_payment_week,
                       self.item_note,
                       self.item_doc,
-                      self.item_order,
                       self.item_id])
 
     @classmethod

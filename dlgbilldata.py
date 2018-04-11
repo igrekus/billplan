@@ -71,6 +71,7 @@ class DlgBillData(QDialog):
         self.ui.spinWeek.setValue(self._currentItem.item_payment_week)
         self.ui.editNote.setText(self._currentItem.item_note)
         self.ui.editDoc.setText(self._currentItem.item_doc)
+        self.ui.editOrder.setText(str(self._currentItem.item_order if self._currentItem.item_order is not None else 0))
 
     def resetWidgets(self):
         self.ui.dateBill.setDate(QDate().currentDate())
@@ -88,6 +89,7 @@ class DlgBillData(QDialog):
         self.ui.spinWeek.setValue(0)
         self.ui.editNote.setText("")
         self.ui.editDoc.setText("")
+        self.ui.editOrder.setText("0")
 
     def verifyInputData(self):
         if not self.ui.editBillName.text():
@@ -156,7 +158,8 @@ class DlgBillData(QDialog):
                                 , shipment_status=self.ui.comboShipment.currentData(const.RoleNodeId)
                                 , payment_week=self.ui.spinWeek.value()
                                 , note=self.ui.editNote.text()
-                                , doc=self.ui.editDoc.text())
+                                , doc=self.ui.editDoc.text()
+                                , order=int(self.ui.editOrder.text()))
 
         # TODO verify data change, reject dialog if not changed
 
