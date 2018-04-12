@@ -42,6 +42,7 @@ class OrderTableModel(QAbstractTableModel):
         # self._modelDomain.planItemsEndInsert.connect(self.planItemsEndInsert)
         # self._modelDomain.planItemsBeginRemove.connect(self.planItemsBeginRemove)
         # self._modelDomain.planItemsEndRemove.connect(self.planItemsEndRemove)
+        self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
 
     def clear(self):
         pass
@@ -151,7 +152,8 @@ class OrderTableModel(QAbstractTableModel):
 
         elif role == Qt.DecorationRole:
             if col == self.ColumnBill:
-                return self._rightDecoration
+                if self._modelDomain.orderHasBill(item.item_id):
+                    return self._rightDecoration
 
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
@@ -184,3 +186,10 @@ class OrderTableModel(QAbstractTableModel):
     @pyqtSlot()
     def planItemsEndRemove(self):
         self.endRemoveRows()
+
+    @pyqtSlot(int, int)
+    def itemsInserted(self, first: int, last: int):
+        self.beginInsertRows(QModelIndex(), first, last)
+        # print("table model slot:", first, last)
+        self.endInsertRows()
+

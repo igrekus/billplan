@@ -15,6 +15,7 @@ class DlgOrderData(QDialog):
 
         # TODO: login system stub
         self._activeUser = 1
+        self._approver = 4
 
         self.setAttribute(Qt.WA_QuitOnClose)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -77,8 +78,12 @@ class DlgOrderData(QDialog):
 
     def collectData(self):
         id_ = None
+        approved = 2
+        approved_by = self._approver
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
+            approved = self._currentItem.item_approved
+            approved_by = self._currentItem.item_approved_by
 
         self._newItem = OrderItem(id_=id_,
                                   name=self.ui.editName.text(),
@@ -88,8 +93,8 @@ class DlgOrderData(QDialog):
                                       self.ui.dateReceive.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                   priority=self.ui.comboPriority.currentData(const.RoleNodeId),
                                   user=self._activeUser,
-                                  approved=0,
-                                  approved_by=0)
+                                  approved=approved,
+                                  approved_by=approved_by)
 
         # TODO verify data change, reject dialog if not changed
 

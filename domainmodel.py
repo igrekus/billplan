@@ -20,6 +20,8 @@ class DomainModel(QObject):
     billItemsInserted = pyqtSignal(int, int)
     billItemsRemoved = pyqtSignal(int, int)
 
+    orderItemsInserted = pyqtSignal(int, int)
+
     def __init__(self, parent=None, persistenceFacade=None):
         super(DomainModel, self).__init__(parent)
 
@@ -113,12 +115,19 @@ class DomainModel(QObject):
             print(ex)
         return 0
 
-    def getOrderStatus(self, order):
+    def getOrderStatus(self, order: int):
         for b in self._billData:
             if b.item_order == order:
                 return b.item_status
         else:
             return 0
+
+    def orderHasBill(self, order: int):
+        for b in self._billData:
+            if b.item_order == order:
+                return True
+        else:
+            return False
 
     def getDicts(self):
         return self.dicts
@@ -192,6 +201,20 @@ class DomainModel(QObject):
         self._persistenceFacade.deleteBillItem(self._billData[row])
         del self._billData[row]
         self.billItemsRemoved.emit(row, row)
+
+    def addOrderItem(self, newItem: OrderItem):
+        print("domain model add order item call:", newItem)
+
+        newId = self._persistenceFacade.insertOrderItem(newItem)
+        newItem.item_id = newId
+        # newItem.item_id = 1000
+
+        self._orderData.append(newItem)
+
+        row = len(self._orderData) - 1
+
+        self.orderItemsInserted.emit(row, row)
+        return row
 
     def updateOrderItem(self, row: int, itemToUpdate: OrderItem):
         print("domain model update order item call, row:", row, itemToUpdate)

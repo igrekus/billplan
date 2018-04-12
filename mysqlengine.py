@@ -120,6 +120,14 @@ class MysqlEngine(QObject):
     def fetchAllPlanRecrods(self):
         return self.execSimpleQuery("CALL getAllPlanRecrods()").fetchall()
 
+    def insertOrderRecord(self, data):
+        q = "CALL insertOrderRecord(%s, %s, %s, %s, %s, %s, %s, %s)"
+        print(q, data[:-1])
+        cursor = self.execParametrizedQuery(q, data[:-1])
+        rec_id = cursor.fetchone()[0]
+        return rec_id
+
+
     def updatePlanData(self, data):
         # TODO error handling
         print("mysql engine update plan data...", data)

@@ -44,3 +44,15 @@ class OrderItem:
         def formatDate(indate):
             if isinstance(indate, datetime.date):
                 return indate.isoformat()
+            return "2000-01-01"
+
+        return tuple([self.item_name
+                         , self.item_descript
+                         , self.item_quantity
+                         , formatDate(self.item_date_receive)
+                         , self.item_priority
+                         , self.item_user
+                         , self.item_approved
+                         , self.item_approved_by
+                         , self.item_id])
+

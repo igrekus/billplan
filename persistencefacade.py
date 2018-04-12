@@ -43,6 +43,10 @@ class PersistenceFacade(QObject):
         print("persistence facade delete bill call:", item)
         self._engine.deleteMainDataRecord((item.item_id, ))
 
+    def insertOrderItem(self, item: BillItem) -> int:
+        print("persistence facade insert order call:", item)
+        return self._engine.insertOrderRecord(item.toTuple())
+
     def updateOrderItem(self, item: OrderItem):
         print("persistence facade update order call:", item)
         self._engine.updateOrderData(item.toTuple())

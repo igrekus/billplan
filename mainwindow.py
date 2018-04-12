@@ -21,8 +21,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex
 
-arc_path = 'd:\\!archive'
-# arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
+# arc_path = 'd:\\!archive'
+arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
 
 
 class MainWindow(QMainWindow):
@@ -482,7 +482,19 @@ class MainWindow(QMainWindow):
         self._uiFacade.requestDeleteRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
     def procActMakeBillFromOrder(self):
-        print("make from order")
+        if not self.ui.tableOrder.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка", "Выберите запись о заказе для создания счёта.")
+            return
+
+        selectedIndex: QModelIndex = self.ui.tableOrder.selectionModel().selectedIndexes()[0]
+        row = self._uiFacade.requestMakeBillFromOrder(self._modelOrderSearchProxy.mapToSource(selectedIndex))
+
+        if row is not None:
+            self.ui.tabWidget.setCurrentIndex(0)
+            index = self._modelBillSearchProxy.mapFromSource(self._modelBillList.index(row, 0))
+            self.ui.tableBill.scrollTo(index)
+            self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
+                                                               | QItemSelectionModel.Rows)
 
     def procActAddOrderRecord(self):
         row = self._uiFacade.requestAddOrderRecord()

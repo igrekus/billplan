@@ -56,7 +56,7 @@ class UiFacade(QObject):
     def requestAddBillRecord(self):
         print("ui facade add bill record request")
 
-        dialog = DlgBillData(item=None, domainModel=self._domainModel)
+        dialog = DlgBillData(billItem=None, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
             return None
 
@@ -69,7 +69,7 @@ class UiFacade(QObject):
         oldItem = self._domainModel.getBillItemAtIndex(targetIndex)
         print("ui facade edit bill record request:", oldItem)
 
-        dialog = DlgBillData(item=oldItem, domainModel=self._domainModel)
+        dialog = DlgBillData(billItem=oldItem, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
             return
 
@@ -87,6 +87,19 @@ class UiFacade(QObject):
         self._domainModel.deleteBillItem(targetIndex)
         self.totalsChanged.emit()
 
+    def requestMakeBillFromOrder(self, index: QModelIndex):
+        print("ui facade make bill from order request")
+        item = self._domainModel.getOrderItemAtIndex(index)
+
+        dialog = DlgBillData(billItem=None, orderItem=item, domainModel=self._domainModel)
+        if dialog.exec() != QDialog.Accepted:
+            return None
+
+        row = self._domainModel.addBillItem(self.saveDocument(dialog.getData()))
+
+        self.totalsChanged.emit()
+        return row
+
     def requestAddOrderRecord(self):
         print("ui facade add order record request")
 
@@ -94,9 +107,8 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        print(dialog.getData())
-        row = 1
-        # row = self._domainModel.addOrderItem(dialog.getData())
+        row = self._domainModel.addOrderItem(dialog.getData())
+
         return row
 
     def requestEditOrderRecord(self, targetIndex: QModelIndex):
@@ -107,11 +119,7 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return
 
-        print(dialog.getData())
-
-        # self._domainModel.updateBillItem(targetIndex, self.saveDocument(dialog.getData()))
-        #
-        # self.totalsChanged.emit()
+        self._domainModel.updateOrderItem(targetIndex.row(), dialog.getData())
 
     def requestPrint(self, currentTab, totals):
         # TODO: extract methods
