@@ -70,7 +70,7 @@ class DlgBillData(QDialog):
         self.ui.comboPeriod.setCurrentText(self._domainModel.dicts["period"].getData(self._currentItem.item_shipment_time))
         self.ui.comboStatus.setCurrentText(self._domainModel.dicts["status"].getData(self._currentItem.item_status))
         self.ui.comboPriority.setCurrentText(self._domainModel.dicts["priority"].getData(self._currentItem.item_priority))
-        self.ui.dateShipment.setDate(QDate().fromString(self._currentItem.item_shipment_date, "dd.MM.yyyyy"))
+        self.ui.dateShipment.setDate(QDate().fromString(self._currentItem.item_shipment_date, "dd.MM.yyyy"))
         self.ui.comboShipment.setCurrentText(self._domainModel.dicts["shipment"].getData(self._currentItem.item_shipment_status))
         self.ui.spinWeek.setValue(self._currentItem.item_payment_week)
         self.ui.editNote.setText(self._currentItem.item_note)

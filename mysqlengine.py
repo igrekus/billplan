@@ -117,6 +117,11 @@ class MysqlEngine(QObject):
         # self.execParametrizedQuery(q, data)
 
     # domain-specific methods
+    def checkUserData(self, data):
+        print("mysql engine check user data:", data)
+        q = "CALL checkUserData(%s, %s)"
+        return self.execParametrizedQuery(q, data).fetchall()
+
     def fetchAllPlanRecrods(self):
         return self.execSimpleQuery("CALL getAllPlanRecrods()").fetchall()
 

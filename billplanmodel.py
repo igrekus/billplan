@@ -6,7 +6,7 @@ from PyQt5.QtGui import QBrush, QColor
 
 
 class BillPlanModel(QAbstractTableModel):
-    # FIXME fix all magical constants
+    # FIXME fix all magic constants
     WeekCount = 8
     ColumnId = 0
     ColumnProject = 1
@@ -145,7 +145,6 @@ class BillPlanModel(QAbstractTableModel):
         elif index.row() == self._modelDomain.planListRowCount() + 1:
 
             if role == Qt.DisplayRole:
-                # TODO: !!! total calculations !!!
                 if index.column() == self.ColumnBillCost + 1:
                     return QVariant("Итого:\n "
                                     + "{:,.2f}".format(float(self._modelDomain.getTotal(self._weeksInHeader) / 100)).replace(",", " ")

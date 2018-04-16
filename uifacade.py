@@ -1,17 +1,16 @@
+import sys
+import const
+
 from copy import deepcopy
 from datetime import datetime
-
-import os
-from PyQt5.QtGui import QBrush, QColor
-
-import const
 from billitem import BillItem
 from dlgbilldata import DlgBillData
 from dlgdicteditor import DlgDictEditor
+from dlglogin import LoginDialog
+from dlgorderdata import DlgOrderData
+from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
-
-from dlgorderdata import DlgOrderData
 
 
 class UiFacade(QObject):
@@ -39,6 +38,15 @@ class UiFacade(QObject):
 
     def setOrderModel(self, model):
         self._orderModel = model
+
+    def requestLogin(self):
+        dialog = LoginDialog(self.parent(), userModel=self._domainModel.dicts['user'], domainModel=self._domainModel)
+
+        if dialog.exec() != QDialog.Accepted:
+            return False
+
+        self._domainModel.setLoggedUser(dialog.getData())
+        return True
 
     def saveDocument(self, item: BillItem):
         ok, archivDocPath = self._archiveManager.storeDocument(item.item_doc, item.item_date)
@@ -103,7 +111,7 @@ class UiFacade(QObject):
     def requestAddOrderRecord(self):
         print("ui facade add order record request")
 
-        dialog = DlgOrderData(item=None, domainModel=self._domainModel)
+        dialog = DlgOrderData(item=None, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser)
         if dialog.exec() != QDialog.Accepted:
             return None
 
@@ -115,7 +123,7 @@ class UiFacade(QObject):
         oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
         print("ui facade edit order request:", oldItem)
 
-        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel)
+        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser)
         if dialog.exec() != QDialog.Accepted:
             return
 

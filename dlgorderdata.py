@@ -10,12 +10,12 @@ from PyQt5.QtCore import Qt, QDate
 
 class DlgOrderData(QDialog):
 
-    def __init__(self, parent=None, domainModel=None, item=None):
+    def __init__(self, parent=None, domainModel=None, item=None, loggedUser=None):
         super(DlgOrderData, self).__init__(parent)
 
-        # TODO: login system stub
-        self._activeUser = 1
-        self._approver = 4
+        self._loggedUser = loggedUser
+        self._approver = 0
+        self._notApproved = 2
 
         self.setAttribute(Qt.WA_QuitOnClose)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -78,7 +78,7 @@ class DlgOrderData(QDialog):
 
     def collectData(self):
         id_ = None
-        approved = 2
+        approved = self._notApproved
         approved_by = self._approver
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
@@ -92,7 +92,7 @@ class DlgOrderData(QDialog):
                                   date_receive=datetime.datetime.strptime(
                                       self.ui.dateReceive.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                   priority=self.ui.comboPriority.currentData(const.RoleNodeId),
-                                  user=self._activeUser,
+                                  user=self._loggedUser["id"],
                                   approved=approved,
                                   approved_by=approved_by)
 
@@ -102,12 +102,9 @@ class DlgOrderData(QDialog):
         return self._newItem
 
     def onBtnOkClicked(self):
-        try:
-            if not self.verifyInputData():
-                return
+        if not self.verifyInputData():
+            return
 
-            self.collectData()
-            self.accept()
-        except Exception as ex:
-            print(ex)
+        self.collectData()
+        self.accept()
 

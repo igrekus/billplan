@@ -16,7 +16,7 @@ class OrderItem:
         self.item_approved_by = approved_by
 
     def __str__(self):
-        return '{}(id={}, name={}, desc={}, qty={}, receive={}, prior={}, user={}, approved={}, by={}'. \
+        return '{}(id={}, name={}, desc={}, qty={}, receive={}, prior={}, user={}, approved={}, by={})'. \
             format(self.__class__
                    , self.item_id
                    , self.item_name

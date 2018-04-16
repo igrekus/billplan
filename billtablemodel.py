@@ -178,7 +178,6 @@ class BillTableModel(QAbstractTableModel):
             return self._font
 
         elif role == Qt.BackgroundRole:
-            # FIXME hardcoded ids for coloring - add color codes to SQL table?
             retcolor = Qt.white
 
             if item.item_status == 1:

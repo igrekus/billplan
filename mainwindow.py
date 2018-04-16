@@ -2,6 +2,8 @@ import os
 import subprocess
 import datetime
 import isoweek
+import sys
+
 import const
 
 from billitem import BillItem
@@ -27,7 +29,6 @@ arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состо
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        # TODO !!! use dict.get(key, default) !!!
         super(MainWindow, self).__init__(parent)
 
         self.setAttribute(Qt.WA_QuitOnClose)
@@ -118,6 +119,7 @@ class MainWindow(QMainWindow):
         self._modelBillPlan.updateHeader(index)
 
     def initApp(self):
+        # TODO: extract methods
         # init instances
         # self._persistenceEngine.initEngine(fileName="ref/1.csv")
         # self._persistenceEngine.initEngine(fileName="sqlite3.db")
@@ -125,6 +127,13 @@ class MainWindow(QMainWindow):
         self._persistenceFacade.initFacade()
         # self._uiFacade.initFacade()
         self._modelDomain.initModel()
+
+        self.show()
+        if not self._uiFacade.requestLogin():
+            sys.exit(5)
+
+        self.setWindowTitle("Планировщик счетов, пользователь: " + self._modelDomain.getLoggedUserName())
+
         self._modelDomain.buildPlanData()
         self._modelBillList.initModel()
         self._modelBillPlan.initModel()
@@ -273,6 +282,8 @@ class MainWindow(QMainWindow):
         self.ui.btnRefresh.setVisible(False)
         self.updateTotals()
 
+        self.prepareUi(self._modelDomain.getLoggedUserLevel())
+
     def initActions(self):
         self.actRefresh.setShortcut("Ctrl+R")
         self.actRefresh.setStatusTip("Обновить данные")
@@ -350,16 +361,24 @@ class MainWindow(QMainWindow):
         # elif self.ui.tabWidget.currentIndex() == 2:
         towidth = screenRect.width() - 45
         self.ui.tableOrder.setColumnWidth(0, towidth * 0.02)
-        self.ui.tableOrder.setColumnWidth(1, towidth * 0.30)
-        self.ui.tableOrder.setColumnWidth(2, towidth * 0.30)
-        self.ui.tableOrder.setColumnWidth(3, towidth * 0.04)
+        self.ui.tableOrder.setColumnWidth(1, towidth * 0.28)
+        self.ui.tableOrder.setColumnWidth(2, towidth * 0.28)
+        self.ui.tableOrder.setColumnWidth(3, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(4, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(5, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(6, towidth * 0.07)
         self.ui.tableOrder.setColumnWidth(7, towidth * 0.08)
-        self.ui.tableOrder.setColumnWidth(8, towidth * 0.04)
+        self.ui.tableOrder.setColumnWidth(8, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(9, towidth * 0.02)
 
+    def prepareUi(self, level):
+        if level == 1:
+            print("admin")
+        elif level == 2 or level == 3:
+            print("approver + user")
+            self.ui.tabWidget.setCurrentIndex(2)
+            self.ui.tabWidget.removeTab(0)
+            self.ui.tabWidget.removeTab(0)
 
     def hideBillTableColumns(self):
         # self.ui.tableBill.hideColumn(11)

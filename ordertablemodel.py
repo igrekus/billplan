@@ -34,8 +34,7 @@ class OrderTableModel(QAbstractTableModel):
         else:
             self._rightDecoration = QColor(const.COLOR_PRIORITY_MEDIUM)
 
-        # TODO: stub for login system
-        self._approverId = 4
+        self._loggedUser = None
 
         # setup signals
         # self._modelDomain.planItemsBeginInsert.connect(self.planItemsBeginInsert)
@@ -53,6 +52,7 @@ class OrderTableModel(QAbstractTableModel):
     def initModel(self):
         print("init order table model")
         self._dicts = self._modelDomain.getDicts()
+        self._loggedUser = self._modelDomain.getLoggedUser()
 
     def headerData(self, section, orientation, role=None):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole and section < len(self._header):
@@ -81,9 +81,10 @@ class OrderTableModel(QAbstractTableModel):
 
                 if value == 2:
                     itemToUpdate.item_approved = 1
-                    itemToUpdate.item_approved_by = self._approverId
+                    itemToUpdate.item_approved_by = self._loggedUser["id"]
                 elif value == 0:
                     itemToUpdate.item_approved = 2
+                    itemToUpdate.item_approved_by = 0
 
                 self._modelDomain.updateOrderItem(row, itemToUpdate)
 
@@ -113,7 +114,7 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnDescription:
                 return QVariant(item.item_descript)
             elif col == self.ColumnQuantity:
-                return QVariant(item.item_quantity)
+                return QVariant(str(item.item_quantity) + " шт./комп.")
             elif col == self.ColumnDateReceive:
                 return QVariant(item.item_date_receive.isoformat())
             elif col == self.ColumnPriority:
@@ -123,19 +124,24 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnApproved:
                 if item.item_approved == 1:
                     return QVariant(self._dicts["user"].getData(item.item_approved_by))
+            elif col == self.ColumnStatus:
+                status = self._modelDomain.getOrderStatus(item.item_id)
+                if status == 1:
+                    return QVariant("Заказано")
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnApproved:
-                if item.item_approved == 1:
-                    return QVariant(2)
-                elif item.item_approved == 2:
-                    return QVariant(0)
+                if self._loggedUser["id"] == item.item_approved_by or item.item_approved_by == 0:
+                    if item.item_approved == 1:
+                        return QVariant(2)
+                    elif item.item_approved == 2:
+                        return QVariant(0)
 
             if col == self.ColumnStatus:
                 status = self._modelDomain.getOrderStatus(item.item_id)
                 if status == 1:
                     return QVariant(2)
-                if status == 2:
+                elif status == 2:
                     return QVariant(0)
 
         elif role == Qt.BackgroundRole:
@@ -160,7 +166,7 @@ class OrderTableModel(QAbstractTableModel):
 
         return QVariant()
 
-    def flags(self, index):
+    def flags(self, index: QModelIndex):
         f = super(OrderTableModel, self).flags(index)
 
         col = index.column()

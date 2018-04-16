@@ -1,3 +1,6 @@
+import datetime
+from copy import deepcopy
+
 from billitem import BillItem
 from orderitem import OrderItem
 from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
@@ -26,6 +29,9 @@ class DomainModel(QObject):
         super(DomainModel, self).__init__(parent)
 
         self._persistenceFacade = persistenceFacade
+
+        self._loggedUser = dict()
+
         self._billData = list()
         self.dicts = dict()
 
@@ -62,6 +68,22 @@ class DomainModel(QObject):
         self._orderData = self._persistenceFacade.getOrderList()
 
         self.buildPlanData()
+
+    def checkLogin(self, userId: int, password: str):
+        print('checking', userId, password)
+        return self._persistenceFacade.checkUser(userId, password)
+
+    def setLoggedUser(self, user: dict):
+        self._loggedUser = user
+
+    def getLoggedUser(self):
+        return self._loggedUser
+
+    def getLoggedUserLevel(self):
+        return self._loggedUser["level"]
+
+    def getLoggedUserName(self):
+        return self.dicts["user"].getData(self._loggedUser["id"])
 
     def refreshPlanData(self):
         if self._rawPlanData:
@@ -105,15 +127,11 @@ class DomainModel(QObject):
         return self._orderData[index.row()]
 
     def getOrderRowById(self, order: int):
-        try:
-            for o in self._orderData:
-                if o.item_id == order:
-                    return self._orderData.index(o)
-            else:
-                return 0
-        except Exception as ex:
-            print(ex)
-        return 0
+        for o in self._orderData:
+            if o.item_id == order:
+                return self._orderData.index(o)
+        else:
+            return 0
 
     def getOrderStatus(self, order: int):
         for b in self._billData:
@@ -128,6 +146,9 @@ class DomainModel(QObject):
                 return True
         else:
             return False
+
+    def billHasOrder(self, row: int):
+        return bool(self._billData[row].item_order)
 
     def getDicts(self):
         return self.dicts
@@ -192,6 +213,18 @@ class DomainModel(QObject):
     def updateBillItem(self, index: QModelIndex, updatedItem: BillItem):
         row = index.row()
         print("domain model update bill item call, row:", row, updatedItem)
+
+        if updatedItem.item_order:
+            orderRow = self.getOrderRowById(updatedItem.item_order)
+            newOrderItem: OrderItem = deepcopy(self._orderData[orderRow])
+            print(updatedItem.item_shipment_date)
+            if isinstance(updatedItem.item_shipment_date, datetime.date):
+                newOrderItem.item_date_receive = updatedItem.item_shipment_date
+            else:
+                newOrderItem.item_date_receive = datetime.datetime.strptime(str(updatedItem.item_shipment_date), "%d.%m.%Y").date()
+            self._orderData[orderRow] = newOrderItem
+            self._persistenceFacade.updateOrderItem(newOrderItem)
+
         self._persistenceFacade.updateBillItem(updatedItem)
         self._billData[row] = updatedItem
 

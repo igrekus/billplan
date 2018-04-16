@@ -18,3 +18,7 @@ RolePriority = Qt.UserRole + 4
 RoleShipment = Qt.UserRole + 5
 RoleDate = Qt.UserRole + 6
 RoleOrderId = Qt.UserRole + 7
+
+LEVEL_USER = 1
+LEVEL_JANITOR = 2
+LEVEL_APPROVER = 3

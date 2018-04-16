@@ -15,6 +15,13 @@ class PersistenceFacade(QObject):
     def initFacade(self):
         print("init persistence facade:", self._engine._engineType)
 
+    def checkUser(self, userId: int, password: str):
+        print("persistence facade check user", userId, password)
+        res = self._engine.checkUserData((userId, password))
+        if res:
+            return True, res[0][1]
+        return False, 0
+
     def getDicts(self, dict_list: list):
         # make domain model dicts from raw SQL records
         dicts = dict()

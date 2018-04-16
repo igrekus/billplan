@@ -44,7 +44,7 @@
           <bool>true</bool>
          </property>
          <property name="suffix">
-          <string> шт.</string>
+          <string> шт./комп.</string>
          </property>
          <property name="maximum">
           <number>1000000000</number>

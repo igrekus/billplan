@@ -20,9 +20,9 @@ class DlgDictEditor(QDialog):
 
         # instance variavles
         self._modelDomain = domainModel
-        self.dictList = {0: "category",
-                         1: "vendor",
-                         2: "project"}
+        self.dictList = {0: 'category',
+                         1: 'vendor',
+                         2: 'project'}
 
         self.initDialog()
 

@@ -46,29 +46,6 @@ class BillItem:
                + "order:" + str(self.item_order) + ")"
 
     @classmethod
-    def fromRawList(cls, raw_list):
-        # TODO fixe format if needed
-        if not raw_list:
-            raise ValueError("Wrong war list.")
-
-        return cls(id_=raw_list[0]
-                   , date=raw_list[1]
-                   , name=raw_list[2]
-                   , category=raw_list[3]
-                   , vendor=raw_list[4]
-                   , cost=raw_list[5]
-                   , project=raw_list[6]
-                   , descript=raw_list[7]
-                   , shipment_time=raw_list[8]
-                   , status=raw_list[9]
-                   , priority=raw_list[10]
-                   , shipment_date="no date set"
-                   , shipment_status=raw_list[11]
-                   , payment_week=raw_list[12]
-                   , note="empty note"
-                   , doc="")
-
-    @classmethod
     def fromSqlTuple(cls, sql_tuple):
         return cls(id_=sql_tuple[0]
                    , date=sql_tuple[1]
