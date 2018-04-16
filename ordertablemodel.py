@@ -131,11 +131,12 @@ class OrderTableModel(QAbstractTableModel):
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnApproved:
-                if self._loggedUser["id"] == item.item_approved_by or item.item_approved_by == 0:
-                    if item.item_approved == 1:
-                        return QVariant(2)
-                    elif item.item_approved == 2:
-                        return QVariant(0)
+                if self._loggedUser["level"] == 1 or self._loggedUser["level"] == 2:
+                    if self._loggedUser["id"] == item.item_approved_by or item.item_approved_by == 0:
+                        if item.item_approved == 1:
+                            return QVariant(2)
+                        elif item.item_approved == 2:
+                            return QVariant(0)
 
             if col == self.ColumnStatus:
                 status = self._modelDomain.getOrderStatus(item.item_id)

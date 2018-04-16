@@ -40,11 +40,13 @@ class UiFacade(QObject):
         self._orderModel = model
 
     def requestLogin(self):
-        dialog = LoginDialog(self.parent(), userModel=self._domainModel.dicts['user'], domainModel=self._domainModel)
+        try:
+            dialog = LoginDialog(self.parent(), userModel=self._domainModel.dicts['user'], domainModel=self._domainModel)
 
-        if dialog.exec() != QDialog.Accepted:
-            return False
-
+            if dialog.exec() != QDialog.Accepted:
+                return False
+        except Exception as ex:
+            print(ex)
         self._domainModel.setLoggedUser(dialog.getData())
         return True
 
