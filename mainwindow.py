@@ -379,6 +379,9 @@ class MainWindow(QMainWindow):
             self.ui.tabWidget.setCurrentIndex(2)
             self.ui.tabWidget.removeTab(0)
             self.ui.tabWidget.removeTab(0)
+            self.ui.btnMakeBillFromOrder.hide()
+            self.ui.btnDictEditor.hide()
+            self.ui.btnPrint.hide()
 
     def hideBillTableColumns(self):
         # self.ui.tableBill.hideColumn(11)

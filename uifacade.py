@@ -113,7 +113,7 @@ class UiFacade(QObject):
     def requestAddOrderRecord(self):
         print("ui facade add order record request")
 
-        dialog = DlgOrderData(item=None, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser)
+        dialog = DlgOrderData(item=None, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
         if dialog.exec() != QDialog.Accepted:
             return None
 
@@ -125,7 +125,7 @@ class UiFacade(QObject):
         oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
         print("ui facade edit order request:", oldItem)
 
-        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser)
+        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
         if dialog.exec() != QDialog.Accepted:
             return
 

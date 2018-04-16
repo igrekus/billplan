@@ -80,10 +80,12 @@ class DlgOrderData(QDialog):
         id_ = None
         approved = self._notApproved
         approved_by = self._approver
+        user = self._loggedUser["id"]
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
             approved = self._currentItem.item_approved
             approved_by = self._currentItem.item_approved_by
+            user = self._currentItem.item_user
 
         self._newItem = OrderItem(id_=id_,
                                   name=self.ui.editName.text(),
@@ -92,7 +94,7 @@ class DlgOrderData(QDialog):
                                   date_receive=datetime.datetime.strptime(
                                       self.ui.dateReceive.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                   priority=self.ui.comboPriority.currentData(const.RoleNodeId),
-                                  user=self._loggedUser["id"],
+                                  user=user,
                                   approved=approved,
                                   approved_by=approved_by)
 
@@ -104,7 +106,6 @@ class DlgOrderData(QDialog):
     def onBtnOkClicked(self):
         if not self.verifyInputData():
             return
-
         self.collectData()
         self.accept()
 
