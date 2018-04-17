@@ -19,6 +19,8 @@ class OrderTableModel(QAbstractTableModel):
     ColumnBill = 9
     ColumnCount = 10
 
+    ColumnsToAlign = (ColumnQuantity, ColumnDateReceive, ColumnPriority, ColumnUser)
+
     _header = ["№", "Наименование", "Описание", "Кол-во", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт"]
 
     def __init__(self, parent=None, domainModel=None, rightIcon=None):
@@ -128,6 +130,8 @@ class OrderTableModel(QAbstractTableModel):
                 status = self._modelDomain.getOrderStatus(item.item_id)
                 if status == 1:
                     return QVariant("Заказано")
+                else:
+                    return QVariant("Не заказано")
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnApproved:
@@ -156,6 +160,10 @@ class OrderTableModel(QAbstractTableModel):
                     retcolor = self._priorityColors[item.item_priority]
 
             return QVariant(QBrush(QColor(retcolor)))
+
+        elif role == Qt.TextAlignmentRole:
+            if col in self.ColumnsToAlign:
+                return QVariant(Qt.AlignCenter)
 
         elif role == Qt.DecorationRole:
             if col == self.ColumnBill:

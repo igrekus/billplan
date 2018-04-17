@@ -69,6 +69,14 @@ class DomainModel(QObject):
 
         self.buildPlanData()
 
+    def clearModel(self):
+        print("clearing domain model")
+        self.dicts.clear()
+        self._billData.clear()
+        self._rawPlanData.clear()
+        self._orderData.clear()
+
+
     def checkLogin(self, userId: int, password: str):
         print('checking', userId, password)
         return self._persistenceFacade.checkUser(userId, password)
