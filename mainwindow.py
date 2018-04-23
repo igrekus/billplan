@@ -21,7 +21,7 @@ from uifacade import UiFacade
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QApplication, QTableView
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex, pyqtSignal
 
 # arc_path = 'd:\\!archive'
 arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
@@ -262,6 +262,14 @@ class MainWindow(QMainWindow):
         self.ui.tableOrder.doubleClicked.connect(self.onTableOrderDoubleClicked)
         self.ui.tableOrder.clicked.connect(self.onTableOrderClicked)
         self.ui.tabWidget.currentChanged.connect(self.onTabBarCurrentChanged)
+
+        # model signals
+        self._modelDomain.beginClearModel.connect(self._modelBillList.beginClearModel)
+        self._modelDomain.beginClearModel.connect(self._modelBillPlan.beginClearModel)
+        self._modelDomain.beginClearModel.connect(self._modelOrderList.beginClearModel)
+        self._modelDomain.endClearModel.connect(self._modelBillList.endClearModel)
+        self._modelDomain.endClearModel.connect(self._modelBillPlan.endClearModel)
+        self._modelDomain.endClearModel.connect(self._modelOrderList.endClearModel)
 
         # totals update
         self._uiFacade.totalsChanged.connect(self.updateTotals)

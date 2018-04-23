@@ -234,3 +234,12 @@ class BillPlanModel(QAbstractTableModel):
     @pyqtSlot()
     def planItemsEndRemove(self):
         self.endRemoveRows()
+
+    @pyqtSlot()
+    def beginClearModel(self):
+        self.beginResetModel()
+
+    @pyqtSlot()
+    def endClearModel(self):
+        self.endResetModel()
+

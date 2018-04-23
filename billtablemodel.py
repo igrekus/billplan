@@ -238,3 +238,12 @@ class BillTableModel(QAbstractTableModel):
         self.beginRemoveRows(QModelIndex(), first, last)
         # print("table model slot:", first, last)
         self.endRemoveRows()
+
+    @pyqtSlot()
+    def beginClearModel(self):
+        self.beginResetModel()
+
+    @pyqtSlot()
+    def endClearModel(self):
+        self.endResetModel()
+

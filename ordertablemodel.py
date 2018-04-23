@@ -43,7 +43,7 @@ class OrderTableModel(QAbstractTableModel):
         # self._modelDomain.planItemsEndInsert.connect(self.planItemsEndInsert)
         # self._modelDomain.planItemsBeginRemove.connect(self.planItemsBeginRemove)
         # self._modelDomain.planItemsEndRemove.connect(self.planItemsEndRemove)
-        self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
+        # self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
 
     def clear(self):
         pass
@@ -207,4 +207,12 @@ class OrderTableModel(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), first, last)
         # print("table model slot:", first, last)
         self.endInsertRows()
+
+    @pyqtSlot()
+    def beginClearModel(self):
+        self.beginResetModel()
+
+    @pyqtSlot()
+    def endClearModel(self):
+        self.endResetModel()
 

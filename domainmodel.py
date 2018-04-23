@@ -25,6 +25,9 @@ class DomainModel(QObject):
 
     orderItemsInserted = pyqtSignal(int, int)
 
+    beginClearModel = pyqtSignal()
+    endClearModel = pyqtSignal()
+
     def __init__(self, parent=None, persistenceFacade=None):
         super(DomainModel, self).__init__(parent)
 
@@ -58,6 +61,7 @@ class DomainModel(QObject):
 
     def initModel(self):
         print("init domain model")
+        self.beginClearModel.emit()
 
         self.dicts = self._persistenceFacade.getDicts(self.dict_list)
 
@@ -68,6 +72,8 @@ class DomainModel(QObject):
         self._orderData = self._persistenceFacade.getOrderList()
 
         self.buildPlanData()
+
+        self.endClearModel.emit()
 
     def clearModel(self):
         print("clearing domain model")
