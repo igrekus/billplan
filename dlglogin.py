@@ -29,7 +29,7 @@ class LoginDialog(QDialog):
         self.ui.comboLogin.setModel(self._userModel)
         self.ui.comboLogin.setCurrentIndex(1)
         self.ui.comboLogin.view().setRowHidden(0, True)
-        self.ui.editPass.setFocus()
+        self.ui.comboLogin.setFocus()
 
     def onInputComplete(self):
         userId = self.ui.comboLogin.currentData(const.RoleNodeId)
@@ -43,8 +43,7 @@ class LoginDialog(QDialog):
             self.ui.editPass.selectAll()
             return
 
-
-        self._loggedUser = {"id": userId, "level": level}
+        self._loggedUser = {"id": userId, "level": level, "login": self.ui.comboLogin.currentText()}
         self.accept()
 
     def getData(self):

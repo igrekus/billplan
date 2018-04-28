@@ -4,7 +4,7 @@ import datetime
 class OrderItem:
     # TODO make properties
     def __init__(self, id_=None, name=None, descript=None, qty=None, date_receive=None, priority=None, user=None,
-                 approved=None, approved_by=None):
+                 approved=None, approved_by=None, cost=None, document=None, date=None):
         self.item_id = id_
         self.item_name = name
         self.item_descript = descript
@@ -14,9 +14,12 @@ class OrderItem:
         self.item_user = user
         self.item_approved = approved
         self.item_approved_by = approved_by
+        self.item_cost = cost
+        self.item_document = document
+        self.item_date = date
 
     def __str__(self):
-        return '{}(id={}, name={}, desc={}, qty={}, receive={}, prior={}, user={}, approved={}, by={})'. \
+        return '{}(id={} name={} desc={} qty={} receive={} prior={} user={} appr={} by={} cost={} doc={} date={})'. \
             format(self.__class__
                    , self.item_id
                    , self.item_name
@@ -26,7 +29,10 @@ class OrderItem:
                    , self.item_priority
                    , self.item_user
                    , self.item_approved
-                   , self.item_approved_by)
+                   , self.item_approved_by
+                   , self.item_cost
+                   , self.item_document
+                   , self.item_date)
 
     @classmethod
     def fromSqlTuple(cls, sql_tuple):
@@ -38,7 +44,10 @@ class OrderItem:
                    priority=sql_tuple[5],
                    user=sql_tuple[6],
                    approved=sql_tuple[7],
-                   approved_by=sql_tuple[8])
+                   approved_by=sql_tuple[8],
+                   cost=sql_tuple[9],
+                   document=sql_tuple[10],
+                   date=sql_tuple[11])
 
     def toTuple(self):
         def formatDate(indate):
@@ -54,5 +63,7 @@ class OrderItem:
                          , self.item_user
                          , self.item_approved
                          , self.item_approved_by
+                         , self.item_cost
+                         , self.item_document
                          , self.item_id])
 

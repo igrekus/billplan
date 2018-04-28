@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QItemSelectionModel, QDate, pyqtSlot, QModelIndex, pyqtSignal
 
 # arc_path = 'd:\\!archive'
-arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Счета'
+arc_path = '\\\\10.10.15.4\FreeShare\Чупрунов Алексей\!Состояние счетов\Документы'
 
 
 class MainWindow(QMainWindow):
@@ -76,6 +76,7 @@ class MainWindow(QMainWindow):
 
         # orders + search proxy
         self._modelOrderList = OrderTableModel(parent=self, domainModel=self._modelDomain,
+                                               docIcon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22),
                                                rightIcon=QPixmap("./icons/right.png", "PNG").scaled(22, 22))
         self._modelOrderSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelOrderSearchProxy.setSourceModel(self._modelOrderList)
@@ -369,15 +370,17 @@ class MainWindow(QMainWindow):
         # elif self.ui.tabWidget.currentIndex() == 2:
         towidth = screenRect.width() - 45
         self.ui.tableOrder.setColumnWidth(0, towidth * 0.02)
-        self.ui.tableOrder.setColumnWidth(1, towidth * 0.26)
-        self.ui.tableOrder.setColumnWidth(2, towidth * 0.28)
+        self.ui.tableOrder.setColumnWidth(1, towidth * 0.24)
+        self.ui.tableOrder.setColumnWidth(2, towidth * 0.23)
         self.ui.tableOrder.setColumnWidth(3, towidth * 0.06)
-        self.ui.tableOrder.setColumnWidth(4, towidth * 0.06)
+        self.ui.tableOrder.setColumnWidth(4, towidth * 0.05)
         self.ui.tableOrder.setColumnWidth(5, towidth * 0.06)
-        self.ui.tableOrder.setColumnWidth(6, towidth * 0.07)
-        self.ui.tableOrder.setColumnWidth(7, towidth * 0.08)
+        self.ui.tableOrder.setColumnWidth(6, towidth * 0.06)
+        self.ui.tableOrder.setColumnWidth(7, towidth * 0.07)
         self.ui.tableOrder.setColumnWidth(8, towidth * 0.08)
-        self.ui.tableOrder.setColumnWidth(9, towidth * 0.02)
+        self.ui.tableOrder.setColumnWidth(9, towidth * 0.08)
+        self.ui.tableOrder.setColumnWidth(10, towidth * 0.02)
+        self.ui.tableOrder.setColumnWidth(11, towidth * 0.02)
 
     def prepareUi(self, level):
         if level == 1:
@@ -400,6 +403,9 @@ class MainWindow(QMainWindow):
     def hideBillTableColumns(self):
         # self.ui.tableBill.hideColumn(11)
         self.ui.tableBill.hideColumn(14)
+
+    def hideOrderTableColumns(self):
+        self.ui.tableOrder.hideColumn(3)
 
     # ui events
     def onBtnRefreshClicked(self):
@@ -456,6 +462,10 @@ class MainWindow(QMainWindow):
                 rowToSelect = self._modelBillList.getRowById(billId)
                 indexToSelect = self._modelBillSearchProxy.mapFromSource(self._modelBillList.index(rowToSelect, 0, QModelIndex()))
                 self.ui.tableBill.selectRow(indexToSelect.row())
+        if col == self._modelOrderList.ColumnDoc:
+            doc = index.data(Qt.EditRole)
+            if doc:
+                subprocess.Popen(r'explorer /select,"' + index.data(Qt.EditRole).replace("/", "\\") + '"')
 
     def onTableOrderDoubleClicked(self, index):
         self.actEditOrderRecord.trigger()
@@ -496,6 +506,8 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.resizeRowsToContents()
         self.ui.tablePlan.resizeRowsToContents()
         self.ui.tableOrder.resizeRowsToContents()
+        self.hideBillTableColumns()
+        self.hideOrderTableColumns()
 
     def procActAddBillRecord(self):
         row = self._uiFacade.requestAddBillRecord()
@@ -577,6 +589,7 @@ class MainWindow(QMainWindow):
         # self._modelPlanSearchProxy.invalidate()
 
         self.hideBillTableColumns()
+        self.hideOrderTableColumns()
         self.refreshView()
 
     def procActOpenDictEditor(self):

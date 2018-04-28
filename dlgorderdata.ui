@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
@@ -66,14 +66,62 @@
         </widget>
        </item>
        <item row="3" column="0">
+        <widget class="QLabel" name="lblCost">
+         <property name="text">
+          <string>Сумма:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="spinCost">
+         <property name="suffix">
+          <string> руб.</string>
+         </property>
+         <property name="maximum">
+          <double>100000000000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
         <widget class="QLabel" name="lblPriority">
          <property name="text">
           <string>Приоритет:</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="4" column="1">
         <widget class="QComboBox" name="comboPriority"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblUser">
+         <property name="text">
+          <string>Заказчик:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="comboUser"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="lblDocumnt">
+         <property name="text">
+          <string>Документ:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLineEdit" name="editDocument"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnAddDocument">
+           <property name="text">
+            <string>Открыть...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>

@@ -11,19 +11,21 @@ class OrderTableModel(QAbstractTableModel):
     ColumnName = 1
     ColumnDescription = 2
     ColumnQuantity = 3
-    ColumnDateReceive = 4
-    ColumnPriority = 5
-    ColumnUser = 6
-    ColumnApproved = 7
-    ColumnStatus = 8
-    ColumnBill = 9
-    ColumnCount = 10
+    ColumnCost = 4
+    ColumnDateReceive = 5
+    ColumnPriority = 6
+    ColumnUser = 7
+    ColumnApproved = 8
+    ColumnStatus = 9
+    ColumnBill = 10
+    ColumnDoc = 11
+    ColumnCount = 12
 
     ColumnsToAlign = (ColumnQuantity, ColumnDateReceive, ColumnPriority, ColumnUser)
 
-    _header = ["№", "Наименование", "Описание", "Кол-во", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт"]
+    _header = ["№", "Наименование", "Описание", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Док."]
 
-    def __init__(self, parent=None, domainModel=None, rightIcon=None):
+    def __init__(self, parent=None, domainModel=None, rightIcon=None, docIcon=None):
         super(OrderTableModel, self).__init__(parent)
 
         self._modelDomain = domainModel
@@ -35,6 +37,11 @@ class OrderTableModel(QAbstractTableModel):
             self._rightDecoration = rightIcon
         else:
             self._rightDecoration = QColor(const.COLOR_PRIORITY_MEDIUM)
+
+        if docIcon is not None:
+            self._docDecoration = docIcon
+        else:
+            self._docDecoration = QColor(const.COLOR_PRIORITY_MEDIUM)
 
         self._loggedUser = None
 
@@ -117,6 +124,8 @@ class OrderTableModel(QAbstractTableModel):
                 return QVariant(item.item_descript)
             elif col == self.ColumnQuantity:
                 return QVariant(str(item.item_quantity) + " шт./комп.")
+            elif col == self.ColumnCost:
+                return QVariant(f"{float(item.item_cost/100):,.2f}".replace(",", " "))
             elif col == self.ColumnDateReceive:
                 return QVariant(item.item_date_receive.isoformat())
             elif col == self.ColumnPriority:
@@ -132,6 +141,10 @@ class OrderTableModel(QAbstractTableModel):
                     return QVariant("Заказано")
                 else:
                     return QVariant("Не заказано")
+
+        elif role == Qt.EditRole:
+            if col == self.ColumnDoc:
+                return QVariant(item.item_document)
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnApproved:
@@ -169,6 +182,9 @@ class OrderTableModel(QAbstractTableModel):
             if col == self.ColumnBill:
                 if self._modelDomain.orderHasBill(item.item_id):
                     return self._rightDecoration
+            elif col == self.ColumnDoc:
+                if item.item_document:
+                    return self._docDecoration
 
         elif role == const.RoleNodeId:
             return QVariant(item.item_id)
@@ -178,9 +194,16 @@ class OrderTableModel(QAbstractTableModel):
     def flags(self, index: QModelIndex):
         f = super(OrderTableModel, self).flags(index)
 
+        row = index.row()
         col = index.column()
-        if col == self.ColumnStatus or col == self.ColumnApproved:
+        if col == self.ColumnStatus:
             f = f | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
+        elif col == self.ColumnApproved:
+            item: OrderItem = self._modelDomain.getOrderItemAtRow(row)
+            if item.item_cost > 0:
+                f = f | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
+        # self.dataChanged.emit(self.index(row, 0, QModelIndex()),
+        #                       self.index(row, self.ColumnCount - 1, QModelIndex()), [])
         return f
 
     def getRowById(self, id_):

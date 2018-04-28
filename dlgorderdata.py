@@ -38,24 +38,41 @@ class DlgOrderData(QDialog):
 
     def initDialog(self):
         self.ui.comboPriority.setModel(self._domainModel.dicts["priority"])
+        self.ui.comboPriority.view().setRowHidden(0, True)
         self.ui.comboPriority.view().setRowHidden(3, True)
+
+        self.ui.comboUser.setModel(self._domainModel.dicts["user"])
+        self.ui.comboUser.view().setRowHidden(0, True)
 
         # setup signals
         self.ui.btnOk.clicked.connect(self.onBtnOkClicked)
+        self.ui.btnAddDocument.clicked.connect(self.onBtnAddDocumentClicked)
+
+        if self._loggedUser["level"] != 1:
+            self.ui.lblUser.hide()
+            self.ui.comboUser.hide()
+            self.ui.lblCost.hide()
+            self.ui.spinCost.hide()
 
     def updateWidgets(self):
         self.ui.editName.setText(self._currentItem.item_name)
         self.ui.spinQuantity.setValue(self._currentItem.item_quantity)
         self.ui.dateReceive.setDate(QDate().fromString(self._currentItem.item_date_receive.isoformat(), "yyyy-MM-dd"))
+        self.ui.spinCost.setValue(float(self._currentItem.item_cost)/100)
         self.ui.comboPriority.setCurrentText(self._domainModel.dicts["priority"].getData(self._currentItem.item_priority))
+        self.ui.comboUser.setCurrentText(self._domainModel.dicts["user"].getData(self._currentItem.item_user))
         self.ui.textDescript.setPlainText(self._currentItem.item_descript)
+        self.ui.editDocument.setText(self._currentItem.item_document)
 
     def resetWidgets(self):
         self.ui.editName.setText("")
         self.ui.spinQuantity.setValue(0)
         self.ui.dateReceive.setDate(QDate().currentDate())
+        self.ui.spinCost.setValue(0)
         self.ui.comboPriority.setCurrentIndex(4)
+        self.ui.comboUser.setCurrentText(self._loggedUser["login"])
         self.ui.textDescript.setPlainText("")
+        self.ui.editDocument.setText("")
 
     def verifyInputData(self):
         if not self.ui.editName.text():
@@ -66,8 +83,12 @@ class DlgOrderData(QDialog):
             QMessageBox.information(self, "Ошибка", "Введите количество.")
             return False
 
-        if self.ui.comboPriority.currentData(const.RoleNodeId) == 0:
+        if self.ui.comboPriority.currentData(const.RoleNodeId) in [0, 1]:
             QMessageBox.information(self, "Ошибка", "Выберите приоритет.")
+            return False
+
+        if self.ui.comboUser.currentData(const.RoleNodeId) == 0:
+            QMessageBox.information(self, "Ошибка", "Выберите заказчика.")
             return False
 
         if not self.ui.textDescript.toPlainText():
@@ -80,12 +101,12 @@ class DlgOrderData(QDialog):
         id_ = None
         approved = self._notApproved
         approved_by = self._approver
-        user = self._loggedUser["id"]
+        date_ = datetime.datetime.now().date()
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
             approved = self._currentItem.item_approved
             approved_by = self._currentItem.item_approved_by
-            user = self._currentItem.item_user
+            date_ = self._currentItem.item_date
 
         self._newItem = OrderItem(id_=id_,
                                   name=self.ui.editName.text(),
@@ -94,9 +115,12 @@ class DlgOrderData(QDialog):
                                   date_receive=datetime.datetime.strptime(
                                       self.ui.dateReceive.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                   priority=self.ui.comboPriority.currentData(const.RoleNodeId),
-                                  user=user,
+                                  user=self.ui.comboUser.currentData(const.RoleNodeId),
                                   approved=approved,
-                                  approved_by=approved_by)
+                                  approved_by=approved_by,
+                                  cost=int(self.ui.spinCost.value()*100),
+                                  document=self.ui.editDocument.text(),
+                                  date=date_)
 
         # TODO verify data change, reject dialog if not changed
 
@@ -108,4 +132,8 @@ class DlgOrderData(QDialog):
             return
         self.collectData()
         self.accept()
+
+    def onBtnAddDocumentClicked(self):
+        fileName = QFileDialog.getOpenFileName(self, "Выбрать документ", "./", "Все файлы (*)")
+        self.ui.editDocument.setText(fileName[0])
 

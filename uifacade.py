@@ -12,6 +12,8 @@ from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
+from orderitem import OrderItem
+
 
 class UiFacade(QObject):
 
@@ -50,12 +52,20 @@ class UiFacade(QObject):
         self._domainModel.setLoggedUser(dialog.getData())
         return True
 
-    def saveDocument(self, item: BillItem):
-        ok, archivDocPath = self._archiveManager.storeDocument(item.item_doc, item.item_date)
+    def saveBillDocument(self, item: BillItem):
+        ok, arcBillPath = self._archiveManager.storeBillDocument(item.item_doc, item.item_date)
         if not ok:
             QMessageBox.warning(self.parent(), "Ощибка", "Ошибка при сохранении документа.")
         newItem = deepcopy(item)
-        newItem.item_doc = archivDocPath
+        newItem.item_doc = arcBillPath
+        return newItem
+
+    def saveOrderDocument(self, item: OrderItem):
+        ok, arcOrderPath = self._archiveManager.storeOrderDocument(item.item_document, item.item_date)
+        if not ok:
+            QMessageBox.warning(self.parent(), "Ощибка", "Ошибка при сохранении документа.")
+        newItem = deepcopy(item)
+        newItem.item_document = arcOrderPath
         return newItem
 
     # process ui requests
@@ -70,7 +80,7 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        row = self._domainModel.addBillItem(self.saveDocument(dialog.getData()))
+        row = self._domainModel.addBillItem(self.saveBillDocument(dialog.getData()))
 
         self.totalsChanged.emit()
         return row
@@ -83,7 +93,7 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return
 
-        self._domainModel.updateBillItem(targetIndex, self.saveDocument(dialog.getData()))
+        self._domainModel.updateBillItem(targetIndex, self.saveBillDocument(dialog.getData()))
 
         self.totalsChanged.emit()
 
@@ -105,7 +115,7 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        row = self._domainModel.addBillItem(self.saveDocument(dialog.getData()))
+        row = self._domainModel.addBillItem(self.saveBillDocument(dialog.getData()))
 
         self.totalsChanged.emit()
         return row
@@ -117,22 +127,24 @@ class UiFacade(QObject):
         if dialog.exec() != QDialog.Accepted:
             return None
 
-        row = self._domainModel.addOrderItem(dialog.getData())
+        row = self._domainModel.addOrderItem(self.saveOrderDocument(dialog.getData()))
 
         return row
 
     def requestEditOrderRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
         print("ui facade edit order request:", oldItem)
+        try:
+            dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
+            if dialog.exec() != QDialog.Accepted:
+                return
 
-        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
-        if dialog.exec() != QDialog.Accepted:
-            return
-
-        self._domainModel.updateOrderItem(targetIndex.row(), dialog.getData())
+            self._domainModel.updateOrderItem(targetIndex.row(), self.saveOrderDocument(dialog.getData()))
+        except Exception as ex:
+            print(ex)
 
     def requestPrint(self, currentTab, totals):
-        # TODO: extract methods
+        # TODO: should UI facade be responsible for forming the report data stream?
         print("ui facade print request")
         title = None
         data = list()
@@ -158,8 +170,8 @@ class UiFacade(QObject):
                 data.append(d)
                 color.append(c)
 
+            labels = ["Оплачено:", "Осталось:", "Всего:"]
             for i in range(3):
-                labels = ["Оплачено:", "Осталось:", "Всего:"]
                 cols = [QBrush(QColor(const.COLOR_PAYMENT_FINISHED)),
                         QBrush(QColor(const.COLOR_PAYMENT_PENDING)),
                         None]

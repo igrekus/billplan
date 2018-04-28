@@ -119,14 +119,14 @@ class MysqlEngine(QObject):
     # domain-specific methods
     def checkUserData(self, data):
         print("mysql engine check user data:", data)
-        q = "CALL checkUserData(%s, %s)"
+        q = "CALL _checkUserData(%s, %s)"
         return self.execParametrizedQuery(q, data).fetchall()
 
     def fetchAllPlanRecrods(self):
         return self.execSimpleQuery("CALL getAllPlanRecrods()").fetchall()
 
     def insertOrderRecord(self, data):
-        q = "CALL insertOrderRecord(%s, %s, %s, %s, %s, %s, %s, %s)"
+        q = "CALL insertOrderRecord(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         print(q, data[:-1])
         cursor = self.execParametrizedQuery(q, data[:-1])
         rec_id = cursor.fetchone()[0]
@@ -146,7 +146,7 @@ class MysqlEngine(QObject):
 
     def updateOrderData(self, data):
         print("mysql engine update order data:", data)
-        q = "CALL updateOrderData(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        q = "CALL updateOrderData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         # print(q, data)
         try:
             self.execParametrizedQuery(q, data)
