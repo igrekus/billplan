@@ -135,6 +135,9 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnApproved:
                 if item.item_approved == 1:
                     return QVariant(self._dicts["user"].getData(item.item_approved_by))
+                if item.item_cost == 0:
+                    return QVariant("Нет суммы")
+
             elif col == self.ColumnStatus:
                 status = self._modelDomain.getOrderStatus(item.item_id)
                 if status == 1:
@@ -150,25 +153,25 @@ class OrderTableModel(QAbstractTableModel):
             if col == self.ColumnApproved:
                 if self._loggedUser["level"] == 1 or self._loggedUser["level"] == 2:
                     if self._loggedUser["id"] == item.item_approved_by or item.item_approved_by == 0:
-                        if item.item_approved == 1:
-                            return QVariant(2)
-                        elif item.item_approved == 2:
-                            return QVariant(0)
+                        if item.item_cost > 0:
+                            if item.item_approved == 1:
+                                return QVariant(2)
+                            elif item.item_approved == 2:
+                                return QVariant(0)
 
-            if col == self.ColumnStatus:
-                status = self._modelDomain.getOrderStatus(item.item_id)
-                if status == 1:
-                    return QVariant(2)
-                elif status == 2:
-                    return QVariant(0)
+            # elif col == self.ColumnStatus:
+            #     status = self._modelDomain.getOrderStatus(item.item_id)
+            #     if status == 1:
+            #         return QVariant(2)
+            #     elif status == 2:
+            #         return QVariant(0)
 
         elif role == Qt.BackgroundRole:
             retcolor = Qt.white
             status = self._modelDomain.getOrderStatus(item.item_id)
             if status == 1:
                 retcolor = const.COLOR_PAYMENT_FINISHED
-
-            if status == 2:
+            else:
                 if col == self.ColumnPriority:
                     retcolor = self._priorityColors[item.item_priority]
 
@@ -196,14 +199,12 @@ class OrderTableModel(QAbstractTableModel):
 
         row = index.row()
         col = index.column()
-        if col == self.ColumnStatus:
-            f = f | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
-        elif col == self.ColumnApproved:
+        # if col == self.ColumnStatus:
+        #     f = f | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
+        if col == self.ColumnApproved:
             item: OrderItem = self._modelDomain.getOrderItemAtRow(row)
             if item.item_cost > 0:
                 f = f | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled
-        # self.dataChanged.emit(self.index(row, 0, QModelIndex()),
-        #                       self.index(row, self.ColumnCount - 1, QModelIndex()), [])
         return f
 
     def getRowById(self, id_):

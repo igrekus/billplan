@@ -495,7 +495,16 @@ class MainWindow(QMainWindow):
     def procActRefresh(self):
         print("act refresh trigger")
 
+        try:
+            if self._modelDomain.savePlanData():
+                print("plan data saved")
+            else:
+                QMessageBox.information(self, "Ошибка", "Ошибка подключения к БД при попытке отбновления данных.\nОбратитесь к разработчику.")
+        except Exception as ex:
+            print(ex)
+
         self._modelDomain.clearModel()
+
         self._modelDomain.initModel()
         self._modelBillList.initModel()
         self._modelBillPlan.initModel()
