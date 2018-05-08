@@ -13,12 +13,12 @@ class DlgOrderData(QDialog):
     def __init__(self, parent=None, domainModel=None, item=None, loggedUser=None):
         super(DlgOrderData, self).__init__(parent)
 
+        self.setAttribute(Qt.WA_QuitOnClose)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
         self._loggedUser = loggedUser
         self._approver = 0
         self._notApproved = 2
-
-        self.setAttribute(Qt.WA_QuitOnClose)
-        self.setAttribute(Qt.WA_DeleteOnClose)
 
         # create instance variables
         # ui
@@ -55,17 +55,17 @@ class DlgOrderData(QDialog):
             self.ui.spinCost.hide()
 
     def updateWidgets(self):
-        self.ui.editName.setText(self._currentItem.item_name)
+        self.ui.textReason.setPlainText(self._currentItem.item_descript)
         self.ui.spinQuantity.setValue(self._currentItem.item_quantity)
         self.ui.dateReceive.setDate(QDate().fromString(self._currentItem.item_date_receive.isoformat(), "yyyy-MM-dd"))
         self.ui.spinCost.setValue(float(self._currentItem.item_cost)/100)
         self.ui.comboPriority.setCurrentText(self._domainModel.dicts["priority"].getData(self._currentItem.item_priority))
         self.ui.comboUser.setCurrentText(self._domainModel.dicts["user"].getData(self._currentItem.item_user))
-        self.ui.textDescript.setPlainText(self._currentItem.item_descript)
+        self.ui.textDescript.setPlainText(self._currentItem.item_name)
         self.ui.editDocument.setText(self._currentItem.item_document)
 
     def resetWidgets(self):
-        self.ui.editName.setText("")
+        self.ui.textReason.setPlainText("")
         self.ui.spinQuantity.setValue(0)
         self.ui.dateReceive.setDate(QDate().currentDate())
         self.ui.spinCost.setValue(0)
@@ -75,8 +75,8 @@ class DlgOrderData(QDialog):
         self.ui.editDocument.setText("")
 
     def verifyInputData(self):
-        if not self.ui.editName.text():
-            QMessageBox.information(self, "Ошибка", "Введите наименование заказа.")
+        if not self.ui.textReason.toPlainText():
+            QMessageBox.information(self, "Ошибка", "Введите описание заказа.")
             return False
 
         if self.ui.spinQuantity.value == 0:
@@ -92,7 +92,7 @@ class DlgOrderData(QDialog):
             return False
 
         if not self.ui.textDescript.toPlainText():
-            QMessageBox.information(self, "Ошибка", "Введите описание.")
+            QMessageBox.information(self, "Ошибка", "Введите назначение заказа.")
             return False
 
         return True
@@ -109,8 +109,8 @@ class DlgOrderData(QDialog):
             date_ = self._currentItem.item_date
 
         self._newItem = OrderItem(id_=id_,
-                                  name=self.ui.editName.text(),
-                                  descript=self.ui.textDescript.toPlainText(),
+                                  name=self.ui.textDescript.toPlainText(),
+                                  descript=self.ui.textReason.toPlainText(),
                                   qty=self.ui.spinQuantity.value(),
                                   date_receive=datetime.datetime.strptime(
                                       self.ui.dateReceive.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),

@@ -132,7 +132,6 @@ class MysqlEngine(QObject):
         rec_id = cursor.fetchone()[0]
         return rec_id
 
-
     def updatePlanData(self, data):
         # TODO error handling
         print("mysql engine update plan data...", data)
@@ -148,8 +147,9 @@ class MysqlEngine(QObject):
         print("mysql engine update order data:", data)
         q = "CALL updateOrderData(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         # print(q, data)
-        try:
-            self.execParametrizedQuery(q, data)
-        except Exception as ex:
-            print(ex)
+        self.execParametrizedQuery(q, data)
 
+    def fetchBillStats(self):
+        print("mysql engine get bill stats")
+        q = "CALL getBillStats()"
+        return self.execSimpleQuery(q).fetchall()

@@ -23,7 +23,7 @@ class OrderTableModel(QAbstractTableModel):
 
     ColumnsToAlign = (ColumnQuantity, ColumnDateReceive, ColumnPriority, ColumnUser)
 
-    _header = ["№", "Наименование", "Описание", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Док."]
+    _header = ["№", "Описание", "Назначение", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Док."]
 
     def __init__(self, parent=None, domainModel=None, rightIcon=None, docIcon=None):
         super(OrderTableModel, self).__init__(parent)
@@ -131,7 +131,9 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnPriority:
                 return QVariant(self._dicts["priority"].getData(item.item_priority))
             elif col == self.ColumnUser:
-                return QVariant(self._dicts["user"].getData(item.item_user))
+                user = self._dicts["user"].getData(item.item_user)
+                if user:
+                    return QVariant(user)
             elif col == self.ColumnApproved:
                 if item.item_approved == 1:
                     return QVariant(self._dicts["user"].getData(item.item_approved_by))

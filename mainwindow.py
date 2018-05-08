@@ -97,6 +97,7 @@ class MainWindow(QMainWindow):
         self.actMakeBillFromOrder = QAction("Создать счёт...", self)
         self.actAddOrderRecord = QAction("Добавить заказ...", self)
         self.actEditOrderRecord = QAction("Изменить заказ...", self)
+        self.actViewBillStats = QAction("Статистика по счетам...", self)
 
     def buildWeekSelectionCombo(self):
         # TODO if more settings is needed, move all settings-related code to a separate class
@@ -256,6 +257,7 @@ class MainWindow(QMainWindow):
         self.ui.btnMakeBillFromOrder.clicked.connect(self.onBtnMakeBillFromOrderClicked)
         self.ui.btnAddOrder.clicked.connect(self.onBtnAddOrderClicked)
         self.ui.btnEditOrder.clicked.connect(self.onBtnEditOrderClicked)
+        self.ui.btnBillStats.clicked.connect(self.onBtnBillStatsClicked)
 
         # table widgets
         self.ui.tableBill.doubleClicked.connect(self.onTableBillDoubleClicked)
@@ -325,6 +327,8 @@ class MainWindow(QMainWindow):
         self.actEditOrderRecord.setStatusTip("Изменить заказ")
         self.actEditOrderRecord.triggered.connect(self.procActEditOrderRecord)
 
+        self.actViewBillStats.setStatusTip("Посмотреть статистику по счетам...")
+        self.actViewBillStats.triggered.connect(self.procActViewBillStats)
 
     def refreshView(self):
         screenRect = QApplication.desktop().screenGeometry()
@@ -370,17 +374,17 @@ class MainWindow(QMainWindow):
         # elif self.ui.tabWidget.currentIndex() == 2:
         towidth = screenRect.width() - 45
         self.ui.tableOrder.setColumnWidth(0, towidth * 0.02)
-        self.ui.tableOrder.setColumnWidth(1, towidth * 0.24)
-        self.ui.tableOrder.setColumnWidth(2, towidth * 0.23)
+        self.ui.tableOrder.setColumnWidth(1, towidth * 0.30)
+        self.ui.tableOrder.setColumnWidth(2, towidth * 0.20)
         self.ui.tableOrder.setColumnWidth(3, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(4, towidth * 0.05)
         self.ui.tableOrder.setColumnWidth(5, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(6, towidth * 0.06)
         self.ui.tableOrder.setColumnWidth(7, towidth * 0.07)
-        self.ui.tableOrder.setColumnWidth(8, towidth * 0.08)
-        self.ui.tableOrder.setColumnWidth(9, towidth * 0.08)
+        self.ui.tableOrder.setColumnWidth(8, towidth * 0.07)
+        self.ui.tableOrder.setColumnWidth(9, towidth * 0.07)
         self.ui.tableOrder.setColumnWidth(10, towidth * 0.02)
-        self.ui.tableOrder.setColumnWidth(11, towidth * 0.02)
+        self.ui.tableOrder.setColumnWidth(11, towidth * 0.01)
 
     def prepareUi(self, level):
         if level == 1:
@@ -399,6 +403,7 @@ class MainWindow(QMainWindow):
             self.ui.btnDictEditor.hide()
             self.ui.btnPrint.hide()
             self.ui.btnRefresh.hide()
+            self.ui.btnBillStats.hide()
 
     def hideBillTableColumns(self):
         # self.ui.tableBill.hideColumn(11)
@@ -428,6 +433,9 @@ class MainWindow(QMainWindow):
 
     def onBtnMakeBillFromOrderClicked(self):
         self.actMakeBillFromOrder.trigger()
+
+    def onBtnBillStatsClicked(self):
+        self.actViewBillStats.trigger()
 
     def onBtnAddOrderClicked(self):
         self.actAddOrderRecord.trigger()
@@ -603,6 +611,9 @@ class MainWindow(QMainWindow):
 
     def procActOpenDictEditor(self):
         self._uiFacade.requestOpenDictEditor()
+
+    def procActViewBillStats(self):
+        self._uiFacade.requestViewBillStats()
 
     @pyqtSlot()
     def updateTotals(self):

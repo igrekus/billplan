@@ -73,3 +73,15 @@ class PersistenceFacade(QObject):
     def deleteDictRecord(self, dictName, data):
         print("persistence facade add dict record:", dictName, data)
         return self._engine.deleteDictRecord(dictName, (data, ))
+
+    def getBillStats(self):
+        print("persistence facade get bill stats")
+        stats = self._engine.fetchBillStats()
+        sizes = list()
+        labels = list()
+        for stat in stats:
+            sizes.append(float(int(stat[0]))/100)
+            labels.append(stat[1])
+
+        return sizes, labels
+

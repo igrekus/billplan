@@ -8,11 +8,12 @@ from dlgbilldata import DlgBillData
 from dlgdicteditor import DlgDictEditor
 from dlglogin import LoginDialog
 from dlgorderdata import DlgOrderData
+from dlgstatsviewer import DlgStatsViewer
+from orderitem import OrderItem
+
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import QObject, QModelIndex, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QMessageBox
-
-from orderitem import OrderItem
 
 
 class UiFacade(QObject):
@@ -227,15 +228,21 @@ class UiFacade(QObject):
 
         dialog.exec()
 
+    def requestViewBillStats(self):
+        print("ui facade view bill stats request...")
+        dialog = DlgStatsViewer(domainModel=self._domainModel)
+
+        dialog.exec()
+
     def requestExit(self, index):
         # TODO make settings class if needed, only current week is saved for now
-        print("ui facade exit request...")
-        print("saving preferences...", index)
-        # TODO extract saving process into settings class, only send a message from UI
-        with open("settings.ini", mode='tw') as f:
-            f.write("week="+str(index + 1))
-
-        if self._domainModel.savePlanData():
-            print("...exit request ok")
-        else:
-            raise RuntimeError("DB connection error")
+        if self._domainModel.getLoggedUserLevel() == 1:
+            print("ui facade exit request...")
+            print("saving preferences...", index)
+            # TODO extract saving process into settings class, only send a message from UI
+            with open("settings.ini", mode='tw') as f:
+                f.write("week="+str(index + 1))
+            if self._domainModel.savePlanData():
+                print("...exit request ok")
+            else:
+                raise RuntimeError("DB connection error")

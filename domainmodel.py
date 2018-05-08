@@ -291,3 +291,8 @@ class DomainModel(QObject):
         self._persistenceFacade.deleteDictRecord(dictName, data)
 
         self.dicts[dictName].removeItem(data)
+
+    def getBillStats(self):
+        print("domain model get bill stats")
+        return self._persistenceFacade.getBillStats()
+

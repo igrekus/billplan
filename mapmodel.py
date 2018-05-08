@@ -91,7 +91,10 @@ class MapModel(QAbstractListModel):
                 return i
 
     def getData(self, id_=None):
-        return self.mapData[id_]
+        if self.mapData[id_]:
+            return self.mapData[id_]
+        else:
+            return None
 
 #     void
 #     MapModel::removeItem(const
