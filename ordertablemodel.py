@@ -23,7 +23,7 @@ class OrderTableModel(QAbstractTableModel):
 
     ColumnsToAlign = (ColumnQuantity, ColumnDateReceive, ColumnPriority, ColumnUser)
 
-    _header = ["№", "Описание", "Назначение", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Док."]
+    _header = ["№", "Описание", "Назначение", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Файл"]
 
     def __init__(self, parent=None, domainModel=None, rightIcon=None, docIcon=None):
         super(OrderTableModel, self).__init__(parent)

@@ -218,7 +218,27 @@ class UiFacade(QObject):
 
         elif currentTab == 2:
             print("making order list report data...")
-            return
+            title = "Отчёт о состоянии заказов на " + datetime.now().strftime("%d.%m.%Y")
+            header = [self._orderModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
+                      range(self._orderModel.columnCount() - 2) if i != 3]   # filter out hidden columns
+
+            for i in range(self._orderModel.rowCount() - 2):
+                d = [self._orderModel.data(self._orderModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._orderModel.columnCount() - 2) if j != 3]
+                c = [self._orderModel.data(self._orderModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._orderModel.columnCount() - 2) if j != 3]
+                data.append(d)
+                color.append(c)
+
+            for i in range(self._orderModel.rowCount() - 1, self._orderModel.rowCount()):
+                d = [self._orderModel.data(self._orderModel.index(i, j), Qt.DisplayRole) for j in
+                     range(self._orderModel.columnCount() - 2) if j != 3]
+                c = [self._orderModel.data(self._orderModel.index(i, j), Qt.BackgroundRole) for j in
+                     range(self._orderModel.columnCount() - 2) if j != 3]
+                footer_data.append(d)
+                footer_color.append(c)
+
+            widths = [0.04, 0.300, 0.250, 0.07, 0.08, 0.07, 0.08, 0.08, 0.07]
 
         self._reportManager.makeReport(title, header, data, color, footer_data, footer_color, widths)
 
