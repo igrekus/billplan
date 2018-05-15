@@ -46,11 +46,7 @@ class OrderTableModel(QAbstractTableModel):
         self._loggedUser = None
 
         # setup signals
-        # self._modelDomain.planItemsBeginInsert.connect(self.planItemsBeginInsert)
-        # self._modelDomain.planItemsEndInsert.connect(self.planItemsEndInsert)
-        # self._modelDomain.planItemsBeginRemove.connect(self.planItemsBeginRemove)
-        # self._modelDomain.planItemsEndRemove.connect(self.planItemsEndRemove)
-        # self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
+        self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
 
     def clear(self):
         pass
@@ -211,22 +207,6 @@ class OrderTableModel(QAbstractTableModel):
 
     def getRowById(self, id_):
         return self._modelDomain.getOrderRowById(id_)
-
-    @pyqtSlot(int, int)
-    def planItemsBeginInsert(self, first: int, last: int):
-        self.beginInsertRows(QModelIndex(), first, last)
-
-    @pyqtSlot()
-    def planItemsEndInsert(self):
-        self.endInsertRows()
-
-    @pyqtSlot(int, int)
-    def planItemsBeginRemove(self, first: int, last: int):
-        self.beginRemoveRows(QModelIndex(), first, last)
-
-    @pyqtSlot()
-    def planItemsEndRemove(self):
-        self.endRemoveRows()
 
     @pyqtSlot(int, int)
     def itemsInserted(self, first: int, last: int):
