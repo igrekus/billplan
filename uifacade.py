@@ -28,7 +28,7 @@ class UiFacade(QObject):
         self._orderModel = None
         self._reportManager = reportManager
         self._archiveManager = archiveManager
-        print("init facade")
+        print('init facade')
 
     def setDomainModel(self, domainModel=None):
         self._domainModel = domainModel
@@ -56,7 +56,7 @@ class UiFacade(QObject):
     def saveBillDocument(self, item: BillItem):
         ok, arcBillPath = self._archiveManager.storeBillDocument(item.item_doc, item.item_date)
         if not ok:
-            QMessageBox.warning(self.parent(), "Ощибка", "Ошибка при сохранении документа.")
+            QMessageBox.warning(self.parent(), 'Ошибка', 'Ошибка при сохранении документа.')
         newItem = deepcopy(item)
         newItem.item_doc = arcBillPath
         return newItem
@@ -64,7 +64,7 @@ class UiFacade(QObject):
     def saveOrderDocument(self, item: OrderItem):
         ok, arcOrderPath = self._archiveManager.storeOrderDocument(item.item_document, item.item_date)
         if not ok:
-            QMessageBox.warning(self.parent(), "Ощибка", "Ошибка при сохранении документа.")
+            QMessageBox.warning(self.parent(), 'Ошибка', 'Ошибка при сохранении документа.')
         newItem = deepcopy(item)
         newItem.item_document = arcOrderPath
         return newItem
@@ -72,10 +72,10 @@ class UiFacade(QObject):
     # process ui requests
     def requestRefresh(self):
         self._domainModel.refreshData()
-        print("ui facade refresh request")
+        print('ui facade refresh request')
 
     def requestAddBillRecord(self):
-        print("ui facade add bill record request")
+        print('ui facade add bill record request')
 
         dialog = DlgBillData(billItem=None, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
@@ -88,7 +88,7 @@ class UiFacade(QObject):
 
     def requestEditBillRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getBillItemAtIndex(targetIndex)
-        print("ui facade edit bill record request:", oldItem)
+        print('ui facade edit bill record request:', oldItem)
 
         dialog = DlgBillData(billItem=oldItem, domainModel=self._domainModel)
         if dialog.exec() != QDialog.Accepted:
@@ -99,9 +99,9 @@ class UiFacade(QObject):
         self.totalsChanged.emit()
 
     def requestDeleteRecord(self, targetIndex: QModelIndex):
-        print("ui facade delete bill record request")
-        result = QMessageBox.question(self.parent(), "Вопрос",
-                                      "Вы действительно хотите удалить выбранную запись?")
+        print('ui facade delete bill record request')
+        result = QMessageBox.question(self.parent(), 'Вопрос',
+                                      'Вы действительно хотите удалить выбранную запись?')
         if result != QMessageBox.Yes:
             return
 
@@ -109,7 +109,7 @@ class UiFacade(QObject):
         self.totalsChanged.emit()
 
     def requestMakeBillFromOrder(self, index: QModelIndex):
-        print("ui facade make bill from order request")
+        print('ui facade make bill from order request')
         item = self._domainModel.getOrderItemAtIndex(index)
 
         dialog = DlgBillData(billItem=None, orderItem=item, domainModel=self._domainModel)
@@ -122,7 +122,7 @@ class UiFacade(QObject):
         return row
 
     def requestAddOrderRecord(self):
-        print("ui facade add order record request")
+        print('ui facade add order record request')
 
         dialog = DlgOrderData(item=None, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
         if dialog.exec() != QDialog.Accepted:
@@ -134,7 +134,7 @@ class UiFacade(QObject):
 
     def requestEditOrderRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
-        print("ui facade edit order request:", oldItem)
+        print('ui facade edit order request:', oldItem)
         try:
             dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
             if dialog.exec() != QDialog.Accepted:
@@ -146,7 +146,7 @@ class UiFacade(QObject):
 
     def requestPrint(self, currentTab, totals):
         # TODO: should UI facade be responsible for forming the report data stream?
-        print("ui facade print request")
+        print('ui facade print request')
         title = None
         data = list()
         color = list()
@@ -156,9 +156,9 @@ class UiFacade(QObject):
         widths = list()
 
         if currentTab == 0:
-            print("making bill list export data...")
+            print('making bill list export data...')
 
-            title = "Отчёт о состоянии счетов на " + datetime.now().strftime("%d.%m.%Y")
+            title = 'Отчёт о состоянии счетов на ' + datetime.now().strftime('%d.%m.%Y')
 
             header = [self._billModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
                       range(self._billModel.columnCount() - 5)]
@@ -171,15 +171,15 @@ class UiFacade(QObject):
                 data.append(d)
                 color.append(c)
 
-            labels = ["Оплачено:", "Осталось:", "Всего:"]
+            labels = ['Оплачено:', 'Осталось:', 'Всего:']
             for i in range(3):
                 cols = [QBrush(QColor(const.COLOR_PAYMENT_FINISHED)),
                         QBrush(QColor(const.COLOR_PAYMENT_PENDING)),
                         None]
 
-                d = [""]*11
+                d = ['']*11
                 d[4] = labels[i]
-                d[5] = "{:,.2f}".format(float(totals[i] / 100)).replace(",", " ")
+                d[5] = '{:,.2f}'.format(float(totals[i] / 100)).replace(',', ' ')
 
                 c = [None]*11
                 c[5] = cols[i]
@@ -190,11 +190,11 @@ class UiFacade(QObject):
             widths = [0.04, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.215, 0.06, 0.065, 0.06, 0.06, 0.06, 0.04, 0.001, 0.01]
 
         elif currentTab == 1:
-            print("making plan export data...")
-            title = "План оплаты счетов с " + \
-                    self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole).replace(": ", "(") + ") по " + \
+            print('making plan export data...')
+            title = 'План оплаты счетов с ' + \
+                    self._planModel.headerData(5, Qt.Horizontal, Qt.DisplayRole).replace(': ', '(') + ') по ' + \
                     self._planModel.headerData(self._planModel.columnCount() - 1, Qt.Horizontal,
-                                               Qt.DisplayRole).replace(": ", "(") + ")"
+                                               Qt.DisplayRole).replace(': ', '(') + ')'
             header = [self._planModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
                       range(self._planModel.columnCount()) if i != 0 and i != 4]
 
@@ -217,8 +217,8 @@ class UiFacade(QObject):
             widths = [0.13, 0.05, 0.10, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09]
 
         elif currentTab == 2:
-            print("making order list report data...")
-            title = "Отчёт о состоянии заказов на " + datetime.now().strftime("%d.%m.%Y")
+            print('making order list report data...')
+            title = 'Отчёт о состоянии заказов на ' + datetime.now().strftime('%d.%m.%Y')
             header = [self._orderModel.headerData(i, Qt.Horizontal, Qt.DisplayRole) for i in
                       range(self._orderModel.columnCount() - 2) if i != 3]   # filter out hidden columns
 
@@ -243,13 +243,13 @@ class UiFacade(QObject):
         self._reportManager.makeReport(title, header, data, color, footer_data, footer_color, widths)
 
     def requestOpenDictEditor(self):
-        print("ui facade open dict editor request...")
+        print('ui facade open dict editor request...')
         dialog = DlgDictEditor(domainModel=self._domainModel)
 
         dialog.exec()
 
     def requestViewBillStats(self):
-        print("ui facade view bill stats request...")
+        print('ui facade view bill stats request...')
         dialog = DlgStatsViewer(domainModel=self._domainModel)
 
         dialog.exec()
@@ -257,12 +257,12 @@ class UiFacade(QObject):
     def requestExit(self, index):
         # TODO make settings class if needed, only current week is saved for now
         if self._domainModel.getLoggedUserLevel() == 1:
-            print("ui facade exit request...")
-            print("saving preferences...", index)
+            print('ui facade exit request...')
+            print('saving preferences...', index)
             # TODO extract saving process into settings class, only send a message from UI
-            with open("settings.ini", mode='tw') as f:
-                f.write("week="+str(index + 1))
+            with open('settings.ini', mode='tw') as f:
+                f.write('week='+str(index + 1))
             if self._domainModel.savePlanData():
-                print("...exit request ok")
+                print('...exit request ok')
             else:
-                raise RuntimeError("DB connection error")
+                raise RuntimeError('DB connection error')

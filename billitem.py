@@ -27,23 +27,11 @@ class BillItem:
         self.item_order = order
 
     def __str__(self):
-        return "BillItem(" + "id:" + str(self.item_id) + " " \
-               + "date:" + str(self.item_date) + " " \
-               + "name:" + str(self.item_name) + " " \
-               + "cat:" + str(self.item_category) + " " \
-               + "vend:" + str(self.item_vendor) + " " \
-               + "cost:" + str(self.item_cost) + " " \
-               + "proj:" + str(self.item_project) + " " \
-               + "desc:" + str(self.item_descript) + " " \
-               + "due:" + str(self.item_shipment_time) + " " \
-               + "stat:" + str(self.item_status) + " " \
-               + "prior:" + str(self.item_priority) + " " \
-               + "ship date:" + str(self.item_shipment_date) + " " \
-               + "ship stat:" + str(self.item_shipment_status) + " " \
-               + "week:" + str(self.item_payment_week) + " " \
-               + "note:" + str(self.item_note) + " " \
-               + "doc:" + str(self.item_doc) + " " \
-               + "order:" + str(self.item_order) + ")"
+        return f'BillItem(id:{self.item_id} date:{self.item_date} name:{self.item_name} cat:{self.item_category} ' \
+               f'vend:{self.item_vendor} cost:{self.item_cost} proj:{self.item_project} desc:{self.item_descript} ' \
+               f'due:{self.item_shipment_time} stat:{self.item_status} prior:{self.item_priority} ' \
+               f'ship date:{self.item_shipment_date} ship stat:{self.item_shipment_status} ' \
+               f'week:{self.item_payment_week} note:{self.item_note} doc:{self.item_doc} order:{self.item_order})'
 
     @classmethod
     def fromSqlTuple(cls, sql_tuple):
@@ -70,10 +58,10 @@ class BillItem:
     @classmethod
     def fromQSqlRecord(cls, record):
         # if not record:
-        #     raise ValueError("Wrong SQL record.")
+        #     raise ValueError('Wrong SQL record.')
         # return cls(id_=record.value(0)
         #            , date=record.value(1)
-        #            , text=codecs.decode(record.value(2).replace("Р", "РЄ").encode("cp1251")).replace("Ъ", "И")
+        #            , text=codecs.decode(record.value(2).replace('Р', 'РЄ').encode('cp1251')).replace('Ъ', 'И')
         #            , author=record.value(3)
         #            , approver=record.value(4)
         #            , is_active=record.value(5)
@@ -85,7 +73,7 @@ class BillItem:
         def formatDate(indate):
             if isinstance(indate, datetime.date):
                 return indate.isoformat()
-            return "01.01.2000"
+            return '01.01.2000'
 
         return tuple([self.item_date,
                       self.item_name,
@@ -107,4 +95,4 @@ class BillItem:
 
     @classmethod
     def itemListRequestString(self):
-        return str("CALL getBillList()")
+        return str('CALL getBillList()')

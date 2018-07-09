@@ -127,7 +127,7 @@ class BillTableModel(QAbstractTableModel):
             elif col == self.ColumnVendor:
                 return QVariant(self._dicts["vendor"].getData(item.item_vendor))
             elif col == self.ColumnCost:
-                return QVariant("{:,.2f}".format(float(item.item_cost/100)).replace(",", " "))
+                return QVariant(f'{f"{item.item_cost/100:,.2f}".replace(",", " ")}')
             elif col == self.ColumnProject:
                 return QVariant(self._dicts["project"].getData(item.item_project))
             elif col == self.ColumnDescription:

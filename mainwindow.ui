@@ -174,7 +174,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabBillStatus">
        <attribute name="title">
@@ -309,6 +309,13 @@
            <widget class="QPushButton" name="btnEditOrder">
             <property name="text">
              <string>Изменить</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDelOrder">
+            <property name="text">
+             <string>В архив</string>
             </property>
            </widget>
           </item>

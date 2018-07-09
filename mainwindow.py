@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
 
         # create instance variables
         # ui
-        self.ui = uic.loadUi("mainwindow.ui", self)
+        self.ui = uic.loadUi('mainwindow.ui', self)
 
         # report manager
         self._reportManager = ReportManager(parent=self)
@@ -64,8 +64,8 @@ class MainWindow(QMainWindow):
         # bill list + search proxy
         # TODO: use settings to set icon
         self._modelBillList = BillTableModel(parent=self, domainModel=self._modelDomain,
-                                             docIcon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22),
-                                             rightIcon=QPixmap("./icons/right.png", "PNG").scaled(22, 22))
+                                             docIcon=QPixmap('./icons/doc.png', 'PNG').scaled(22, 22),
+                                             rightIcon=QPixmap('./icons/right.png', 'PNG').scaled(22, 22))
         self._modelBillSearchProxy = BillSearchProxyModel(parent=self)
         self._modelBillSearchProxy.setSourceModel(self._modelBillList)
 
@@ -76,8 +76,8 @@ class MainWindow(QMainWindow):
 
         # orders + search proxy
         self._modelOrderList = OrderTableModel(parent=self, domainModel=self._modelDomain,
-                                               docIcon=QPixmap("./icons/doc.png", "PNG").scaled(22, 22),
-                                               rightIcon=QPixmap("./icons/right.png", "PNG").scaled(22, 22))
+                                               docIcon=QPixmap('./icons/doc.png', 'PNG').scaled(22, 22),
+                                               rightIcon=QPixmap('./icons/right.png', 'PNG').scaled(22, 22))
         self._modelOrderSearchProxy = QSortFilterProxyModel(parent=self)
         self._modelOrderSearchProxy.setSourceModel(self._modelOrderList)
 
@@ -88,16 +88,17 @@ class MainWindow(QMainWindow):
         self._uiFacade.setOrderModel(self._modelOrderSearchProxy)
 
         # actions
-        self.actRefresh = QAction("Обновить", self)
-        self.actAddBillRecord = QAction("Добавить счёт...", self)
-        self.actEditBillRecord = QAction("Изменить счёт...", self)
-        self.actDeleteBillRecord = QAction("Удалить счёт...", self)
-        self.actPrint = QAction("Распечатать...", self)
-        self.actOpenDictEditor = QAction("Словари", self)
-        self.actMakeBillFromOrder = QAction("Создать счёт...", self)
-        self.actAddOrderRecord = QAction("Добавить заказ...", self)
-        self.actEditOrderRecord = QAction("Изменить заказ...", self)
-        self.actViewBillStats = QAction("Статистика по счетам...", self)
+        self.actRefresh = QAction('Обновить', self)
+        self.actAddBillRecord = QAction('Добавить счёт...', self)
+        self.actEditBillRecord = QAction('Изменить счёт...', self)
+        self.actDeleteBillRecord = QAction('Удалить счёт...', self)
+        self.actPrint = QAction('Распечатать...', self)
+        self.actOpenDictEditor = QAction('Словари', self)
+        self.actMakeBillFromOrder = QAction('Создать счёт...', self)
+        self.actAddOrderRecord = QAction('Добавить заказ...', self)
+        self.actEditOrderRecord = QAction('Изменить заказ...', self)
+        self.actViewBillStats = QAction('Статистика по счетам...', self)
+        self.actDeleteOrderRecord = QAction('Удалить заказ...', self)
 
     def buildWeekSelectionCombo(self):
         # TODO if more settings is needed, move all settings-related code to a separate class
@@ -105,15 +106,15 @@ class MainWindow(QMainWindow):
         week_list = list()
         for i in range(1, isoweek.Week.last_week_of_year(year).week + 1):
             w = isoweek.Week(year, i)
-            week_list.append(str(i) + ": " + str(w.monday().strftime("%d.%m")) + "-" + str(w.friday().strftime("%d.%m")))
+            week_list.append(str(i) + ': ' + str(w.monday().strftime('%d.%m')) + '-' + str(w.friday().strftime('%d.%m')))
 
         self.ui.comboWeek.addItems(week_list)
 
         # TODO read settings
-        if os.path.isfile("settings.ini"):
-            with open("settings.ini", mode='tr') as f:
+        if os.path.isfile('settings.ini'):
+            with open('settings.ini', mode='tr') as f:
                 line = f.readline()
-            index = int(line.split("=")[1])
+            index = int(line.split('=')[1])
         else:
             index = week
 
@@ -123,8 +124,8 @@ class MainWindow(QMainWindow):
     def initApp(self):
         # TODO: extract methods
         # init instances
-        # self._persistenceEngine.initEngine(fileName="ref/1.csv")
-        # self._persistenceEngine.initEngine(fileName="sqlite3.db")
+        # self._persistenceEngine.initEngine(fileName='ref/1.csv')
+        # self._persistenceEngine.initEngine(fileName='sqlite3.db')
         self._persistenceEngine.initEngine()
         self._persistenceFacade.initFacade()
         # self._uiFacade.initFacade()
@@ -134,7 +135,7 @@ class MainWindow(QMainWindow):
         if not self._uiFacade.requestLogin():
             sys.exit(5)
 
-        self.setWindowTitle("Планировщик счетов, пользователь: " + self._modelDomain.getLoggedUserName())
+        self.setWindowTitle('Планировщик счетов, пользователь: ' + self._modelDomain.getLoggedUserName())
 
         self._modelDomain.buildPlanData()
         self._modelBillList.initModel()
@@ -156,22 +157,22 @@ class MainWindow(QMainWindow):
         self.ui.tableBill.horizontalHeader().setHighlightSections(False)
         self.ui.tableBill.horizontalHeader().setFixedHeight(24)
         self.ui.tableBill.horizontalHeader().setStretchLastSection(True)
-        self.ui.tableBill.horizontalHeader().setStyleSheet("QHeaderView::section {"
-                                                           "    padding: 4px;"
-                                                           "    border-style: none;"
-                                                           "    border-color: #000000;"
-                                                           "    border-bottom: 1px solid #000000;"
-                                                           "    border-right: 1px solid #000000;"
-                                                           "}"
-                                                           "QHeaderView::section:horizontal {"
-                                                           "    border-right: 1px solid #000000"
-                                                           "}")
+        self.ui.tableBill.horizontalHeader().setStyleSheet('QHeaderView::section {'
+                                                           '    padding: 4px;'
+                                                           '    border-style: none;'
+                                                           '    border-color: #000000;'
+                                                           '    border-bottom: 1px solid #000000;'
+                                                           '    border-right: 1px solid #000000;'
+                                                           '}'
+                                                           'QHeaderView::section:horizontal {'
+                                                           '    border-right: 1px solid #000000'
+                                                           '}')
         # self.ui.tableBill.horizontalHeader().setAutoFillBackground(False)
         self.ui.tableBill.verticalHeader().setVisible(False)
         # self.ui.tableBill.verticalHeader().setDefaultSectionSize(40)
         self.ui.tableBill.setWordWrap(True)
         self.ui.tableBill.resizeRowsToContents()
-        self.ui.tableBill.setStyleSheet("QTableView { gridline-color : black}")
+        self.ui.tableBill.setStyleSheet('QTableView { gridline-color : black}')
         self.hideBillTableColumns()
         # self.ui.tableBill.setSpan(0, 0, 1, 3)
 
@@ -184,16 +185,16 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.horizontalHeader().setHighlightSections(False)
         self.ui.tablePlan.horizontalHeader().setFixedHeight(24)
         self.ui.tablePlan.horizontalHeader().setStretchLastSection(True)
-        self.ui.tablePlan.horizontalHeader().setStyleSheet("QHeaderView::section {"
-                                                           "    padding: 4px;"
-                                                           "    border-style: none;"
-                                                           "    border-color: #000000;"
-                                                           "    border-bottom: 1px solid #000000;"
-                                                           "    border-right: 1px solid #000000;"
-                                                           "}"
-                                                           "QHeaderView::section:horizontal {"
-                                                           "    border-right: 1px solid #000000"
-                                                           "}")
+        self.ui.tablePlan.horizontalHeader().setStyleSheet('QHeaderView::section {'
+                                                           '    padding: 4px;'
+                                                           '    border-style: none;'
+                                                           '    border-color: #000000;'
+                                                           '    border-bottom: 1px solid #000000;'
+                                                           '    border-right: 1px solid #000000;'
+                                                           '}'
+                                                           'QHeaderView::section:horizontal {'
+                                                           '    border-right: 1px solid #000000'
+                                                           '}')
         self.ui.tablePlan.verticalHeader().setVisible(False)
         self.ui.tablePlan.hideColumn(0)
         # self.ui.tablePlan.hideColumn(3)
@@ -202,7 +203,7 @@ class MainWindow(QMainWindow):
         self.ui.tablePlan.setWordWrap(True)
         self.ui.tablePlan.resizeRowsToContents()
         # self.ui.tablePlan.setSpan(0, 0, 1, 3)
-        self.ui.tablePlan.setStyleSheet("QTableView { gridline-color : black }")
+        self.ui.tablePlan.setStyleSheet('QTableView { gridline-color : black }')
         # self.ui.tablePlan.setItemDelegateForRow(0, TableRowDelegate(self.ui.tablePlan))
 
         # bill order table
@@ -216,27 +217,27 @@ class MainWindow(QMainWindow):
         self.ui.tableOrder.horizontalHeader().setHighlightSections(False)
         self.ui.tableOrder.horizontalHeader().setFixedHeight(24)
         self.ui.tableOrder.horizontalHeader().setStretchLastSection(True)
-        self.ui.tableOrder.horizontalHeader().setStyleSheet("QHeaderView::section {"
-                                                           "    padding: 4px;"
-                                                           "    border-style: none;"
-                                                           "    border-color: #000000;"
-                                                           "    border-bottom: 1px solid #000000;"
-                                                           "    border-right: 1px solid #000000;"
-                                                           "}"
-                                                           "QHeaderView::section:horizontal {"
-                                                           "    border-right: 1px solid #000000"
-                                                           "}")
+        self.ui.tableOrder.horizontalHeader().setStyleSheet('QHeaderView::section {'
+                                                           '    padding: 4px;'
+                                                           '    border-style: none;'
+                                                           '    border-color: #000000;'
+                                                           '    border-bottom: 1px solid #000000;'
+                                                           '    border-right: 1px solid #000000;'
+                                                           '}'
+                                                           'QHeaderView::section:horizontal {'
+                                                           '    border-right: 1px solid #000000'
+                                                           '}')
         self.ui.tableOrder.verticalHeader().setVisible(False)
         self.ui.tableOrder.setWordWrap(True)
         self.ui.tableOrder.resizeRowsToContents()
-        self.ui.tableOrder.setStyleSheet("QTableView { gridline-color : black}")
+        self.ui.tableOrder.setStyleSheet('QTableView { gridline-color : black}')
 
         # setup filter widgets
-        self.ui.comboProjectFilter.setModel(self._modelDomain.dicts["project"])
-        self.ui.comboStatusFilter.setModel(self._modelDomain.dicts["status"])
-        self.ui.comboPriorityFilter.setModel(self._modelDomain.dicts["priority"])
-        self.ui.comboShipmentFilter.setModel(self._modelDomain.dicts["shipment"])
-        self.ui.dateFromFilter.setDate(QDate.fromString(self._modelDomain.getEarliestBillDate(), "dd.MM.yyyy"))
+        self.ui.comboProjectFilter.setModel(self._modelDomain.dicts['project'])
+        self.ui.comboStatusFilter.setModel(self._modelDomain.dicts['status'])
+        self.ui.comboPriorityFilter.setModel(self._modelDomain.dicts['priority'])
+        self.ui.comboShipmentFilter.setModel(self._modelDomain.dicts['shipment'])
+        self.ui.dateFromFilter.setDate(QDate.fromString(self._modelDomain.getEarliestBillDate(), 'dd.MM.yyyy'))
         self.ui.dateUntilFilter.setDate(QDate.currentDate())
 
         # self.btnRefresh.setVisible(False)
@@ -257,6 +258,7 @@ class MainWindow(QMainWindow):
         self.ui.btnMakeBillFromOrder.clicked.connect(self.onBtnMakeBillFromOrderClicked)
         self.ui.btnAddOrder.clicked.connect(self.onBtnAddOrderClicked)
         self.ui.btnEditOrder.clicked.connect(self.onBtnEditOrderClicked)
+        self.ui.btnDelOrder.clicked.connect(self.onBtnDelOrderClicked)
         self.ui.btnBillStats.clicked.connect(self.onBtnBillStatsClicked)
 
         # table widgets
@@ -296,39 +298,42 @@ class MainWindow(QMainWindow):
         self.prepareUi(self._modelDomain.getLoggedUserLevel())
 
     def initActions(self):
-        self.actRefresh.setShortcut("Ctrl+R")
-        self.actRefresh.setStatusTip("Обновить данные")
+        self.actRefresh.setShortcut('Ctrl+R')
+        self.actRefresh.setStatusTip('Обновить данные')
         self.actRefresh.triggered.connect(self.procActRefresh)
 
-        self.actAddBillRecord.setShortcut("Ctrl+A")
-        self.actAddBillRecord.setStatusTip("Добавить новый счёт")
+        self.actAddBillRecord.setShortcut('Ctrl+A')
+        self.actAddBillRecord.setStatusTip('Добавить новый счёт')
         self.actAddBillRecord.triggered.connect(self.procActAddBillRecord)
 
-        # self.actEditBillRecord.setShortcut("Ctrl+A")
-        self.actEditBillRecord.setStatusTip("Добавить новый счёт")
+        # self.actEditBillRecord.setShortcut('Ctrl+A')
+        self.actEditBillRecord.setStatusTip('Добавить новый счёт')
         self.actEditBillRecord.triggered.connect(self.procActEditRecord)
 
-        # self.actDeleteBillRecord.setShortcut("Ctrl+A")
-        self.actDeleteBillRecord.setStatusTip("Добавить новый счёт")
+        # self.actDeleteBillRecord.setShortcut('Ctrl+A')
+        self.actDeleteBillRecord.setStatusTip('Добавить новый счёт')
         self.actDeleteBillRecord.triggered.connect(self.procActDeleteRecord)
 
-        self.actPrint.setStatusTip("Напечатать текущую таблицу")
+        self.actPrint.setStatusTip('Напечатать текущую таблицу')
         self.actPrint.triggered.connect(self.procActPrint)
 
-        self.actOpenDictEditor.setStatusTip("Открыть редактор словарей")
+        self.actOpenDictEditor.setStatusTip('Открыть редактор словарей')
         self.actOpenDictEditor.triggered.connect(self.procActOpenDictEditor)
 
-        self.actMakeBillFromOrder.setStatusTip("Создать счёт из заказа")
+        self.actMakeBillFromOrder.setStatusTip('Создать счёт из заказа')
         self.actMakeBillFromOrder.triggered.connect(self.procActMakeBillFromOrder)
 
-        self.actAddOrderRecord.setStatusTip("Добавить заказ")
+        self.actAddOrderRecord.setStatusTip('Добавить заказ')
         self.actAddOrderRecord.triggered.connect(self.procActAddOrderRecord)
 
-        self.actEditOrderRecord.setStatusTip("Изменить заказ")
+        self.actEditOrderRecord.setStatusTip('Изменить заказ')
         self.actEditOrderRecord.triggered.connect(self.procActEditOrderRecord)
 
-        self.actViewBillStats.setStatusTip("Посмотреть статистику по счетам...")
+        self.actViewBillStats.setStatusTip('Посмотреть статистику по счетам...')
         self.actViewBillStats.triggered.connect(self.procActViewBillStats)
+
+        self.actDeleteOrderRecord.setStatusTip('Перенести заказ в архив...')
+        self.actDeleteOrderRecord.triggered.connect(self.procActDeleteOrderRecord)
 
     def refreshView(self):
         screenRect = QApplication.desktop().screenGeometry()
@@ -395,7 +400,7 @@ class MainWindow(QMainWindow):
             self.ui.tableBill.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select
                                                                | QItemSelectionModel.Rows)
         elif level == 2 or level == 3:
-            print("approver + user")
+            print('approver + user')
             self.ui.tabWidget.setCurrentIndex(2)
             self.ui.tabWidget.removeTab(0)
             self.ui.tabWidget.removeTab(0)
@@ -443,6 +448,9 @@ class MainWindow(QMainWindow):
     def onBtnEditOrderClicked(self):
         self.actEditOrderRecord.trigger()
 
+    def onBtnDelOrderClicked(self):
+        self.actDeleteOrderRecord.trigger()
+
     def onTableBillClicked(self, index):
         col = index.column()
         if col == self._modelBillList.ColumnDoc:
@@ -487,7 +495,7 @@ class MainWindow(QMainWindow):
 
     # misc events
     def resizeEvent(self, event):
-        # print("resize event")
+        # print('resize event')
         self.refreshView()
         # self.ui.tableBill.resizeRowsToContents()
         # self.ui.tablePlan.resizeRowsToContents()
@@ -501,13 +509,13 @@ class MainWindow(QMainWindow):
     # action processing
     # send user commands to the ui facade: (command, parameters (like indexes, etc.))
     def procActRefresh(self):
-        print("act refresh trigger")
+        print('act refresh trigger')
 
         try:
             if self._modelDomain.savePlanData():
-                print("plan data saved")
+                print('plan data saved')
             else:
-                QMessageBox.information(self, "Ошибка", "Ошибка подключения к БД при попытке отбновления данных.\nОбратитесь к разработчику.")
+                QMessageBox.information(self, 'Ошибка', 'Ошибка подключения к БД при попытке отбновления данных.\nОбратитесь к разработчику.')
         except Exception as ex:
             print(ex)
 
@@ -537,16 +545,16 @@ class MainWindow(QMainWindow):
 
     def procActEditRecord(self):
         if not self.ui.tableBill.selectionModel().hasSelection():
-            QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
+            QMessageBox.information(self, 'Ошибка', 'Изменить: пожалуйста, выберите запись.')
             return
 
         selectedIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
         self._uiFacade.requestEditBillRecord(self._modelBillSearchProxy.mapToSource(selectedIndex))
 
     def procActDeleteRecord(self):
-        # print("act delete record trigger")
+        # print('act delete record trigger')
         if not self.ui.tableBill.selectionModel().hasSelection():
-            QMessageBox.information(self, "Ошибка", "Удалить: пожалуйста, выберите запись.")
+            QMessageBox.information(self, 'Ошибка', 'Удалить: пожалуйста, выберите запись.')
             return
 
         selectedIndex: QModelIndex = self.ui.tableBill.selectionModel().selectedIndexes()[0]
@@ -556,7 +564,7 @@ class MainWindow(QMainWindow):
 
     def procActMakeBillFromOrder(self):
         if not self.ui.tableOrder.selectionModel().hasSelection():
-            QMessageBox.information(self, "Ошибка", "Выберите запись о заказе для создания счёта.")
+            QMessageBox.information(self, 'Ошибка', 'Выберите запись о заказе для создания счёта.')
             return
 
         selectedIndex: QModelIndex = self.ui.tableOrder.selectionModel().selectedIndexes()[0]
@@ -580,11 +588,14 @@ class MainWindow(QMainWindow):
 
     def procActEditOrderRecord(self):
         if not self.ui.tableOrder.selectionModel().hasSelection():
-            QMessageBox.information(self, "Ошибка", "Изменить: пожалуйста, выберите запись.")
+            QMessageBox.information(self, 'Ошибка', 'Изменить: пожалуйста, выберите запись.')
             return
 
         selectedIndex = self.ui.tableOrder.selectionModel().selectedIndexes()[0]
         self._uiFacade.requestEditOrderRecord(self._modelOrderSearchProxy.mapToSource(selectedIndex))
+
+    def procActDeleteOrderRecord(self):
+        print('del order')
 
     def procActPrint(self):
         self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex(), self._modelDomain.getBillTotals())
@@ -619,9 +630,7 @@ class MainWindow(QMainWindow):
     def updateTotals(self):
         print("update totals")
         p, r, t = self._modelDomain.getBillTotals()
-        self.ui.lblTotal.setText('Оплачено: <span style="background-color:#92D050">' +
-                                 "{:,.2f}".format(float(p/100)).replace(',', ' ') + '</span><br>' +
-                                 'Осталось: <span style="background-color:#FF6767">' +
-                                 "{:,.2f}".format(float(r/100)).replace(",", " ") + '</span><br>' +
-                                 'Всего: ' +
-                                 "{:,.2f}".format(float(t/100)).replace(",", " "))
+        self.ui.lblTotal.setText(
+            f'Оплачено:  <span style="background-color:#92D050">{f"{p/100:,.2f}".replace(",", " ")}</span><br>'
+            f'Осталось:  <span style="background-color:#FF6767">{f"{r/100:,.2f}".replace(",", " ")}</span><br>'
+            f'Всего:  {f"{t/100:,.2f}".replace(",", " ")}')

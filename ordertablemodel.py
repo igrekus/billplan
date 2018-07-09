@@ -121,7 +121,7 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnQuantity:
                 return QVariant(str(item.item_quantity) + " шт./комп.")
             elif col == self.ColumnCost:
-                return QVariant(f"{float(item.item_cost/100):,.2f}".replace(",", " "))
+                return QVariant(f"{item.item_cost/100:,.2f}".replace(",", " "))
             elif col == self.ColumnDateReceive:
                 return QVariant(item.item_date_receive.isoformat())
             elif col == self.ColumnPriority:

@@ -87,7 +87,7 @@ class BillPlanModel(QAbstractTableModel):
             if num > last_week.week:
                 num = num % last_week.week
                 year = year + 1
-            self._header.append(str(num) + ": " + d1.strftime("%d.%m") + "-" + d2.strftime("%d.%m"))
+            self._header.append(f'{num}: {d1:%d.%m} - {d2:%d.%m}')
             self._weeksInHeader.append([year, num, 1])
 
         self.headerDataChanged.emit(Qt.Horizontal, self.ColumnCount - self.WeekCount, self.ColumnCount)
@@ -138,7 +138,7 @@ class BillPlanModel(QAbstractTableModel):
 
             if index.column() > self.ColumnBillCost:
                 week_total = self._modelDomain.getTotalForWeek(self._weeksInHeader[index.column() - 5])
-                return QVariant("Неделя:\n " + "{:,.2f}".format(float(week_total / 100)).replace(",", " ") + " руб")
+                return QVariant(f'Неделя: {f"{week_total/100:,.2f}".replace(",", " ")} руб')
 
             return QVariant()
 
@@ -146,17 +146,13 @@ class BillPlanModel(QAbstractTableModel):
 
             if role == Qt.DisplayRole:
                 if index.column() == self.ColumnBillCost + 1:
-                    return QVariant("Итого:\n "
-                                    + "{:,.2f}".format(float(self._modelDomain.getTotal(self._weeksInHeader) / 100)).replace(",", " ")
-                                    + " руб")
+                    return QVariant(f'Итого: {f"{self._modelDomain.getTotal(self._weeksInHeader)/100:,.2f}".replace(",", " ")} руб')
+
                 elif index.column() == self.ColumnBillCost + 2:
-                    return QVariant("Оплачено:\n "
-                                    + "{:,.2f}".format(float(self._modelDomain.getPayedTotal(self._weeksInHeader) / 100)).replace(",", " ")
-                                    + " руб")
+                    return QVariant(f'Итого: {f"{self._modelDomain.getPayedTotal(self._weeksInHeader)/100:,.2f}".replace(",", " ")} руб')
+
                 elif index.column() == self.ColumnBillCost + 3:
-                    return QVariant("Осталось: \n"
-                                    + "{:,.2f}".format(float(self._modelDomain.getRemainingTotal(self._weeksInHeader) / 100)).replace(",", " ")
-                                    + " руб")
+                    return QVariant(f'Итого: {f"{self._modelDomain.getRemainingTotal(self._weeksInHeader)/100:,.2f}".replace(",", " ")} руб')
 
             elif role == Qt.BackgroundRole:
                 if index.column() == self.ColumnBillCost + 2:
@@ -185,7 +181,7 @@ class BillPlanModel(QAbstractTableModel):
                 return QVariant(item[4])
             elif col > self.ColumnBillCost:
                 if item[5] == self._weeksInHeader[col - 5]:
-                    return QVariant(str(item[2]) + ": " + "{:,.2f}".format(float(item[4] / 100)).replace(",", " ") + " руб")
+                    return QVariant(f'{item[2]}: {f"{item[4]/100:,.2f}".replace(",", " ")} руб')
 
         elif role == Qt.CheckStateRole:
             if col > self.ColumnBillCost:
