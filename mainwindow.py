@@ -595,7 +595,12 @@ class MainWindow(QMainWindow):
         self._uiFacade.requestEditOrderRecord(self._modelOrderSearchProxy.mapToSource(selectedIndex))
 
     def procActDeleteOrderRecord(self):
-        print('del order')
+        if not self.ui.tableOrder.selectionModel().hasSelection():
+            QMessageBox.information(self, 'Ошибка', 'Перенести в архив: пожалуйста, выберите запись.')
+            return
+
+        selectedIndex = self.ui.tableOrder.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestDeleteOrderRecord(self._modelOrderSearchProxy.mapToSource(selectedIndex))
 
     def procActPrint(self):
         self._uiFacade.requestPrint(self.ui.tabWidget.currentIndex(), self._modelDomain.getBillTotals())

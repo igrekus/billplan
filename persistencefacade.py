@@ -13,10 +13,10 @@ class PersistenceFacade(QObject):
         self.engineType = self._engine._engineType
 
     def initFacade(self):
-        print("init persistence facade:", self._engine._engineType)
+        print('init persistence facade:', self._engine._engineType)
 
     def checkUser(self, userId: int, password: str):
-        print("persistence facade check user", userId, password)
+        print('persistence facade check user', userId, password)
         res = self._engine.checkUserData((userId, password))
         if res:
             return True, res[0][1]
@@ -39,43 +39,47 @@ class PersistenceFacade(QObject):
         return [OrderItem.fromSqlTuple(r) for r in self._engine.fetchOrderData()]
 
     def updateBillItem(self, item: BillItem):
-        print("persistence facade update bill call:", item)
+        print('persistence facade update bill call:', item)
         self._engine.updateMainDataRecord(item.toTuple())
 
     def insertBillItem(self, item: BillItem) -> int:
-        print("persistence facade insert bill call:", item)
+        print('persistence facade insert bill call:', item)
         return self._engine.insertMainDataRecord(item.toTuple())
 
     def deleteBillItem(self, item: BillItem):
-        print("persistence facade delete bill call:", item)
+        print('persistence facade delete bill call:', item)
         self._engine.deleteMainDataRecord((item.item_id, ))
 
     def insertOrderItem(self, item: BillItem) -> int:
-        print("persistence facade insert order call:", item)
+        print('persistence facade insert order call:', item)
         return self._engine.insertOrderRecord(item.toTuple())
 
     def updateOrderItem(self, item: OrderItem):
-        print("persistence facade update order call:", item)
+        print('persistence facade update order call:', item)
         self._engine.updateOrderData(item.toTuple())
 
+    def deleteOrderItem(self, item: OrderItem):
+        print('persistence facade delete order call:', item)
+        self._engine.deleteOrderData((item.item_id, ))
+
     def persistPlanData(self, data):
-        print("persistence facade persist plan data call")
+        print('persistence facade persist plan data call')
         return self._engine.updatePlanData([tuple([v[0], v[1], v[2], k]) for k, v in data.items()])
 
     def addDictRecord(self, dictName, data):
-        print("persistence facade add dict record:", dictName, data)
+        print('persistence facade add dict record:', dictName, data)
         return self._engine.insertDictRecord(dictName, (data, ))
 
     def editDictRecord(self, dictName, data):
-        print("persistence facade add dict record:", dictName, data)
+        print('persistence facade add dict record:', dictName, data)
         return self._engine.updateDictRecord(dictName, (data[1], data[0]))
 
     def deleteDictRecord(self, dictName, data):
-        print("persistence facade add dict record:", dictName, data)
+        print('persistence facade add dict record:', dictName, data)
         return self._engine.deleteDictRecord(dictName, (data, ))
 
     def getBillStats(self):
-        print("persistence facade get bill stats")
+        print('persistence facade get bill stats')
         stats = self._engine.fetchBillStats()
         sizes = list()
         labels = list()

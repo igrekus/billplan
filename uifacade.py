@@ -135,14 +135,22 @@ class UiFacade(QObject):
     def requestEditOrderRecord(self, targetIndex: QModelIndex):
         oldItem = self._domainModel.getOrderItemAtIndex(targetIndex)
         print('ui facade edit order request:', oldItem)
-        try:
-            dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
-            if dialog.exec() != QDialog.Accepted:
-                return
+        dialog = DlgOrderData(item=oldItem, domainModel=self._domainModel, loggedUser=self._domainModel.getLoggedUser())
+        if dialog.exec() != QDialog.Accepted:
+            return
 
-            self._domainModel.updateOrderItem(targetIndex.row(), self.saveOrderDocument(dialog.getData()))
-        except Exception as ex:
-            print(ex)
+        self._domainModel.updateOrderItem(targetIndex.row(), self.saveOrderDocument(dialog.getData()))
+
+    def requestDeleteOrderRecord(self, targetIndex: QModelIndex):
+        targetItem = self._domainModel.getOrderItemAtIndex(targetIndex)
+        print('ui facade delete order request:', targetItem)
+
+        result = QMessageBox.question(self.parent(), 'Вопрос',
+                                      'Вы действительно хотите перенести выбранную запись в архив?')
+        if result != QMessageBox.Yes:
+            return
+
+        self._domainModel.deleteOrderItem(targetIndex.row())
 
     def requestPrint(self, currentTab, totals):
         # TODO: should UI facade be responsible for forming the report data stream?

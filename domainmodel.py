@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
 
 class DomainModel(QObject):
 
-    dict_list = ["category", "period", "priority", "project", "shipment", "status", "vendor", "user"]
+    dict_list = ['category', 'period', 'priority', 'project', 'shipment', 'status', 'vendor', 'user']
 
     billItemsBeginInsert = pyqtSignal(int, int)
     billItemsEndInsert = pyqtSignal()
@@ -24,6 +24,7 @@ class DomainModel(QObject):
     billItemsRemoved = pyqtSignal(int, int)
 
     orderItemsInserted = pyqtSignal(int, int)
+    orderItemsRemoved = pyqtSignal(int, int)
 
     beginClearModel = pyqtSignal()
     endClearModel = pyqtSignal()
@@ -44,7 +45,7 @@ class DomainModel(QObject):
         self._orderData = list()
 
     def buildPlanData(self):
-        print("building plan data")
+        print('building plan data')
         oldsize = len(self._planData)
 
         self.planItemsBeginRemove.emit(0, oldsize + 2)
@@ -52,7 +53,7 @@ class DomainModel(QObject):
         self.planItemsEndRemove.emit()
 
         self.planItemsBeginInsert.emit(0, sum([v[2] for v in self._rawPlanData.values()]) + 1)
-        for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts["project"].getData(item.item_project))):
+        for i, d in enumerate(sorted(self._billData, key=lambda item: self.dicts['project'].getData(item.item_project))):
             # TODO fix hardcoded magic numbers
             if self._rawPlanData[d.item_id][2] == 1:
                 self._planData.append([i, d.item_project, d.item_id, d.item_name, d.item_cost, self._rawPlanData[d.item_id]])
@@ -60,7 +61,7 @@ class DomainModel(QObject):
         self.planItemsEndInsert.emit()
 
     def initModel(self):
-        print("init domain model")
+        print('init domain model')
         self.beginClearModel.emit()
 
         self.dicts = self._persistenceFacade.getDicts(self.dict_list)
@@ -76,7 +77,7 @@ class DomainModel(QObject):
         self.endClearModel.emit()
 
     def clearModel(self):
-        print("clearing domain model")
+        print('clearing domain model')
         self.dicts.clear()
         self._billData.clear()
         self._rawPlanData.clear()
@@ -94,10 +95,10 @@ class DomainModel(QObject):
         return self._loggedUser
 
     def getLoggedUserLevel(self):
-        return self._loggedUser["level"]
+        return self._loggedUser['level']
 
     def getLoggedUserName(self):
-        return self.dicts["user"].getData(self._loggedUser["id"])
+        return self.dicts['user'].getData(self._loggedUser['id'])
 
     def refreshPlanData(self):
         if self._rawPlanData:
@@ -203,14 +204,14 @@ class DomainModel(QObject):
 
     def getEarliestBillDate(self):
         return min([d.item_date for d in self._billData],
-                   key=lambda d: QDate.fromString(d, "dd.MM.yyyy"),
+                   key=lambda d: QDate.fromString(d, 'dd.MM.yyyy'),
                    default=QDate.currentDate())
 
     def refreshData(self):
-        print("domain model refresh call")
+        print('domain model refresh call')
 
     def addBillItem(self, newItem):
-        print("domain model add bill item call:", newItem)
+        print('domain model add bill item call:', newItem)
         newId = self._persistenceFacade.insertBillItem(newItem)
         newItem.item_id = newId
         # newItem.item_id = 1000
@@ -226,7 +227,7 @@ class DomainModel(QObject):
 
     def updateBillItem(self, index: QModelIndex, updatedItem: BillItem):
         row = index.row()
-        print("domain model update bill item call, row:", row, updatedItem)
+        print('domain model update bill item call, row:', row, updatedItem)
 
         if updatedItem.item_order:
             orderRow = self.getOrderRowById(updatedItem.item_order)
@@ -235,7 +236,7 @@ class DomainModel(QObject):
             if isinstance(updatedItem.item_shipment_date, datetime.date):
                 newOrderItem.item_date_receive = updatedItem.item_shipment_date
             else:
-                newOrderItem.item_date_receive = datetime.datetime.strptime(str(updatedItem.item_shipment_date), "%d.%m.%Y").date()
+                newOrderItem.item_date_receive = datetime.datetime.strptime(str(updatedItem.item_shipment_date), '%d.%m.%Y').date()
             self._orderData[orderRow] = newOrderItem
             self._persistenceFacade.updateOrderItem(newOrderItem)
 
@@ -244,13 +245,13 @@ class DomainModel(QObject):
 
     def deleteBillItem(self, index: QModelIndex):
         row = index.row()
-        print("domain model delete bill item call, row", row)
+        print('domain model delete bill item call, row', row)
         self._persistenceFacade.deleteBillItem(self._billData[row])
         del self._billData[row]
         self.billItemsRemoved.emit(row, row)
 
     def addOrderItem(self, newItem: OrderItem):
-        print("domain model add order item call:", newItem)
+        print('domain model add order item call:', newItem)
 
         newId = self._persistenceFacade.insertOrderItem(newItem)
         newItem.item_id = newId
@@ -264,35 +265,42 @@ class DomainModel(QObject):
         return row
 
     def updateOrderItem(self, row: int, itemToUpdate: OrderItem):
-        print("domain model update order item call, row:", row, itemToUpdate)
+        print('domain model update order item call, row:', row, itemToUpdate)
         self._persistenceFacade.updateOrderItem(itemToUpdate)
         self._orderData[row] = itemToUpdate
 
+    def deleteOrderItem(self, row: int):
+        print('domain model delete order item call, row:', row)
+        itemToDelete = self._orderData[row]
+        self._persistenceFacade.deleteOrderItem(itemToDelete)
+        del self._orderData[row]
+        self.billItemsRemoved.emit(row, row)
+
     def savePlanData(self):
-        print("domain model persist plan data call")
+        print('domain model persist plan data call')
         # TODO: collect and save only changed plan data
         return self._persistenceFacade.persistPlanData(self._rawPlanData)
 
     def addDictRecord(self, dictName, data):
-        print("domain model add dict record:", dictName, data)
+        print('domain model add dict record:', dictName, data)
         newId = self._persistenceFacade.addDictRecord(dictName, data)
 
         self.dicts[dictName].addItem(newId, data)
 
     def editDictRecord(self, dictName, data):
-        print("domain model edit dict record:", dictName, data)
+        print('domain model edit dict record:', dictName, data)
         self._persistenceFacade.editDictRecord(dictName, data)
 
         self.dicts[dictName].updateItem(data[0], data[1])
 
     def deleteDictRecord(self, dictName, data):
         # TODO: check for existing references
-        print("domain model delete dict record:", dictName, data)
+        print('domain model delete dict record:', dictName, data)
         self._persistenceFacade.deleteDictRecord(dictName, data)
 
         self.dicts[dictName].removeItem(data)
 
     def getBillStats(self):
-        print("domain model get bill stats")
+        print('domain model get bill stats')
         return self._persistenceFacade.getBillStats()
 

@@ -47,6 +47,7 @@ class OrderTableModel(QAbstractTableModel):
 
         # setup signals
         self._modelDomain.orderItemsInserted.connect(self.itemsInserted)
+        self._modelDomain.orderItemsRemoved.connect(self.itemsRemoved)
 
     def clear(self):
         pass
@@ -213,6 +214,11 @@ class OrderTableModel(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), first, last)
         # print("table model slot:", first, last)
         self.endInsertRows()
+
+    @pyqtSlot(int, int)
+    def itemsRemoved(self, first: int, last: int):
+        self.beginRemoveRows(QModelIndex(), first, last)
+        self.endRemoveRows()
 
     @pyqtSlot()
     def beginClearModel(self):
