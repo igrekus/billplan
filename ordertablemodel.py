@@ -23,7 +23,7 @@ class OrderTableModel(QAbstractTableModel):
 
     ColumnsToAlign = (ColumnQuantity, ColumnDateReceive, ColumnPriority, ColumnUser)
 
-    _header = ["№", "Описание", "Назначение", "Кол-во", "Сумма", "Дата поставки", "Приоритет", "Заказчик", "Согласовано", "Статус", "Счёт", "Файл"]
+    _header = ['№', 'Описание', 'Назначение', 'Кол-во', 'Сумма', 'Дата поставки', 'Приоритет', 'Заказчик', 'Согласовано', 'Статус', 'Счёт', 'Файл']
 
     def __init__(self, parent=None, domainModel=None, rightIcon=None, docIcon=None):
         super(OrderTableModel, self).__init__(parent)
@@ -56,7 +56,7 @@ class OrderTableModel(QAbstractTableModel):
         # self.endRemoveRows()
 
     def initModel(self):
-        print("init order table model")
+        print('init order table model')
         self._dicts = self._modelDomain.getDicts()
         self._loggedUser = self._modelDomain.getLoggedUser()
 
@@ -87,7 +87,7 @@ class OrderTableModel(QAbstractTableModel):
 
                 if value == 2:
                     itemToUpdate.item_approved = 1
-                    itemToUpdate.item_approved_by = self._loggedUser["id"]
+                    itemToUpdate.item_approved_by = self._loggedUser['id']
                 elif value == 0:
                     itemToUpdate.item_approved = 2
                     itemToUpdate.item_approved_by = 0
@@ -120,29 +120,29 @@ class OrderTableModel(QAbstractTableModel):
             elif col == self.ColumnDescription:
                 return QVariant(item.item_descript)
             elif col == self.ColumnQuantity:
-                return QVariant(str(item.item_quantity) + " шт./комп.")
+                return QVariant(str(item.item_quantity) + ' шт./комп.')
             elif col == self.ColumnCost:
-                return QVariant(f"{item.item_cost/100:,.2f}".replace(",", " "))
+                return QVariant(f'{item.item_cost/100:,.2f}'.replace(',', ' '))
             elif col == self.ColumnDateReceive:
                 return QVariant(item.item_date_receive.isoformat())
             elif col == self.ColumnPriority:
-                return QVariant(self._dicts["priority"].getData(item.item_priority))
+                return QVariant(self._dicts['priority'].getData(item.item_priority))
             elif col == self.ColumnUser:
-                user = self._dicts["user"].getData(item.item_user)
+                user = self._dicts['user'].getData(item.item_user)
                 if user:
                     return QVariant(user)
             elif col == self.ColumnApproved:
                 if item.item_approved == 1:
-                    return QVariant(self._dicts["user"].getData(item.item_approved_by))
+                    return QVariant(self._dicts['user'].getData(item.item_approved_by))
                 if item.item_cost == 0:
-                    return QVariant("Нет суммы")
+                    return QVariant('Нет суммы')
 
             elif col == self.ColumnStatus:
                 status = self._modelDomain.getOrderStatus(item.item_id)
                 if status == 1:
-                    return QVariant("Заказано")
+                    return QVariant('Заказано')
                 else:
-                    return QVariant("Не заказано")
+                    return QVariant('Не заказано')
 
         elif role == Qt.EditRole:
             if col == self.ColumnDoc:
@@ -150,8 +150,8 @@ class OrderTableModel(QAbstractTableModel):
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnApproved:
-                if self._loggedUser["level"] == 1 or self._loggedUser["level"] == 2:
-                    if self._loggedUser["id"] == item.item_approved_by or item.item_approved_by == 0:
+                if self._loggedUser['level'] == 1 or self._loggedUser['level'] == 2:
+                    if self._loggedUser['id'] == item.item_approved_by or item.item_approved_by == 0:
                         if item.item_cost > 0:
                             if item.item_approved == 1:
                                 return QVariant(2)
@@ -212,7 +212,7 @@ class OrderTableModel(QAbstractTableModel):
     @pyqtSlot(int, int)
     def itemsInserted(self, first: int, last: int):
         self.beginInsertRows(QModelIndex(), first, last)
-        # print("table model slot:", first, last)
+        # print('table model slot:', first, last)
         self.endInsertRows()
 
     @pyqtSlot(int, int)
